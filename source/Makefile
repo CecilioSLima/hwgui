@@ -3,7 +3,7 @@ ROOT=../../../
 C_SOURCES=\
 	commond.c \
 	control.c \
-   dialog.c \
+	dialog.c \
 	draw.c \
 	drawtext.c \
 	freeimg.c \
@@ -11,13 +11,15 @@ C_SOURCES=\
 	message.c \
 	misc.c \
 	registry.c \
-	wbrowse.c \
 	shellapi.c \
 	media_c.c \
 	richedit.c \
 	resource.c \
 	wprint.c \
 	window.c \
+	nice.c \
+	grid.c \
+	c_ipaddr.c
 	
 PRG_SOURCES=\
 	drawwidg.prg \
@@ -27,6 +29,7 @@ PRG_SOURCES=\
 	hcheck.prg \
 	hcombo.prg \
 	hcontrol.prg \
+	hcwindow.prg \
 	hdatepic.prg \
 	hedit.prg \
 	hfreeimg.prg \
@@ -40,6 +43,7 @@ PRG_SOURCES=\
 	htab.prg \
 	hupdown.prg \
 	hwindow.prg \
+	hwinprn.prg \
 	menu.prg \
 	repexec.prg \
 	hprogres.prg \
@@ -48,6 +52,13 @@ PRG_SOURCES=\
 	htree.prg \
 	hsplit.prg \
 	hsayimg.prg \
+	richtext.prg \
+	hnice.prg \
+	hgrid.prg \
+	hrect.prg \
+	htrackbr.prg \
+	hmonthc.prg \
+	hipedit.prg	
 	
 LIBNAME=hwgui
 

@@ -1,9 +1,11 @@
 /*
+ * $Id: shellapi.c,v 1.7 2005-10-17 21:24:35 lculik Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * Shell API wrappers
  *
  * Copyright 2002 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #define HB_OS_WIN_32_USED
@@ -37,7 +39,7 @@
 
 HB_FUNC( SELECTFOLDER )
 { 
-   BROWSEINFO bi; 
+   BROWSEINFO bi = { 0 }; 
    char *lpBuffer = (char*) hb_xgrab( MAX_PATH+1 );
    LPITEMIDLIST pidlBrowse;    // PIDL selected by user 
 
@@ -60,7 +62,7 @@ HB_FUNC( SELECTFOLDER )
  *  ShellNotifyIcon( lAdd, hWnd, hIcon, cTooltip )
  */
 
-HB_FUNC ( SHELLNOTIFYICON )
+HB_FUNC( SHELLNOTIFYICON )
 {
    NOTIFYICONDATA tnid;
 
@@ -79,6 +81,33 @@ HB_FUNC ( SHELLNOTIFYICON )
       Shell_NotifyIcon( NIM_ADD,&tnid );
    else
       Shell_NotifyIcon( NIM_DELETE,&tnid );
+}
+
+/*
+  *  ShellModifyIcon( hWnd, hIcon, cTooltip )
+  */
+
+HB_FUNC( SHELLMODIFYICON )
+{
+    NOTIFYICONDATA tnid;
+
+    memset( (void*) &tnid, 0, sizeof( NOTIFYICONDATA ) );
+
+    tnid.cbSize = sizeof( NOTIFYICONDATA );
+    tnid.hWnd   = (HWND) hb_parnl(1);
+    tnid.uID    = ID_NOTIFYICON;
+    if( ISNUM(2) )
+    {
+       tnid.uFlags |= NIF_ICON;
+       tnid.hIcon  = (HICON) hb_parnl(2);
+    }
+    if( ISCHAR(3) )
+    {
+       tnid.uFlags |= NIF_TIP;
+       lstrcpy( tnid.szTip,TEXT(hb_parc(3)) );
+    }
+
+    Shell_NotifyIcon( NIM_MODIFY,&tnid );
 }
 
 /*

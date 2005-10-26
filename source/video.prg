@@ -1,11 +1,13 @@
 /*
+ * $Id: video.prg,v 1.4 2004-09-29 05:24:52 alkresin Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * TVideo component
  *
  * Copyright 2003 Luiz Rafael Culik Guimaraes <culikr@brtrubo.com>
  * www - http://sites.uol.com.br/culikr/
 */
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "windows.ch"
 #include "guilib.ch"
 
@@ -42,7 +44,7 @@ METHOD New( nRow, nCol, nWidth, nHeight, cFileName, oWnd, lNoBorder,nid ) CLASS 
    ::nLeft     := nCol * VID_CHARPIX_W   // 14
    ::nHeight   := ::nTop  + nHeight - 1
    ::nwidth    := ::nLeft + nWidth + 1
-   ::Style     := nOR( WS_CHILD, WS_VISIBLE, WS_TABSTOP, If( ! lNoBorder, WS_BORDER, 0 ) )
+   ::Style     := hwg_bitOR( WS_CHILD+ WS_VISIBLE+ WS_TABSTOP, If( ! lNoBorder, WS_BORDER, 0 ) )
 
    ::oParent   := Iif( oWnd==Nil, ::oDefaultParent, oWnd )
    ::id        := Iif( nId==Nil,::NewId(), nId )

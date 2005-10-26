@@ -1,14 +1,17 @@
 /*
+ * $Id: menu_c.c,v 1.23 2005-10-17 21:24:35 lculik Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * C level menu functions
  *
  * Copyright 2001 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #define HB_OS_WIN_32_USED
 
-#define _WIN32_WINNT 0x0400
+#define _WIN32_WINNT 0x0500
+#define WINVER 0x0500
 #define OEMRESOURCE
 #include <windows.h>
 #include <commctrl.h>
@@ -22,18 +25,20 @@
 #include "hbvm.h"
 #include "hbstack.h"
 
+#define  FLAG_DISABLED   1
+
 extern HWND aWindows[];
 
 /*
  *  CreateMenu() --> hMenu
  */
-HB_FUNC ( HWG__CREATEMENU )
+HB_FUNC( HWG__CREATEMENU )
 {
    HMENU hMenu = CreateMenu();
    hb_retnl( (LONG) hMenu );
 }
 
-HB_FUNC ( HWG__CREATEPOPUPMENU )
+HB_FUNC( HWG__CREATEPOPUPMENU )
 {
    HMENU hMenu = CreatePopupMenu();
    hb_retnl( (LONG) hMenu );
@@ -45,13 +50,30 @@ HB_FUNC ( HWG__CREATEPOPUPMENU )
 
 HB_FUNC( HWG__ADDMENUITEM )
 {
-   UINT uFlags = MF_BYPOSITION | ( ( ISNIL(6) || hb_parl(6) )? 0:MFS_DISABLED );
+   UINT uFlags = MF_BYPOSITION;
    LPCTSTR lpNewItem = NULL;
+
+   if( !ISNIL(6) && ( hb_parni(6) & FLAG_DISABLED ) )
+   {
+      uFlags |= MFS_DISABLED;
+   }
 
    if( ISCHAR( 2 ) )
    {
+      BOOL lString = 0;
+      LPCTSTR ptr;
       lpNewItem	 = (LPCTSTR) hb_parc(2);
-      uFlags |= MF_STRING;
+      ptr = lpNewItem;
+      while( *ptr )
+      {
+         if( *ptr != ' ' && *ptr != '-' )
+         {
+            lString = 1;
+            break;
+         }
+         ptr ++;
+      }
+      uFlags |= (lString)? MF_STRING:MF_SEPARATOR ;
    }
    else
       uFlags |= MF_SEPARATOR;
@@ -62,7 +84,7 @@ HB_FUNC( HWG__ADDMENUITEM )
 
       uFlags |= MF_POPUP;
       InsertMenu( ( HMENU ) hb_parnl(1), hb_parni(3),
-       uFlags,	// menu item flags
+       uFlags,     	// menu item flags
        (UINT)hSubMenu,	// menu item identifier or handle of drop-down menu or submenu 
        lpNewItem	// menu item content
       );
@@ -83,7 +105,7 @@ HB_FUNC( HWG__ADDMENUITEM )
 HB_FUNC( HWG__ADDMENUITEM )
 {
 
-   MENUITEMINFO mii;
+   MENUITEMINFO mii = { 0 };
    BOOL fByPosition = ( ISNIL(4) )? 0:(BOOL) hb_parl(4);
 
    mii.cbSize = sizeof( MENUITEMINFO );
@@ -111,7 +133,7 @@ HB_FUNC( HWG__ADDMENUITEM )
 HB_FUNC( HWG__CREATESUBMENU )
 {
 
-   MENUITEMINFO mii;
+   MENUITEMINFO mii= { 0 };
    HMENU hSubMenu = CreateMenu();
 
    mii.cbSize = sizeof( MENUITEMINFO );
@@ -132,9 +154,16 @@ HB_FUNC( HWG__SETMENU )
    hb_retl( SetMenu( ( HWND ) hb_parnl( 1 ), ( HMENU ) hb_parnl( 2 ) ) );
 }
 
-HB_FUNC ( CHECKMENUITEM )
+HB_FUNC( GETMENUHANDLE )
 {
-   HMENU hMenu = GetMenu( ( hb_pcount()>0 && !ISNIL(1) )? (HWND)hb_parnl(1):aWindows[0] );
+   HWND handle = ( hb_pcount()>0 && !ISNIL(1) )? (HWND)hb_parnl(1):aWindows[0];
+   hb_retnl( (LONG) GetMenu( handle ) );
+}
+
+HB_FUNC( CHECKMENUITEM )
+{
+   HWND handle = ( hb_pcount()>0 && !ISNIL(1) )? ((HWND)hb_parnl(1)):aWindows[0];
+   HMENU hMenu = GetMenu( handle );
    UINT  uCheck = ( hb_pcount() < 3 || !ISLOG( 3 ) || hb_parl( 3 ) )? MF_CHECKED:MF_UNCHECKED;
 
    if( !hMenu )
@@ -149,9 +178,10 @@ HB_FUNC ( CHECKMENUITEM )
    }
 }
 
-HB_FUNC ( ISCHECKEDMENUITEM )
+HB_FUNC( ISCHECKEDMENUITEM )
 {
-   HMENU hMenu = GetMenu( ( hb_pcount()>0 && !ISNIL(1) )? (HWND)hb_parnl(1):aWindows[0] );
+   HWND handle = ( hb_pcount()>0 && !ISNIL(1) )? ((HWND)hb_parnl(1)):aWindows[0];
+   HMENU hMenu = GetMenu( handle );
    UINT  uCheck;
 
    if( !hMenu )
@@ -167,10 +197,9 @@ HB_FUNC ( ISCHECKEDMENUITEM )
    }
 }
 
-HB_FUNC ( ENABLEMENUITEM )
+HB_FUNC( ENABLEMENUITEM )
 {
-   // HMENU hMenu = GetMenu( ( hb_pcount()>0 && !ISNIL(1) )? (HWND)hb_parnl(1):aWindows[0] );
-   HMENU hMenu = ( hb_pcount()>0 && !ISNIL(1) )? (HMENU)hb_parnl(1) : GetMenu( aWindows[0] );
+   HMENU hMenu = ( hb_pcount()>0 && !ISNIL(1) )? ((HMENU)hb_parnl(1)) : GetMenu(aWindows[0]);
    UINT  uEnable = ( hb_pcount() < 3 || !ISLOG( 3 ) || hb_parl( 3 ) )? MF_ENABLED:MF_GRAYED;
    UINT  uFlag = ( hb_pcount() < 4 || !ISLOG( 4 ) || hb_parl( 4 ) )? MF_BYCOMMAND:MF_BYPOSITION;
 
@@ -189,9 +218,9 @@ HB_FUNC ( ENABLEMENUITEM )
    }
 }
 
-HB_FUNC ( ISENABLEDMENUITEM )
+HB_FUNC( ISENABLEDMENUITEM )
 {
-   HMENU hMenu = GetMenu( ( hb_pcount()>0 && !ISNIL(1) )? (HWND)hb_parnl(1):aWindows[0] );
+   HMENU hMenu = ( hb_pcount()>0 && !ISNIL(1) )? ((HMENU)hb_parnl(1)):GetMenu(aWindows[0]);
    UINT  uCheck;
    UINT  uFlag = ( hb_pcount() < 3 || !ISLOG( 3 ) || hb_parl( 3 ) )? MF_BYCOMMAND:MF_BYPOSITION;
 
@@ -208,17 +237,21 @@ HB_FUNC ( ISENABLEDMENUITEM )
    }
 }
 
-HB_FUNC ( HWG_TRACKMENU )
+HB_FUNC( HWG_TRACKMENU )
 {
-    hb_retl( TrackPopupMenu(
+   HWND hWnd = (HWND) hb_parnl(4);
+   SetForegroundWindow( hWnd );
+   hb_retl( TrackPopupMenu(
                   (HMENU) hb_parnl(1),  // handle of shortcut menu
                   TPM_RIGHTALIGN,       // screen-position and mouse-button flags
                   hb_parni(2),          // horizontal position, in screen coordinates
                   hb_parni(3),          // vertical position, in screen coordinates
                   0,                    // reserved, must be zero
-                  (HWND) hb_parnl(4),   // handle of owner window
+                  hWnd,   // handle of owner window
                   NULL
     ) );
+   PostMessage( hWnd, 0, 0, 0 );
+
 }
 
 HB_FUNC( HWG_DESTROYMENU )
@@ -271,7 +304,7 @@ HB_FUNC( DRAWMENUBAR )
 HB_FUNC( SETMENUCAPTION )
 {
 
-   MENUITEMINFO mii;
+   MENUITEMINFO mii= { 0 };
 
    mii.cbSize = sizeof( MENUITEMINFO );
    mii.fMask = MIIM_TYPE;
@@ -283,3 +316,75 @@ HB_FUNC( SETMENUCAPTION )
    else
       hb_retl( 0 );
 }
+
+HB_FUNC( SETMENUITEMBITMAPS )
+{  
+    hb_retl(SetMenuItemBitmaps( (HMENU) hb_parnl(1), hb_parni(2), MF_BYCOMMAND, (HBITMAP) hb_parnl(3) , (HBITMAP) hb_parnl(4))) ;
+}
+
+HB_FUNC( GETMENUCHECKMARKDIMENSIONS )
+{
+    hb_retnl( (LONG) GetMenuCheckMarkDimensions( ) );
+}
+ 
+  
+HB_FUNC( GETSIZEMENUBITMAPWIDTH )
+{
+    hb_retni(   GetSystemMetrics(SM_CXMENUSIZE));
+}	
+HB_FUNC( GETSIZEMENUBITMAPHEIGHT )
+{
+    hb_retni(   GetSystemMetrics(SM_CYMENUSIZE));
+}	
+HB_FUNC( GETMENUCHECKMARKWIDTH )
+{
+    hb_retni( GetSystemMetrics(SM_CXMENUCHECK) );
+}
+
+HB_FUNC( GETMENUCHECKMARKHEIGHT )
+{
+    hb_retni( GetSystemMetrics(SM_CYMENUCHECK) );
+}
+
+HB_FUNC( STRETCHBLT )
+{
+   hb_retl( StretchBlt( (HDC) hb_parnl( 1 )   ,
+                        hb_parni( 2 )         ,
+                        hb_parni( 3 )         ,
+                        hb_parni( 4 )         ,
+                        hb_parni( 5 )         ,
+                        (HDC) hb_parnl( 6 )   ,
+                        hb_parni( 7 )         ,
+                        hb_parni( 8 )         ,
+                        hb_parni( 9 )         ,
+                        hb_parni( 10 )        ,
+                        (DWORD) hb_parnl( 11 )
+                        ) ) ;
+}  
+   
+
+HB_FUNC( HWG__INSERTBITMAPMENU )
+{
+   MENUITEMINFO mii= { 0 };
+   
+   mii.cbSize = sizeof( MENUITEMINFO );
+   mii.fMask = MIIM_ID | MIIM_BITMAP | MIIM_DATA; 
+   mii.hbmpItem = (HBITMAP) hb_parnl( 3 ); 
+
+   hb_retl( (LONG) SetMenuItemInfo( ( HMENU ) hb_parnl( 1 ), hb_parni( 2 ), 0, &mii ) );
+}
+
+HB_FUNC( CHANGEMENU )
+{
+   hb_retl( ChangeMenu( (HMENU) hb_parnl( 1 ), (UINT) hb_parni( 2 ) ,
+                        (LPCSTR) hb_parc( 3 ),(UINT) hb_parni( 4 ) ,
+                        (UINT) hb_parni( 5 ) ) ) ;
+}
+
+HB_FUNC( MODIFYMENU )
+{
+
+   hb_retl( ModifyMenu( (HMENU) hb_parnl( 1 ), (UINT) hb_parni( 2 ) ,
+                        (UINT) hb_parni( 3 ) , (UINT) hb_parni( 4 ) ,
+                        (LPCSTR) hb_parc( 5 ) ) ) ;
+}  

@@ -1,25 +1,28 @@
 /*
- * $Id: guimain.prg,v 1.6 2004-03-22 21:15:03 rodrigo_moreno Exp $
+ * $Id: guimain.prg,v 1.12 2004-10-19 05:43:42 alkresin Exp $
  *
  * HWGUI - Harbour Win32 GUI library source code:
  * Main prg level functions
  *
  * Copyright 2001 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #include "windows.ch"
 #include "guilib.ch"
 
 Function InitControls( oWnd,lNoActivate )
-Local i, pArray := oWnd:aControls
+Local i, pArray := oWnd:aControls, lInit
 
    lNoActivate := Iif( lNoActivate==Nil,.F.,lNoActivate )
    IF pArray != Nil
       FOR i := 1 TO Len( pArray )
-         // writelog( "InitControl1"+str(pArray[i]:handle)+"/"+pArray[i]:classname )
+         // writelog( "InitControl1"+str(pArray[i]:handle)+"/"+pArray[i]:classname+" "+str(pArray[i]:nWidth)+"/"+str(pArray[i]:nHeight) )
          IF pArray[i]:handle == 0 .AND. !lNoActivate
+            lInit := pArray[i]:lInit
+            pArray[i]:lInit := .T.
             pArray[i]:Activate()
+            pArray[i]:lInit := lInit
          ENDIF
          IF pArray[i]:handle <= 0          
             pArray[i]:handle := GetDlgItem( oWnd:handle, pArray[i]:id )
@@ -238,7 +241,7 @@ Return Nil
 
 Function EndWindow()
    IF HWindow():GetMain() != Nil
-      SendMessage( Hwg_GetWindowHandle(1), WM_SYSCOMMAND, SC_CLOSE, 0 )
+      SendMessage( HWindow():aWindows[1]:handle, WM_SYSCOMMAND, SC_CLOSE, 0 )
    ENDIF
 Return Nil
 
@@ -264,3 +267,77 @@ Function SetHelpFileName ( cNewName )
       cName := cNewName
    endif
 return cOldName
+
+Function RefreshAllGets( oDlg )
+
+   AEval( oDlg:GetList, {|o|o:Refresh()} )
+Return Nil
+
+/*
+
+cTitle:   Window Title
+cDescr:  'Data Bases','*.dbf'
+cTip  :   *.dbf
+cInitDir: Initial directory
+
+*/
+
+FUNCTION SelectMultipleFiles(cDescr, cTip, cIniDir, cTitle )
+
+   LOCAL aFiles, cRet, cFile, x, aFilter, cFilter := "", cItem, nAt, cChar,i
+   Local hWnd := 0
+   Local nFlags:=""
+   Local cPath := ""
+   Local nIndex:=1
+
+   cFilter += cDescr + Chr(0) + cTip + Chr(0)
+
+   cFile := Space( 32000 )
+
+
+   cRet := _GetOpenFileName( hWnd, @cFile, cTitle, cFilter, nFlags, cIniDir, Nil, @nIndex )
+
+   nAt := At( Chr(0) + Chr(0), cFile )
+
+   cFile := Left( cFile, nAt )
+
+   aFiles := {}
+
+   IF nAt == 0 // no double chr(0) user must have pressed cancel
+       RETURN( aFiles )
+   ENDIF
+
+   x := At( Chr(0), cFile ) // fist null
+   cPath := Left( cFile, x )
+
+   cFile := StrTran( cFile, cPath, "" )
+
+   IF ! Empty(cFile) // user selected more than 1 file
+      cItem := ""
+
+      FOR i:=1 to Len(cFile) //EACH cChar IN cFile
+          cChar:=cFile[i]
+          IF cChar == 0
+             aAdd( aFiles, StrTran( cPath, Chr(0), "" ) + '\' + cItem )
+             cItem := ""
+             LOOP
+          ENDIF
+          cItem += cChar
+      NEXT
+   ELSE
+       aFiles := { StrTran( cPath, CHR(0), "" ) }
+   ENDIF
+
+   Return( aFiles )
+ 
+Function HWG_Version(oTip)
+Local oVersion
+if oTip==1
+  oVersion:="HwGUI "+HWG_VERSION+" "+Version()
+Else
+  oVersion:="HwGUI "+HWG_VERSION
+Endif
+Return oVersion
+
+
+

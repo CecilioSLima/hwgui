@@ -1,13 +1,15 @@
 /*
+ * $Id: hpanel.prg,v 1.11 2005-10-19 10:04:27 alkresin Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * HPanel class
  *
  * Copyright 2002 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #include "windows.ch"
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "guilib.ch"
 
 CLASS HPanel INHERIT HControl
@@ -17,32 +19,22 @@ CLASS HPanel INHERIT HControl
    METHOD New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight, ;
                   bInit,bSize,bPaint,lDocked )
    METHOD Activate()
+   METHOD onEvent( msg, wParam, lParam )
    METHOD Init()
    METHOD Redefine( oWndParent,nId,nHeight,bInit,bSize,bPaint,lDocked )
    METHOD Paint()
-   METHOD End()
 
 ENDCLASS
 
 
 METHOD New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight, ;
                   bInit,bSize,bPaint,lDocked ) CLASS HPanel
+Local oParent:=iif(oWndParent==Nil, ::oDefaultParent, oWndParent)
 
-   // ::classname:= "HPANEL"
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := Iif( nId==Nil,::NewId(), nId )
-   ::style   := Hwg_BitOr( Iif( nStyle==Nil,0,nStyle ), WS_CHILD+WS_VISIBLE )
-   ::nLeft   := nLeft
-   ::nTop    := nTop
-   ::nWidth  := Iif( nWidth==Nil,0,nWidth )
-   ::nHeight := nHeight
-   ::oFont   := ::oParent:oFont
-   ::bInit   := bInit
-   IF bSize == Nil
-      ::bSize := {|o,x,y|MoveWindow(o:handle,0,0,Iif(::nHeight!=0.and.(::nWidth>::nHeight.or.::nWidth==0),x,::nWidth),Iif(::nWidth!=0.and.(::nHeight>::nWidth.or.::nHeight==0),y,::nHeight))}
-   ELSE
-      ::bSize   := bSize
-   ENDIF
+   Super:New( oWndParent,nId,nStyle,nLeft,nTop,Iif( nWidth==Nil,0,nWidth ), ;
+                  nHeight,oParent:oFont,bInit, ;
+                  bSize,bPaint )
+
    ::bPaint  := bPaint
    IF __ObjHasMsg( ::oParent,"AOFFSET" ) .AND. ::oParent:type == WND_MDI
       IF ::nWidth > ::nHeight .OR. ::nWidth == 0
@@ -56,7 +48,7 @@ METHOD New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight, ;
       ENDIF
    ENDIF
 
-   ::oParent:AddControl( Self )
+   hwg_RegPanel()
    ::Activate()
 
 Return Self
@@ -71,24 +63,55 @@ Local handle := ::oParent:handle, oClient
    ENDIF
 Return Nil
 
+METHOD onEvent( msg, wParam, lParam )  CLASS HPanel
+
+   IF msg == WM_PAINT
+      ::Paint()
+   ELSEIF msg == WM_ERASEBKGND
+      IF ::brush != Nil
+         IF Valtype( ::brush ) != "N"
+            FillRect( wParam, 0,0,::nWidth,::nHeight,::brush:handle )
+         ENDIF
+         Return 1
+      ENDIF
+   ELSE
+      IF msg == WM_HSCROLL .OR. msg == WM_VSCROLL
+         onTrackScroll( Self,wParam,lParam )
+      ENDIF
+      Return Super:onEvent( msg, wParam, lParam )
+   ENDIF
+
+Return -1
+
 METHOD Init CLASS HPanel
-   Super:Init()
-   SetWindowObject( ::handle,Self )
-   Hwg_InitPanelProc( ::handle )
+
+   IF !::lInit
+      IF ::bSize == Nil
+         IF ::nHeight!=0 .AND. ( ::nWidth>::nHeight .OR. ::nWidth==0 )
+            ::bSize := {|o,x,y|o:Move( 0,::nTop,x,::nHeight )}
+         ELSEIF ::nWidth!=0 .AND. ( ::nHeight>::nWidth .OR. ::nHeight==0 )
+            ::bSize := {|o,x,y|o:Move( ::nLeft,0,::nWidth,y )}
+         ENDIF
+      ENDIF
+
+      Super:Init()
+      ::nHolder := 1
+      SetWindowObject( ::handle,Self )
+      Hwg_InitWinCtrl( ::handle )
+   ENDIF
+
 Return Nil
 
 
 METHOD Redefine( oWndParent,nId,nHeight,bInit,bSize,bPaint,lDocked ) CLASS HPanel
-   // ::classname:= "HPANEL"
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := nId
-   ::style   := ::nLeft := ::nTop := ::nWidth := 0
-   ::oFont   := ::oParent:oFont
-   ::bInit   := bInit
-   ::bSize   := bSize
-   ::nHeight := IIF( nHeight!=Nil,nHeight,0 )
+Local oParent:=iif(oWndParent==Nil, ::oDefaultParent, oWndParent)
 
-   ::oParent:AddControl( Self )
+   Super:New( oWndParent,nId,0,0,0,0, ;
+                  IIF( nHeight!=Nil,nHeight,0 ),oParent:oFont,bInit, ;
+                  bSize,bPaint )
+
+   ::bPaint  := bPaint
+   hwg_RegPanel()
 
 Return Self
 
@@ -116,32 +139,3 @@ Local pps, hDC, aCoors, oPenLight, oPenGray
 
 Return Nil
 
-METHOD End() CLASS HPanel
-Local aControls := ::aControls, nControls := Len( aControls ), i
-   FOR i := 1 TO nControls
-      IF __ObjHasMsg( aControls[i],"END" )
-         aControls[i]:End()
-      ENDIF
-   NEXT
-Return Nil
-
-
-FUNCTION PanelProc( hPanel, msg, wParam, lParam )
-Local oPanel
-   // WriteLog( "Panel: "+Str(hPanel,10)+"|"+Str(msg,6)+"|"+Str(wParam,10)+"|"+Str(lParam,10) )
-   if msg != WM_CREATE
-      /*
-      if ( oPanel := FindSelf( hPanel ) ) == Nil
-         Return .F.
-      endif
-      */
-      oPanel := GetWindowObject( hPanel )
-      if msg == WM_PAINT
-         oPanel:Paint()
-      elseif msg == WM_CTLCOLORSTATIC
-         Return DlgCtlColor( oPanel,wParam,lParam )
-      else
-         DefProc( oPanel, msg, wParam, lParam )
-      endif
-   endif
-RETURN -1

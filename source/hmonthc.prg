@@ -1,5 +1,5 @@
 /*
- * $Id: hmonthc.prg,v 1.3 2004-03-15 18:51:17 alkresin Exp $
+ * $Id: hmonthc.prg,v 1.9 2005-10-26 07:43:26 omm Exp $
  *
  * HWGUI - Harbour Win32 GUI library source code:
  * HMonthCalendar class
@@ -11,7 +11,7 @@
 //--------------------------------------------------------------------------//
 
 #include "windows.ch"
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "guilib.ch"
 
 #define MCN_SELECT      4294966550
@@ -46,25 +46,19 @@ METHOD New( oWndParent, nId, vari, nStyle, nLeft, nTop, nWidth, nHeight, ;
             oFont, bInit, bChange, cTooltip, lNoToday, lNoTodayCircle, ;
             lWeekNumbers ) CLASS HMonthCalendar
 
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := Iif( nId==Nil, ::NewId(), nId )
+   nStyle := Hwg_BitOr( Iif( nStyle==Nil, 0, nStyle ), WS_TABSTOP )
+   nStyle   += Iif( lNoToday==Nil.OR.!lNoToday, 0, MCS_NOTODAY )
+   nStyle   += Iif( lNoTodayCircle==Nil.OR.!lNoTodayCircle, 0, MCS_NOTODAYCIRCLE )
+   nStyle   += Iif( lWeekNumbers==Nil.OR.!lWeekNumbers, 0, MCS_WEEKNUMBERS )
+   Super:New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight,oFont,bInit, ;
+                  ,,ctooltip )
+
    ::value   := Iif( Valtype(vari)=="D" .And. !Empty(vari), vari, Date() )
-   ::style   := Hwg_BitOr( Iif( nStyle==Nil, 0, nStyle ), WS_CHILD+WS_VISIBLE+WS_TABSTOP )
-   ::style   := ::style + Iif( lNoToday      , MCS_NOTODAY      , 0 )
-   ::style   := ::style + Iif( lNoTodayCircle, MCS_NOTODAYCIRCLE, 0 )
-   ::style   := ::style + Iif( lWeekNumbers  , MCS_WEEKNUMBERS  , 0 )
-   ::oFont   := Iif( oFont==Nil, ::oParent:oFont, oFont )
-   ::nLeft   := nLeft
-   ::nTop    := nTop
-   ::nWidth  := nWidth
-   ::nHeight := nHeight
-   ::bInit   := bInit
+
    ::bChange := bChange
-   ::tooltip := cTooltip
 
    HWG_InitCommonControlsEx()
    ::Activate()
-   ::oParent:AddControl( Self )
 
    If bChange != Nil
       ::oParent:AddEvent( MCN_SELECT, ::id, bChange, .T. )
@@ -78,7 +72,7 @@ METHOD Activate CLASS HMonthCalendar
 
    If ::oParent:handle != 0
       ::handle := InitMonthCalendar ( ::oParent:handle, ::id, ::style, ;
-                  ::nLeft, ::nTop, ::nWidth, ::nHeight, ::oFont:handle )
+                  ::nLeft, ::nTop, ::nWidth, ::nHeight )
       ::Init()
    EndIf
 
@@ -153,13 +147,11 @@ HB_FUNC ( INITMONTHCALENDAR )
                          GetModuleHandle(NULL),
                          NULL );
 
-	SendMessage( hMC, (UINT) WM_SETFONT, (WPARAM) (HFONT) hb_parnl(8), 1 );
-
    MonthCal_GetMinReqRect( hMC, &rc );
 
    SetWindowPos( hMC, NULL, hb_parni(4), hb_parni(5), rc.right, rc.bottom, SWP_NOZORDER );
 
-	hb_retnl( (LONG) hMC );
+    hb_retnl( (LONG) hMC );
 }
 
 HB_FUNC ( SETMONTHCALENDARDATE ) // adaptation of function SetDatePicker of file Control.c
@@ -169,7 +161,11 @@ HB_FUNC ( SETMONTHCALENDARDATE ) // adaptation of function SetDatePicker of file
    if( pDate )
    {
       SYSTEMTIME sysTime;
+      #ifndef HARBOUR_OLD_VERSION
+      int lYear, lMonth, lDay;
+      #else
       long lYear, lMonth, lDay;
+      #endif
 
       hb_dateDecode( hb_itemGetDL( pDate ), &lYear, &lMonth, &lDay );
 

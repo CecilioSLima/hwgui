@@ -1,16 +1,27 @@
 /*
- *$Id: guilib.ch,v 1.20 2004-03-23 15:42:33 rodrigo_moreno Exp $
+ *$Id: guilib.ch,v 1.62 2005-10-25 16:01:46 lculik Exp $
  */
+#define HWG_VERSION           "2.14"
+#define	WND_MAIN		1
+#define	WND_MDI 		2
+#define WND_MDICHILD            3
+#define WND_CHILD               4
+#define	WND_DLG_RESOURCE       10
+#define	WND_DLG_NORESOURCE     11
 
-#include "guilib.h"
+#define	OBTN_INIT               0
+#define	OBTN_NORMAL             1
+#define	OBTN_MOUSOVER           2
+#define	OBTN_PRESSED            3
+
+#define	BRW_ARRAY               1
+#define	BRW_DATABASE            2
 
 // Commands for windows, dialogs handling
-// Alterado por jamaj - CHILD window clause
+
 #xcommand INIT WINDOW <oWnd>                ;
              [ MAIN ]                       ;
              [<lMdi: MDI>]                  ;
-             [<lMdiChild: MDICHILD>]        ;
-             [<lChild: CHILD>]              ;
              [ APPNAME <appname> ]          ;
              [ TITLE <cTitle> ]             ;
              [ AT <x>, <y> ]                ;
@@ -29,17 +40,69 @@
              [ ON LOSTFOCUS <bLfocus> ]     ;
              [ ON OTHER MESSAGES <bOther> ] ;
              [ ON EXIT <bExit> ]            ;
-             [<lMaximize: MAXIMIZE>]        ;
              [ HELP <cHelp> ]               ;
              [ HELPID <nHelpId> ]           ;
           => ;
-   <oWnd> := HWindow():New( Iif(<.lMdi.>,WND_MDI,Iif(<.lMdiChild.>,WND_MDICHILD, Iif(<.lChild.>,WND_CHILD,WND_MAIN) )), ;
+   <oWnd> := HMainWindow():New( Iif(<.lMdi.>,WND_MDI,WND_MAIN), ;
                    <ico>,<clr>,<nStyle>,<x>,<y>,<width>,<height>,<cTitle>, ;
-                   <cMenu>,<nPos>,<oFont>,<bInit>,<bExit>, ;
-                   <bSize>, <bPaint>,<bGfocus>,<bLfocus>,<bOther>,<appname>,<oBmp>,<.lMaximize.>,<cHelp>,<nHelpId>)
+                   <cMenu>,<nPos>,<oFont>,<bInit>,<bExit>,<bSize>,<bPaint>,;
+                   <bGfocus>,<bLfocus>,<bOther>,<appname>,<oBmp>,<cHelp>,<nHelpId> )
+
+#xcommand INIT WINDOW <oWnd> MDICHILD       ;
+             [ APPNAME <appname> ]          ;
+             [ TITLE <cTitle> ]             ;
+             [ AT <x>, <y> ]                ;
+             [ SIZE <width>, <height> ]     ;
+             [ ICON <ico> ]                 ;
+             [ COLOR <clr> ]                ;
+             [ BACKGROUND BITMAP <oBmp> ]   ;
+             [ STYLE <nStyle> ]             ;
+             [ FONT <oFont> ]               ;
+             [ MENU <cMenu> ]               ;
+             [ ON INIT <bInit> ]            ;
+             [ ON SIZE <bSize> ]            ;
+             [ ON PAINT <bPaint> ]          ;
+             [ ON GETFOCUS <bGfocus> ]      ;
+             [ ON LOSTFOCUS <bLfocus> ]     ;
+             [ ON OTHER MESSAGES <bOther> ] ;
+             [ ON EXIT <bExit> ]            ;
+             [ HELP <cHelp> ]               ;
+             [ HELPID <nHelpId> ]           ;
+          => ;
+   <oWnd> := HMdiChildWindow():New( ;
+                   <ico>,<clr>,<nStyle>,<x>,<y>,<width>,<height>,<cTitle>, ;
+                   <cMenu>,<oFont>,<bInit>,<bExit>,<bSize>,<bPaint>, ;
+                   <bGfocus>,<bLfocus>,<bOther>,<appname>,<oBmp>,<cHelp>,<nHelpId> )
+
+#xcommand INIT WINDOW <oWnd> CHILD          ;
+             APPNAME <appname>              ;
+             [ TITLE <cTitle> ]             ;
+             [ AT <x>, <y> ]                ;
+             [ SIZE <width>, <height> ]     ;
+             [ ICON <ico> ]                 ;
+             [ COLOR <clr> ]                ;
+             [ BACKGROUND BITMAP <oBmp> ]   ;
+             [ STYLE <nStyle> ]             ;
+             [ FONT <oFont> ]               ;
+             [ MENU <cMenu> ]               ;
+             [ ON INIT <bInit> ]            ;
+             [ ON SIZE <bSize> ]            ;
+             [ ON PAINT <bPaint> ]          ;
+             [ ON GETFOCUS <bGfocus> ]      ;
+             [ ON LOSTFOCUS <bLfocus> ]     ;
+             [ ON OTHER MESSAGES <bOther> ] ;
+             [ ON EXIT <bExit> ]            ;
+             [ HELP <cHelp> ]               ;
+             [ HELPID <nHelpId> ]           ;
+          => ;
+   <oWnd> := HChildWindow():New( ;
+                   <ico>,<clr>,<nStyle>,<x>,<y>,<width>,<height>,<cTitle>, ;
+                   <cMenu>,<oFont>,<bInit>,<bExit>,<bSize>,<bPaint>, ;
+                   <bGfocus>,<bLfocus>,<bOther>,<appname>,<oBmp>,<cHelp>,<nHelpId> )
+
 
 #xcommand INIT DIALOG <oDlg>                ;
-             [<res: FROM RESOURCE>]         ;
+             [<res: FROM RESOURCE> <Resid> ]         ;
              [ TITLE <cTitle> ]             ;
              [ AT <x>, <y> ]                ;
              [ SIZE <width>, <height> ]     ;
@@ -49,6 +112,7 @@
              [ FONT <oFont> ]               ;
              [<lClipper: CLIPPER>]          ;
              [<lExitOnEnter: NOEXIT>]       ; //Modified By Sandro
+             [<lExitOnEsc: NOEXITESC>]      ; //Modified By Sandro
              [ ON INIT <bInit> ]            ;
              [ ON SIZE <bSize> ]            ;
              [ ON PAINT <bPaint> ]          ;
@@ -60,13 +124,39 @@
           => ;
    <oDlg> := HDialog():New( Iif(<.res.>,WND_DLG_RESOURCE,WND_DLG_NORESOURCE), ;
                    <nStyle>,<x>,<y>,<width>,<height>,<cTitle>,<oFont>,<bInit>,<bExit>,;
-                   <bSize>, <bPaint>,<bGfocus>,<bLfocus>,<bOther>,<.lClipper.>,<oBmp>,<ico>,<.lExitOnEnter.>,<nHelpId> )
+                   <bSize>, <bPaint>,<bGfocus>,<bLfocus>,<bOther>,<.lClipper.>,<oBmp>,<ico>,<.lExitOnEnter.>,<nHelpId>,<Resid>,<.lExitOnEsc.> )
 
-#xcommand ACTIVATE WINDOW <oWnd> [<lNoShow: NOSHOW>]     ;
+#xcommand ACTIVATE WINDOW <oWnd> ;
+               [<lNoShow: NOSHOW>] ;
+               [<lMaximized: MAXIMIZED>] ;
+               [<lMinimized: MINIMIZED>] ;
            => ;
-      <oWnd>:Activate( !<.lNoShow.>) 
-                                                        
-  
+      <oWnd>:Activate( !<.lNoShow.>, <.lMaximized.>, <.lMinimized.> )
+
+#xcommand CENTER WINDOW <oWnd> ;
+	=>;
+        <oWnd>:Center()
+
+#xcommand MAXIMIZE WINDOW <oWnd> ;
+	=>;
+        <oWnd>:Maximize()
+
+#xcommand MINIMIZE WINDOW <oWnd> ;
+	=>;
+        <oWnd>:Minimize()
+
+#xcommand RESTORE WINDOW <oWnd> ;
+	=>;
+        <oWnd>:Restore()
+
+#xcommand SHOW WINDOW <oWnd> ;
+	=>;
+        <oWnd>:Show()
+
+#xcommand HIDE WINDOW <oWnd> ;
+	=>;
+        <oWnd>:Hide()
+
 #xcommand ACTIVATE DIALOG <oDlg>                        ;
             [ <lNoModal: NOMODAL> ]                     ;
           => ;
@@ -85,16 +175,28 @@
 
 // Commands for control handling
 
-#xcommand ADD STATUS [ TO <oWnd> ] ;
+// Contribution ATZCT" <atzct@obukhov.kiev.ua
+#xcommand @ <x>,<y> PROGRESSBAR <oPBar>       ;
+            [ OF <oWnd> ]                       ;
+            [ ID <nId> ]                        ;
+            [ SIZE <nWidth>,<nHeight> ]         ;
+            [ BARWIDTH <maxpos> ]               ;
+            [ QUANTITY <nRange> ]               ;
+            =>                                  ;
+            <oPBar> :=  HProgressBar():New( <oWnd>,<nId>,<x>,<y>,<nWidth>, ;
+                       <nHeight>,<maxpos>,<nRange> )
+
+#xcommand ADD STATUS [<oStat>] [ TO <oWnd> ] ;
             [ ID <nId> ]           ;
             [ ON INIT <bInit> ]    ;
             [ ON SIZE <bSize> ]    ;
             [ ON PAINT <bDraw> ]   ;
             [ STYLE <nStyle> ]     ;
             [ FONT <oFont> ]       ;
-            [ PARTS <aparts,...> ] ;
+            PARTS <aparts,...>     ;
           => ;
-    HStatus():New( <oWnd>,<nId>,<nStyle>,<oFont>,\{<aparts>\},<bInit>,<bSize>,<bDraw> )
+            [ <oStat> := ] HStatus():New( <oWnd>,<nId>,<nStyle>,<oFont>,\{<aparts>\},<bInit>,;
+                                          <bSize>,<bDraw> )
 
 
 #xcommand @ <x>,<y> SAY [ <oSay> CAPTION ] <caption> ;
@@ -183,9 +285,10 @@
             [ ON INIT <bInit> ]        ;
             [ ON SIZE <bSize> ]        ;
             [ TOOLTIP <ctoolt> ]       ;
+            [ TYPE <ctype>     ]       ;
           => ;
     [<oImage> := ] HSayFImage():New( <oWnd>,<nId>,<x>,<y>,<width>, ;
-        <height>,<image>,<bInit>,<bSize>,<ctoolt> )
+        <height>,<image>,<bInit>,<bSize>,<ctoolt>,<ctype> )
 
 #xcommand REDEFINE IMAGE [ <oImage> SHOW ] <image> ;
             [ OF <oWnd> ]              ;
@@ -220,12 +323,13 @@
             [ ON LOSTFOCUS <bLfocus> ] ;
             [ STYLE <nStyle> ]         ;
             [<lnoborder: NOBORDER>]    ;
+            [<lPassword: PASSWORD>]    ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
           => ;
     [<oEdit> := ] HEdit():New( <oWnd>,<nId>,<caption>,,<nStyle>,<x>,<y>,<width>, ;
                     <height>,<oFont>,<bInit>,<bSize>,<bDraw>,<bGfocus>, ;
-                    <bLfocus>,<ctoolt>,<color>,<bcolor>,,<.lnoborder.> )
+                    <bLfocus>,<ctoolt>,<color>,<bcolor>,,<.lnoborder.>,,<.lPassword.> )
 
 
 #xcommand REDEFINE EDITBOX [ <oEdit> ] ;
@@ -284,6 +388,7 @@
 #xcommand REDEFINE BUTTON [ <oBut> ]   ;
             [ OF <oWnd> ]              ;
             ID <nId>                   ;
+            [ CAPTION <cCaption> ]     ;
             [ COLOR <color> ]          ;
             [ BACKCOLOR <bcolor> ]     ;
             [ FONT <oFont> ]           ;
@@ -294,7 +399,7 @@
             [ TOOLTIP <ctoolt> ]       ;
           => ;
     [<oBut> := ] HButton():Redefine( <oWnd>,<nId>,<oFont>,<bInit>,<bSize>,<bDraw>, ;
-                    <bClick>,<ctoolt>,<color>,<bcolor> )
+                    <bClick>,<ctoolt>,<color>,<bcolor>,<cCaption> )
 
 #xcommand @ <x>,<y> GROUPBOX [ <oGroup> CAPTION ] <caption> ;
             [ OF <oWnd> ]              ;
@@ -320,12 +425,13 @@
             [ BACKCOLOR <bcolor> ]     ;
             [ ON INIT <bInit> ]        ;
             [ ON SIZE <bSize> ]        ;
+            [ ON CLICK <bClick> ]      ;
             [ STYLE <nStyle> ]         ;
             [<lEdit: EDITABLE>]        ;
-            [ BITMAP <aBmp>  [<res: FROM RESOURCE>] ]  ;
+            [ BITMAP <aBmp>  [<res: FROM RESOURCE>] [ BITCOUNT <nBC> ] ]  ;
           => ;
     [<oTree> := ] HTree():New( <oWnd>,<nId>,<nStyle>,<x>,<y>,<width>, ;
-             <height>,<oFont>,<bInit>,<bSize>,<color>,<bcolor>,<aBmp>,<.res.>,<.lEdit.> )
+             <height>,<oFont>,<bInit>,<bSize>,<color>,<bcolor>,<aBmp>,<.res.>,<.lEdit.>,<bClick>,<nBC> )
 
 #xcommand INSERT NODE [ <oNode> CAPTION ] <cTitle>  ;
             TO <oTree>                            ;
@@ -346,9 +452,14 @@
             [ ON SIZE <bSize> ]        ;
             [ ON PAINT <bDraw> ]       ;
             [ ON CHANGE <bChange> ]    ;
+            [ ON CLICK <bClick> ]      ;
+            [ ON GETFOCUS <bGetFocus> ];
+            [ ON LOSTFOCUS <bLostFocus>];
+            [ BITMAP <aBmp>  [<res: FROM RESOURCE>] [ BITCOUNT <nBC> ] ]  ;
           => ;
     [<oTab> := ] HTab():New( <oWnd>,<nId>,<nStyle>,<x>,<y>,<width>, ;
-             <height>,<oFont>,<bInit>,<bSize>,<bDraw>,<aItems>,<bChange> )
+             <height>,<oFont>,<bInit>,<bSize>,<bDraw>,<aItems>,<bChange>, <aBmp>, <.res.>,<nBC>,;
+             <bClick>, <bGetFocus>, <bLostFocus> )
 
 #xcommand BEGIN PAGE <cname> OF <oTab> ;
           => ;
@@ -445,6 +556,8 @@
             [ ID <nId> ]               ;
             [ INIT <nInit> ]           ;
             [ SIZE <width>, <height> ] ;
+            [ COLOR <color> ]          ;
+            [ BACKCOLOR <bcolor> ]     ;
             [ ON INIT <bInit> ]        ;
             [ ON SIZE <bSize> ]        ;
             [ ON PAINT <bDraw> ]       ;
@@ -452,9 +565,12 @@
             [ STYLE <nStyle> ]         ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
+            [ <edit: EDIT> ]           ;
+            [ <text: TEXT> ]           ;
           => ;
     [<oCombo> := ] HComboBox():New( <oWnd>,<nId>,<nInit>,,<nStyle>,<x>,<y>,<width>, ;
-                  <height>,<aItems>,<oFont>,<bInit>,<bSize>,<bDraw>,<bChange>,<ctoolt> )
+                  <height>,<aItems>,<oFont>,<bInit>,<bSize>,<bDraw>,<bChange>,<ctoolt>,;
+                  <.edit.>,<.text.>,,<color>,<bcolor> )
 
 #xcommand REDEFINE COMBOBOX [ <oCombo> ITEMS ] <aItems> ;
             [ OF <oWnd> ]              ;
@@ -570,9 +686,66 @@
             [ WHEN <bWhen> ]           ;
             [ ITEMS <aItem> ]          ;
             [ BITMAP <oBmp> ]          ;
+            [ COLORBLOCK <bClrBlck> ]  ;
           => ;
     <oBrw>:AddColumn( HColumn():New( <cHeader>,<block>,<cType>,<nLen>,<nDec>,<.lEdit.>,;
-                      <nJusHead>, <nJusLine>, <cPict>, <{bValid}>, <{bWhen}>, <aItem>, <oBmp> ) )
+                      <nJusHead>, <nJusLine>, <cPict>, <{bValid}>, <{bWhen}>, <aItem>, <oBmp>, <{bClrBlck}> ) )
+
+#xcommand INSERT COLUMN <block> TO <oBrw> ;
+            [ HEADER <cHeader> ]       ;
+            [ TYPE <cType> ]           ;
+            [ LENGTH <nLen> ]          ;
+            [ DEC <nDec>    ]          ;
+            [ <lEdit: EDITABLE> ]      ;
+            [ JUSTIFY HEAD <nJusHead> ];
+            [ JUSTIFY LINE <nJusLine> ];
+            [ PICTURE <cPict> ]        ;
+            [ VALID <bValid> ]         ;
+            [ WHEN <bWhen> ]           ;
+            [ ITEMS <aItem> ]          ;
+            [ BITMAP <oBmp> ]          ;
+            [ COLORBLOCK <bClrBlck> ]  ;
+            INTO <nPos>                ;
+          => ;
+    <oBrw>:InsColumn( HColumn():New( <cHeader>,<block>,<cType>,<nLen>,<nDec>,<.lEdit.>,;
+                      <nJusHead>, <nJusLine>, <cPict>, <{bValid}>, <{bWhen}>, <aItem>, <oBmp>, <{bClrBlck}> ),<nPos> )
+
+#xcommand @ <x>,<y> GRID <oGrid>        ;
+            [ OF <oWnd> ]               ;
+            [ ID <nId> ]                ;
+            [ STYLE <nStyle> ]          ;
+            [ SIZE <width>, <height> ]  ;
+            [ FONT <oFont> ]            ;
+            [ ON INIT <bInit> ]         ;
+            [ ON SIZE <bSize> ]         ;
+            [ ON PAINT <bPaint> ]       ;
+            [ ON CLICK <bEnter> ]       ;
+            [ ON GETFOCUS <bGfocus> ]   ;
+            [ ON LOSTFOCUS <bLfocus> ]  ;
+            [ ON KEYDOWN <bKeyDown> ]   ;
+            [ ON POSCHANGE <bPosChg> ]  ;
+            [ ON DISPINFO <bDispInfo> ] ;
+            [ ITEMCOUNT <nItemCount> ]  ;
+            [ <lNoScroll: NOSCROLL> ]   ;
+            [ <lNoBord: NOBORDER> ]     ;
+            [ <lNoLines: NOGRIDLINES> ] ;
+            [ COLOR <color> ]           ;
+            [ BACKCOLOR <bkcolor> ]     ;
+            [ <lNoHeader: NO HEADER> ]  ;
+          => ;
+    <oGrid> := HGrid():New( <oWnd>, <nId>, <nStyle>, <x>, <y>, <width>, <height>,;
+                            <oFont>, <{bInit}>, <{bSize}>, <{bPaint}>, <{bEnter}>,;
+                            <{bGfocus}>, <{bLfocus}>, <.lNoScroll.>, <.lNoBord.>,;
+                            <{bKeyDown}>, <{bPosChg}>, <{bDispInfo}>, <nItemCount>,;
+                             <.lNoLines.>, <color>, <bkcolor>, <.lNoHeader.> )
+
+#xcommand ADD COLUMN TO GRID <oGrid>    ;
+            [ HEADER <cHeader> ]        ;
+            [ WIDTH <nWidth> ]          ;
+            [ JUSTIFY HEAD <nJusHead> ] ;
+          => ;
+    <oGrid>:AddColumn( <cHeader>, <nWidth>, <nJusHead> )
+
 
 
 #xcommand @ <x>,<y> OWNERBUTTON [ <oOwnBtn> ]  ;
@@ -585,11 +758,12 @@
             [ ON CLICK <bClick> ]   ;
             [ STYLE <nStyle> ]      ;
             [ <flat: FLAT> ]        ;
+            [ <enable: DISABLED> ]        ;
             [ TEXT <cText>          ;
                  [ COLOR <color>] [ FONT <font> ] ;
                  [ COORDINATES  <xt>, <yt>, <widtht>, <heightt> ] ;
             ] ;
-            [ BITMAP <bmp>  [<res: FROM RESOURCE>] [<ltr: TRANSPARENT>] ;
+            [ BITMAP <bmp>  [<res: FROM RESOURCE>] [<ltr: TRANSPARENT> [COLOR  <trcolor> ]] ;
                  [ COORDINATES  <xb>, <yb>, <widthb>, <heightb> ] ;
             ] ;
             [ TOOLTIP <ctoolt> ]    ;
@@ -598,7 +772,7 @@
           <height>,<bInit>,<bSize>,<bDraw>, ;
           <bClick>,<.flat.>, ;
               <cText>,<color>,<font>,<xt>, <yt>,<widtht>,<heightt>, ;
-              <bmp>,<.res.>,<xb>,<yb>,<widthb>,<heightb>,<.ltr.>, <ctoolt> )
+              <bmp>,<.res.>,<xb>,<yb>,<widthb>,<heightb>,<.ltr.>,<trcolor>, <ctoolt>,!<.enable.> )
 
 
 #xcommand REDEFINE OWNERBUTTON [ <oOwnBtn> ]  ;
@@ -617,12 +791,13 @@
                  [ COORDINATES  <xb>, <yb>, <widthb>, <heightb> ] ;
             ] ;
             [ TOOLTIP <ctoolt> ]    ;
+            [ <enable: DISABLED> ]        ;
           => ;
     [<oOwnBtn> :=] HOWNBUTTON():Redefine( <oWnd>,<nId>, ;
           <bInit>,<bSize>,<bDraw>, ;
           <bClick>,<.flat.>, ;
               <cText>,<color>,<font>,<xt>, <yt>,<widtht>,<heightt>, ;
-              <bmp>,<.res.>,<xb>, <yb>,<widthb>,<heightb>,<.ltr.>, <ctoolt> )
+              <bmp>,<.res.>,<xb>, <yb>,<widthb>,<heightb>,<.ltr.>, <ctoolt>, !<.enable.>)
 
 #xcommand @ <x>,<y> DATEPICKER [ <oPick> ]  ;
             [ OF <oWnd> ]              ;
@@ -634,12 +809,13 @@
             [ ON INIT <bInit> ]        ;
             [ ON GETFOCUS <bGfocus> ]  ;
             [ ON LOSTFOCUS <bLfocus> ] ;
+            [ ON CHANGE <bChange> ]    ;
             [ STYLE <nStyle> ]         ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
           => ;
     [<oPick> :=] HDatePicker():New( <oWnd>,<nId>,<dInit>,,<nStyle>,<x>,<y>, ;
-        <width>,<height>,<oFont>,<bInit>,<bGfocus>,<bLfocus>,<ctoolt>, ;
+        <width>,<height>,<oFont>,<bInit>,<bGfocus>,<bLfocus>,<bChange>,<ctoolt>, ;
         <color>,<bcolor> )
 
 
@@ -658,8 +834,8 @@
 
 #xcommand PREPARE FONT <oFont>       ;
              NAME <cName>            ;
-             WIDTH <nWidth>          ;
-             HEIGHT <nHeight>        ;
+             [ WIDTH <nWidth> ]      ;
+             [ HEIGHT <nHeight> ]     ;
              [ WEIGHT <nWeight> ]    ;
              [ CHARSET <charset> ]   ;
              [ <ita: ITALIC> ]       ;
@@ -686,6 +862,8 @@
             [ PICTURE <cPicture> ]     ;
             [ WHEN  <bGfocus> ]        ;
             [ VALID <bLfocus> ]        ;
+            [<lPassword: PASSWORD>]    ;
+            [ MAXLENGTH <lMaxLength> ] ;
             [ STYLE <nStyle> ]         ;
             [<lnoborder: NOBORDER>]    ;
             [ FONT <oFont> ]           ;
@@ -694,21 +872,23 @@
     [<oEdit> := ] HEdit():New( <oWnd>,<nId>,<vari>,               ;
                    {|v|Iif(v==Nil,<vari>,<vari>:=v)},             ;
                    <nStyle>,<x>,<y>,<width>,<height>,<oFont>,,,,  ;
-                   <bGfocus>,<bLfocus>,<ctoolt>,<color>,<bcolor>,<cPicture>,<.lnoborder.> )
+                   <bGfocus>,<bLfocus>,<ctoolt>,<color>,<bcolor>,<cPicture>,<.lnoborder.>,<lMaxLength>,<.lPassword.>)
 
 #xcommand REDEFINE GET [ <oEdit> VAR ] <vari>  ;
             [ OF <oWnd> ]              ;
             ID <nId>                   ;
             [ COLOR <color> ]          ;
             [ BACKCOLOR <bcolor> ]     ;
+            [ PICTURE <cPicture> ]     ;
             [ WHEN  <bGfocus> ]        ;
             [ VALID <bLfocus> ]        ;
+            [ MAXLENGHT <lMaxLenght> ] ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
           => ;
     [<oEdit> := ] HEdit():Redefine( <oWnd>,<nId>,<vari>, ;
                    {|v|Iif(v==Nil,<vari>,<vari>:=v)},    ;
-                   <oFont>,,,,<bGfocus>,<bLfocus>,<ctoolt>,<color>,<bcolor> )
+                   <oFont>,,,,<bGfocus>,<bLfocus>,<ctoolt>,<color>,<bcolor>,<cPicture>,<lMaxLenght> )
 
 
 #xcommand @ <x>,<y> GET CHECKBOX [ <oCheck> VAR ] <vari>  ;
@@ -722,11 +902,12 @@
             [ STYLE <nStyle> ]         ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
+            [ WHEN <bWhen> ]           ;
           => ;
     [<oCheck> := ] HCheckButton():New( <oWnd>,<nId>,<vari>,              ;
                     {|v|Iif(v==Nil,<vari>,<vari>:=v)},                   ;
                     <nStyle>,<x>,<y>,<width>,<height>,<caption>,<oFont>, ;
-                    ,,,<bClick>,<ctoolt>,<color>,<bcolor> )
+                    ,,,<bClick>,<ctoolt>,<color>,<bcolor>,<bWhen> )
 
 #xcommand REDEFINE GET CHECKBOX [ <oCheck> VAR ] <vari>  ;
             [ OF <oWnd> ]              ;
@@ -736,25 +917,33 @@
             [ <valid: VALID, ON CLICK> <bClick> ] ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
+            [ WHEN <bWhen> ]           ;
           => ;
     [<oCheck> := ] HCheckButton():Redefine( <oWnd>,<nId>,<vari>, ;
                     {|v|Iif(v==Nil,<vari>,<vari>:=v)},           ;
-                    <oFont>,,,,<bClick>,<ctoolt>,<color>,<bcolor> )
+                    <oFont>,,,,<bClick>,<ctoolt>,<color>,<bcolor>,<bWhen> )
 
 #xcommand @ <x>,<y> GET COMBOBOX [ <oCombo> VAR ] <vari> ;
             ITEMS  <aItems>            ;
             [ OF <oWnd> ]              ;
             [ ID <nId> ]               ;
             [ SIZE <width>, <height> ] ;
+            [ COLOR <color> ]          ;
+            [ BACKCOLOR <bcolor> ]     ;
             [ ON CHANGE <bChange> ]    ;
             [ STYLE <nStyle> ]         ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
+            [ <edit: EDIT> ]           ;
+            [ <text: TEXT> ]           ;
+            [ WHEN <bWhen> ]           ;
+            [ VALID <bValid> ]         ;
           => ;
     [<oCombo> := ] HComboBox():New( <oWnd>,<nId>,<vari>,    ;
                     {|v|Iif(v==Nil,<vari>,<vari>:=v)},      ;
                     <nStyle>,<x>,<y>,<width>,<height>,      ;
-                    <aItems>,<oFont>,,,,<bChange>,<ctoolt> )
+                    <aItems>,<oFont>,,,,<bChange>,<ctoolt>, ;
+                    <.edit.>,<.text.>,<bWhen>,<color>,<bcolor>,<bValid> )
 
 #xcommand REDEFINE GET COMBOBOX [ <oCombo> VAR ] <vari> ;
             ITEMS  <aItems>            ;
@@ -763,10 +952,11 @@
             [ ON CHANGE <bChange> ]    ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
+            [ WHEN <bWhen> ]           ;
           => ;
     [<oCombo> := ] HComboBox():Redefine( <oWnd>,<nId>,<vari>, ;
                     {|v|Iif(v==Nil,<vari>,<vari>:=v)},        ;
-                    <aItems>,<oFont>,,,,<bChange>,<ctoolt> )
+                    <aItems>,<oFont>,,,,<bChange>,<ctoolt>, <bWhen> )
 
 #xcommand @ <x>,<y> GET UPDOWN [ <oUpd> VAR ]  <vari>  ;
             RANGE <nLower>,<nUpper>    ;
@@ -798,6 +988,7 @@
             [ BACKCOLOR <bcolor> ]     ;
             [ WHEN <bGfocus> ]         ;
             [ VALID <bLfocus> ]        ;
+            [ ON CHANGE <bChange> ]    ;
             [ STYLE <nStyle> ]         ;
             [ FONT <oFont> ]           ;
             [ TOOLTIP <ctoolt> ]       ;
@@ -805,7 +996,7 @@
     [<oPick> :=] HDatePicker():New( <oWnd>,<nId>,<vari>,    ;
                     {|v|Iif(v==Nil,<vari>,<vari>:=v)},      ;
                     <nStyle>,<x>,<y>,<width>,<height>,      ;
-                    <oFont>,,<bGfocus>,<bLfocus>,<ctoolt>,<color>,<bcolor> )
+                    <oFont>,,<bGfocus>,<bLfocus>,<bChange>,<ctoolt>,<color>,<bcolor> )
 
 
 #xcommand SAY <value> TO <oDlg> ID <id> ;
@@ -826,10 +1017,25 @@
 
 #xcommand MENUITEM <item> [ ID <nId> ]    ;
             ACTION <act>                  ;
+            [ BITMAP <bmp> ]               ; //ADDED by Sandro Freire
+            [<res: FROM RESOURCE>]        ; //true use image from resource
             [ ACCELERATOR <flag>, <key> ] ;
             [<lDisabled: DISABLED>]       ;
           => ;
-    Hwg_DefineMenuItem( <item>, <nId>, <{act}>, <.lDisabled.>, <flag>, <key> )
+    Hwg_DefineMenuItem( <item>, <nId>, <{act}>, <.lDisabled.>, <flag>, <key>, <bmp>, <.res.>, .f. )
+
+#xcommand MENUITEMCHECK <item> [ ID <nId> ]    ;
+            [ ACTION <act> ]              ;
+            [ ACCELERATOR <flag>, <key> ] ;
+            [<lDisabled: DISABLED>]       ;
+          => ;
+    Hwg_DefineMenuItem( <item>, <nId>, <{act}>, <.lDisabled.>, <flag>, <key>,,, .t. )
+
+#xcommand MENUITEMBITMAP <oMain>  ID <nId> ;
+            BITMAP <bmp>                  ;
+            [<res: FROM RESOURCE>]         ;
+          => ;
+    Hwg_InsertBitmapMenu( <oMain>:menu, <nId>, <bmp>, <.res.>)
 
 #xcommand ACCELERATOR <flag>, <key>       ;
             [ ID <nId> ]                  ;
@@ -870,7 +1076,7 @@
 
 #xcommand SET RESOURCES TO => LOADRESOURCE( NIL )
 
-// Addded by jamaj 
+// Addded by jamaj
 #xcommand DEFAULT <uVar1> := <uVal1> ;
                [, <uVarN> := <uValN> ] => ;
                   <uVar1> := IIf( <uVar1> == nil, <uVal1>, <uVar1> ) ;;
@@ -910,6 +1116,20 @@
 
 #xcommand  END PRINTER <oPtrObj> => <oPtrObj>:End()
 
+/* Hprinter */
+
+#xcommand  INIT PRINTER <oPrinter>   ;
+             [ NAME <cPrinter> ]     ;
+             [ <lPixel: PIXEL> ]     ;
+          =>  ;
+          <oPrinter> := HPrinter():New( <cPrinter>,!<.lPixel.> )
+
+#xcommand  INIT DEFAULT PRINTER <oPrinter>   ;
+             [ <lPixel: PIXEL> ]             ;
+          =>  ;
+          <oPrinter> := HPrinter():New( "",!<.lPixel.> )
+
+
 /*
 Command for MonthCalendar Class
 Added by Marcos Antonio Gambeta
@@ -932,9 +1152,9 @@ Added by Marcos Antonio Gambeta
     [<oMonthCalendar> :=] HMonthCalendar():New( <oWnd>,<nId>,<dInit>,<nStyle>,;
         <x>,<y>,<nWidth>,<nHeight>,<oFont>,<bInit>,<bChange>,<cTooltip>,;
         <.notoday.>,<.notodaycircle.>,<.weeknumbers.>)
- 
 
-/*By Vitor Maclung */ 
+
+/*By Vitor Maclung */
 // Commands for Listbox handling
 
 
@@ -972,6 +1192,126 @@ Added by Marcos Antonio Gambeta
 
 #xcommand SPLASH [<osplash> TO]  <oBitmap> ;
             [<res: FROM RESOURCE>]         ;
-            [ TIME <otime> ]               ;    
+            [ TIME <otime> ]               ;
           => ;
    [ <osplash> := ] HSplash():Create(<oBitmap>,<otime>,<.res.>)
+
+// Nice Buttons by Luiz Rafael
+#xcommand @ <x>,<y> NICEBUTTON [ <oBut> CAPTION ] <caption> ;
+            [ OF <oWnd> ]              ;
+            [ ID <nId> ]               ;
+            [ SIZE <width>, <height> ] ;
+            [ ON INIT <bInit> ]        ;
+            [ ON CLICK <bClick> ]      ;
+            [ STYLE <nStyle> ]         ;
+            [ EXSTYLE <nStyleEx> ]         ;
+            [ TOOLTIP <ctoolt> ]       ;
+            [ RED <r> ] ;
+            [ GREEN <g> ];
+            [ BLUE <b> ];
+          => ;
+    [<oBut> := ] HNicebutton():New( <oWnd>,<nId>,<nStyle>,<nStyleEx>,<x>,<y>,<width>, ;
+             <height>,<bInit>,<bClick>,<caption>,<ctoolt>,<r>,<g>,<b> )
+
+
+#xcommand REDEFINE NICEBUTTON [ <oBut> CAPTION ] <caption> ;
+            [ OF <oWnd> ]              ;
+            [ ID <nId> ]               ;
+            [ ON INIT <bInit> ]        ;
+            [ ON CLICK <bClick> ]      ;
+            [ EXSTYLE <nStyleEx> ]         ;
+            [ TOOLTIP <ctoolt> ]       ;
+            [ RED <r> ] ;
+            [ GREEN <g> ];
+            [ BLUE <b> ];
+          => ;
+    [<oBut> := ] HNicebutton():Redefine( <oWnd>,<nId>,<nStyleEx>, ;
+             <bInit>,<bClick>,<caption>,<ctoolt>,<r>,<g>,<b> )
+
+// trackbar control
+#xcommand @ <x>,<y> TRACKBAR [ <oTrackBar> ]  ;
+            [ OF <oWnd> ]                 ;
+            [ ID <nId> ]                  ;
+            [ SIZE <width>, <height> ]    ;
+            [ RANGE <nLow>,<nHigh> ]      ;
+            [ INIT <nInit> ]              ;
+            [ ON INIT <bInit> ]           ;
+            [ ON SIZE <bSize> ]           ;
+            [ ON PAINT <bDraw> ]          ;
+            [ ON CHANGE <bChange> ]       ;
+            [ ON DRAG <bDrag> ]           ;
+            [ STYLE <nStyle> ]            ;
+            [ TOOLTIP <cTooltip> ]        ;
+            [ < vertical : VERTICAL > ]   ;
+            [ < autoticks : AUTOTICKS > ] ;
+            [ < noticks : NOTICKS > ]     ;
+            [ < both : BOTH > ]           ;
+            [ < top : TOP > ]             ;
+            [ < left : LEFT > ]           ;
+          => ;
+    [<oTrackBar> :=] HTrackBar():New( <oWnd>,<nId>,<nInit>,<nStyle>,<x>,<y>,      ;
+        <width>,<height>,<bInit>,<bSize>,<bDraw>,<cTooltip>,<bChange>,<bDrag>,<nLow>,<nHigh>,<.vertical.>,;
+        Iif(<.autoticks.>,1,Iif(<.noticks.>,16,0)), ;
+        Iif(<.both.>,8,Iif(<.top.>.or.<.left.>,4,0)) )
+
+// animation control
+#xcommand @ <x>,<y>  ANIMATION [ <oAnimation> ] ;
+            [ OF <oWnd> ]                       ;
+            [ ID <nId> ]                        ;
+            [ STYLE <nStyle> ]                  ;
+            [ SIZE <nWidth>, <nHeight> ]        ;
+            [ FILE <cFile> ]                    ;
+            [ < autoplay: AUTOPLAY > ]          ;
+            [ < center : CENTER > ]             ;
+            [ < transparent: TRANSPARENT > ]    ;
+	=>;
+    [<oAnimation> :=] HAnimation():New( <oWnd>,<nId>,<nStyle>,<x>,<y>, ;
+        <nWidth>,<nHeight>,<cFile>,<.autoplay.>,<.center.>,<.transparent.>)
+
+//Contribution   Ricardo de Moura Marques
+#xcommand @ <X>, <Y>, <X2>, <Y2> RECT <oRect> [<lPress: PRESS>] [OF <oWnd>] [RECT_STYLE <nST>];
+          => <oRect> := HRect():New(<oWnd>,<X>,<Y>,<X2>,<Y2>, <.lPress.>, <nST> )
+
+//New Control
+#xcommand @ <x>,<y> SAY [ <oSay> CAPTION ] <caption> ;
+            [ OF <oWnd> ]              ;
+            LINK <cLink>               ;   
+            [ ID <nId> ]               ;
+            [ SIZE <width>, <height> ] ;
+            [ COLOR <color> ]          ;
+            [ BACKCOLOR <bcolor> ]     ;
+            [<lTransp: TRANSPARENT>]   ;
+            [ ON INIT <bInit> ]        ;
+            [ ON SIZE <bSize> ]        ;
+            [ ON PAINT <bDraw> ]       ;
+            [ STYLE <nStyle> ]         ;
+            [ FONT <oFont> ]           ;
+            [ TOOLTIP <ctoolt> ]       ;
+            [ VISITCOLOR <vcolor> ]    ;
+            [ LINKCOLOR <lcolor> ]     ;
+            [ HOVERCOLOR <hcolor> ]    ;
+          => ;
+    [<oSay> := ] HStaticLink():New( <oWnd>, <nId>, <nStyle>, <x>, <y>, <width>, ;
+        <height>, <caption>, <oFont>, <bInit>, <bSize>, <bDraw>, <ctoolt>, ;
+        <color>, <bcolor>, <.lTransp.>, <cLink>, <vcolor>, <lcolor>, <hcolor> )
+
+
+#xcommand REDEFINE SAY [ <oSay> CAPTION ] <cCaption>      ;
+            [ OF <oWnd> ]              ;
+            ID <nId>                   ;
+            LINK <cLink>               ;   
+            [ COLOR <color> ]          ;
+            [ BACKCOLOR <bcolor> ]     ;
+            [<lTransp: TRANSPARENT>]   ;
+            [ ON INIT <bInit> ]        ;
+            [ ON SIZE <bSize> ]        ;
+            [ ON PAINT <bDraw> ]       ;
+            [ FONT <oFont> ]           ;
+            [ TOOLTIP <ctoolt> ]       ;
+            [ VISITCOLOR <vcolor> ]    ;
+            [ LINKCOLOR <lcolor> ]     ;
+            [ HOVERCOLOR <hcolor> ]    ;
+          => ;
+    [<oSay> := ] HStaticLink():Redefine( <oWnd>, <nId>, <cCaption>, ;
+        <oFont>, <bInit>, <bSize>, <bDraw>, <ctoolt>, <color>, <bcolor>,;
+        <.lTransp.>, <cLink>, <vcolor>, <lcolor>, <hcolor> )

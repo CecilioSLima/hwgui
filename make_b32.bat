@@ -5,6 +5,7 @@ if "%1" == "CLEAN" goto CLEAN
 if not exist lib md lib
 if not exist obj md obj
 
+
 :BUILD
 
    make -fmakefile.bc  > make_b32.log

@@ -1,9 +1,11 @@
 /*
+ * $Id: draw.c,v 1.14 2005-10-17 21:24:35 lculik Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * C level painting functions
  *
  * Copyright 2001 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #define HB_OS_WIN_32_USED
@@ -23,9 +25,9 @@
 #include "hbstack.h"
 #include "item.api"
 
-HB_FUNC ( INVALIDATERECT )
+HB_FUNC( INVALIDATERECT )
 {
-   RECT rc;
+   RECT rc= { 0 };
 
    if( hb_pcount() > 2 )
    {
@@ -42,7 +44,7 @@ HB_FUNC ( INVALIDATERECT )
    );
 }
 
-HB_FUNC ( RECTANGLE )
+HB_FUNC( RECTANGLE )
 {
    HDC hDC = (HDC) hb_parnl( 1 );
    int x1 = hb_parni( 2 ), y1 = hb_parni( 3 ), x2 = hb_parni( 4 ), y2 = hb_parni( 5 );
@@ -62,7 +64,7 @@ HB_FUNC ( RECTANGLE )
 */
 }
 
-HB_FUNC ( DRAWLINE )
+HB_FUNC( DRAWLINE )
 {
    MoveToEx( (HDC) hb_parnl( 1 ), hb_parni( 2 ), hb_parni( 3 ), NULL );
    LineTo( (HDC) hb_parnl( 1 ), hb_parni( 4 ), hb_parni( 5 ) );
@@ -102,9 +104,9 @@ HB_FUNC( ELLIPSE )
      hb_retnl( 0 );
 }
 
-HB_FUNC ( FILLRECT )
+HB_FUNC( FILLRECT )
 {
-   RECT rc;
+   RECT rc= { 0 };
 
    rc.left = hb_parni( 2 );
    rc.top = hb_parni( 3 );
@@ -118,7 +120,7 @@ HB_FUNC ( FILLRECT )
    );
 }
 
-HB_FUNC ( ROUNDRECT )
+HB_FUNC( ROUNDRECT )
 {
    hb_parl( RoundRect(
     (HDC) hb_parnl( 1 ),   // handle of device context 
@@ -131,7 +133,7 @@ HB_FUNC ( ROUNDRECT )
    ) );
 }
 
-HB_FUNC ( REDRAWWINDOW )
+HB_FUNC( REDRAWWINDOW )
 {
    RedrawWindow(
     (HWND) hb_parnl( 1 ),  // handle of window
@@ -141,9 +143,9 @@ HB_FUNC ( REDRAWWINDOW )
    );
 }
 
-HB_FUNC ( DRAWBUTTON )
+HB_FUNC( DRAWBUTTON )
 {
-   RECT rc;
+   RECT rc= { 0 };
    HDC hDC = (HDC) hb_parnl( 1 );
    UINT iType = hb_parni( 6 );
 
@@ -174,12 +176,12 @@ HB_FUNC ( DRAWBUTTON )
 /*
  * DrawEdge( hDC,x1,y1,x2,y2,nFlag,nBorder )
  */
-HB_FUNC ( DRAWEDGE )
+HB_FUNC( DRAWEDGE )
 {
-   RECT rc;
+   RECT rc= { 0 };
    HDC hDC = (HDC) hb_parnl( 1 );
-   UINT edge = (UINT) hb_parni(6);
-   UINT grfFlags = (UINT) hb_parni(7);
+   UINT edge = (ISNIL(6))? EDGE_RAISED : (UINT) hb_parni(6);
+   UINT grfFlags = (ISNIL(7))? BF_RECT : (UINT) hb_parni(7);
 
    rc.left = hb_parni( 2 );
    rc.top = hb_parni( 3 );
@@ -189,7 +191,7 @@ HB_FUNC ( DRAWEDGE )
    hb_retl( DrawEdge( hDC, &rc, edge, grfFlags ) );
 }
 
-HB_FUNC ( LOADICON )
+HB_FUNC( LOADICON )
 {
    if( ISNUM(1) )
       hb_retnl( (LONG) LoadIcon( NULL, (LPCTSTR) hb_parnl( 1 ) ) );
@@ -197,7 +199,7 @@ HB_FUNC ( LOADICON )
       hb_retnl( (LONG) LoadIcon( GetModuleHandle( NULL ), (LPCTSTR) hb_parc( 1 ) ) );
 }
 
-HB_FUNC ( LOADIMAGE )
+HB_FUNC( LOADIMAGE )
 {
    hb_retnl( (LONG) 
           LoadImage( (HINSTANCE)hb_parnl(1),    // handle of the instance that contains the image
@@ -209,7 +211,7 @@ HB_FUNC ( LOADIMAGE )
    ) );
 }
 
-HB_FUNC ( LOADBITMAP )
+HB_FUNC( LOADBITMAP )
 {
    if( ISNUM(1) )
       hb_retnl( (LONG) LoadBitmap( NULL, (LPCTSTR) hb_parnl( 1 ) ) );
@@ -220,14 +222,14 @@ HB_FUNC ( LOADBITMAP )
 /*
  * Window2Bitmap( hWnd )
  */
-HB_FUNC ( WINDOW2BITMAP )
+HB_FUNC( WINDOW2BITMAP )
 {
    HWND hWnd = (HWND) hb_parnl(1);
    BOOL lFull = ( ISNIL(2) )? 0 : (BOOL)hb_parl(2);
    HDC hDC = ( lFull )? GetWindowDC( hWnd ) : GetDC( hWnd );
    HDC hDCmem = CreateCompatibleDC( hDC );
    HBITMAP hBitmap;
-   RECT rc;
+   RECT rc= { 0 };
 
    if( lFull )
       GetWindowRect( hWnd, &rc );
@@ -246,13 +248,13 @@ HB_FUNC ( WINDOW2BITMAP )
 /*
  * DrawBitmap( hDC, hBitmap, style, x, y, width, height )
  */
-HB_FUNC ( DRAWBITMAP )
+HB_FUNC( DRAWBITMAP )
 {
    HDC hDC = (HDC) hb_parnl( 1 );
    HDC hDCmem = CreateCompatibleDC( hDC );
    DWORD dwraster = (ISNIL(3))? SRCCOPY:hb_parnl(3);
    HBITMAP hBitmap = (HBITMAP) hb_parnl( 2 );
-   BITMAP  bitmap;
+   BITMAP  bitmap= { 0 };
    int nWidthDest = ( hb_pcount()>=5 && !ISNIL(6) )? hb_parni(6):0;
    int nHeightDest = ( hb_pcount()>=6 && !ISNIL(7) )? hb_parni(7):0;
 
@@ -272,17 +274,18 @@ HB_FUNC ( DRAWBITMAP )
 }
 
 /*
- * DrawTransparentBitmap( hDC, hBitmap, x, y )
+ * DrawTransparentBitmap( hDC, hBitmap, x, y [,trColor] )
  */
-HB_FUNC ( DRAWTRANSPARENTBITMAP )
+HB_FUNC( DRAWTRANSPARENTBITMAP )
 {
    HDC hDC = (HDC) hb_parnl( 1 );
    HBITMAP hBitmap = (HBITMAP) hb_parnl( 2 );
+   COLORREF trColor = (ISNIL(5))? 0x00FFFFFF : (COLORREF)hb_parnl(5);
    COLORREF crOldBack = SetBkColor( hDC, 0x00FFFFFF );
    COLORREF crOldText = SetTextColor( hDC, 0 );
    HBITMAP bitmapTrans;
    HBITMAP pOldBitmapImage, pOldBitmapTrans;
-   BITMAP  bitmap;
+   BITMAP  bitmap= { 0 };
    HDC dcImage, dcTrans;
    int x = hb_parni( 3 );
    int y = hb_parni( 4 );
@@ -298,7 +301,7 @@ HB_FUNC ( DRAWTRANSPARENTBITMAP )
    // Select the mask bitmap into the appropriate dc
    pOldBitmapTrans = (HBITMAP) SelectObject( dcTrans, bitmapTrans );
    // Build mask based on transparent colour
-   SetBkColor( dcImage, 0x00FFFFFF );
+   SetBkColor( dcImage, trColor );
    BitBlt( dcTrans, 0, 0, bitmap.bmWidth, bitmap.bmHeight, dcImage, 0, 0, SRCCOPY );
    // Do the work - True Mask method - cool if not actual display
    BitBlt( hDC, x, y, bitmap.bmWidth, bitmap.bmHeight, dcImage, 0, 0, SRCINVERT );
@@ -317,14 +320,14 @@ HB_FUNC ( DRAWTRANSPARENTBITMAP )
 
 /*  SpreadBitmap( hDC, hWnd, hBitmap, style )
 */
-HB_FUNC ( SPREADBITMAP )
+HB_FUNC( SPREADBITMAP )
 {
    HDC hDC = (HDC) hb_parnl( 1 );
    HDC hDCmem = CreateCompatibleDC( hDC );
    DWORD dwraster = (ISNIL(4))? SRCCOPY:hb_parnl(4);
    HBITMAP hBitmap = (HBITMAP) hb_parnl( 3 );
-   BITMAP  bitmap;
-   RECT rc;
+   BITMAP  bitmap= { 0 };
+   RECT rc= { 0 };
 
    SelectObject( hDCmem, hBitmap );
    GetObject( hBitmap, sizeof( BITMAP ), ( LPVOID ) &bitmap );
@@ -344,9 +347,9 @@ HB_FUNC ( SPREADBITMAP )
    DeleteDC( hDCmem );
 }
 
-HB_FUNC ( GETBITMAPSIZE )
+HB_FUNC( GETBITMAPSIZE )
 {
-   BITMAP  bitmap;
+   BITMAP  bitmap= { 0 };
    PHB_ITEM aMetr = _itemArrayNew( 2 );
    PHB_ITEM temp;
 
@@ -364,10 +367,10 @@ HB_FUNC ( GETBITMAPSIZE )
    _itemRelease( aMetr );
 }
 
-HB_FUNC ( OPENBITMAP )
+HB_FUNC( OPENBITMAP )
 {
-   BITMAPFILEHEADER bmfh;
-   BITMAPINFOHEADER bmih;
+   BITMAPFILEHEADER bmfh= { 0 };
+   BITMAPINFOHEADER bmih= { 0 };
    LPBITMAPINFO lpbmi;
    DWORD dwRead;
    LPVOID lpvBits;
@@ -412,10 +415,23 @@ HB_FUNC ( OPENBITMAP )
    /*  Retrieve the color table. 
     * 1 << bmih.biBitCount == 2 ^ bmih.biBitCount 
    */ 
-   ReadFile(hfbm, lpbmi->bmiColors, 
-      ((1<<bmih.biBitCount) * sizeof(RGBQUAD)), 
-      &dwRead, (LPOVERLAPPED) NULL); 
- 
+   switch(bmih.biBitCount)
+   {
+      case 1  :
+      case 4  :
+      case 8  : ReadFile(hfbm, lpbmi->bmiColors,
+      ((1<<bmih.biBitCount) * sizeof(RGBQUAD)),
+      &dwRead, (LPOVERLAPPED) NULL);
+                break;
+      case 16 :
+      case 32 : if( bmih.biCompression == BI_BITFIELDS )
+                   ReadFile(hfbm, lpbmi->bmiColors,
+                   ( 3 * sizeof(RGBQUAD)),
+                   &dwRead, (LPOVERLAPPED) NULL);
+                break;
+      case 24 : break;
+   }
+   
    /* Allocate memory for the required number of  bytes. */ 
    hmem2 = GlobalAlloc( GHND, (bmfh.bfSize - bmfh.bfOffBits) );
    lpvBits = GlobalLock(hmem2); 
@@ -435,21 +451,23 @@ HB_FUNC ( OPENBITMAP )
  
    GlobalUnlock(hmem1); 
    GlobalUnlock(hmem2); 
+   GlobalFree(hmem1);
+   GlobalFree(hmem2);
    CloseHandle(hfbm); 
    hb_retnl( (LONG) hbm );
 }
 
-HB_FUNC ( DRAWICON )
+HB_FUNC( DRAWICON )
 {
    DrawIcon( (HDC)hb_parnl( 1 ), hb_parni( 3 ), hb_parni( 4 ), (HICON)hb_parnl( 2 ) );
 }
 
-HB_FUNC ( GETSYSCOLOR )
+HB_FUNC( GETSYSCOLOR )
 {
    hb_retnl( (LONG) GetSysColor( hb_parni( 1 ) ) );
 }
 
-HB_FUNC ( CREATEPEN )
+HB_FUNC( CREATEPEN )
 {
    hb_retnl( (LONG) CreatePen(
                hb_parni( 1 ),	// pen style 
@@ -458,20 +476,20 @@ HB_FUNC ( CREATEPEN )
              ) );
 }
 
-HB_FUNC ( CREATESOLIDBRUSH )
+HB_FUNC( CREATESOLIDBRUSH )
 {
    hb_retnl( (LONG) CreateSolidBrush(
                (COLORREF) hb_parnl( 1 ) 	// brush color
              ) );
 }
 
-HB_FUNC ( CREATEHATCHBRUSH )
+HB_FUNC( CREATEHATCHBRUSH )
 {
    hb_retnl( (LONG) CreateHatchBrush(
                hb_parni(1), (COLORREF) hb_parnl(2) ) );
 }
 
-HB_FUNC ( SELECTOBJECT )
+HB_FUNC( SELECTOBJECT )
 {
    hb_retnl( (LONG) SelectObject(
               (HDC) hb_parnl( 1 ),	// handle of device context 
@@ -479,19 +497,19 @@ HB_FUNC ( SELECTOBJECT )
              ) );
 }
 
-HB_FUNC ( DELETEOBJECT )
+HB_FUNC( DELETEOBJECT )
 {
    DeleteObject(
       (HGDIOBJ) hb_parnl( 1 ) 	// handle of object  
    );
 }
 
-HB_FUNC ( GETDC )
+HB_FUNC( GETDC )
 {
    hb_retnl( (LONG) GetDC( (HWND) hb_parnl( 1 ) ) );
 }
 
-HB_FUNC ( RELEASEDC )
+HB_FUNC( RELEASEDC )
 {
    hb_retnl( (LONG) ReleaseDC( (HWND) hb_parnl( 1 ), (HDC) hb_parnl( 2 ) ) );
 }
@@ -533,3 +551,135 @@ HB_FUNC( GETDRAWITEMINFO )
    _itemReturn( aMetr );
    _itemRelease( aMetr );
 }
+
+/*
+ * DrawGrayBitmap( hDC, hBitmap, x, y )
+ */
+HB_FUNC( DRAWGRAYBITMAP )
+{
+   HDC hDC = (HDC) hb_parnl( 1 );
+   HBITMAP hBitmap = (HBITMAP) hb_parnl( 2 );
+   HBITMAP bitmapgray;
+   HBITMAP pOldBitmapImage, pOldbitmapgray;
+   BITMAP  bitmap= { 0 };
+   HDC dcImage, dcTrans;
+   int x = hb_parni( 3 );
+   int y = hb_parni( 4 );
+
+   SetBkColor( hDC, GetSysColor( COLOR_BTNHIGHLIGHT ) );
+   SetTextColor( hDC, GetSysColor( COLOR_BTNFACE   ) );
+   // Create two memory dcs for the image and the mask
+   dcImage = CreateCompatibleDC( hDC );
+   dcTrans = CreateCompatibleDC( hDC );
+   // Select the image into the appropriate dc
+   pOldBitmapImage = (HBITMAP) SelectObject( dcImage, hBitmap );
+   GetObject( hBitmap, sizeof( BITMAP ), ( LPVOID ) &bitmap );
+   // Create the mask bitmap
+   bitmapgray = CreateBitmap( bitmap.bmWidth, bitmap.bmHeight, 1, 1, NULL);
+   // Select the mask bitmap into the appropriate dc
+   pOldbitmapgray = (HBITMAP) SelectObject( dcTrans, bitmapgray );
+   // Build mask based on transparent colour
+   SetBkColor( dcImage, RGB( 255, 255, 255 ) );
+   BitBlt( dcTrans, 0, 0, bitmap.bmWidth, bitmap.bmHeight, dcImage, 0, 0, SRCCOPY );
+   // Do the work - True Mask method - cool if not actual display
+   BitBlt( hDC, x, y, bitmap.bmWidth, bitmap.bmHeight, dcImage, 0, 0, SRCINVERT );
+   BitBlt( hDC, x, y, bitmap.bmWidth, bitmap.bmHeight, dcTrans, 0, 0, SRCAND );
+   BitBlt( hDC, x, y, bitmap.bmWidth, bitmap.bmHeight, dcImage, 0, 0, SRCINVERT );
+   // Restore settings
+   SelectObject( dcImage, pOldBitmapImage);
+   SelectObject( dcTrans, pOldbitmapgray );
+   SetBkColor( hDC, GetPixel (hDC, 0, 0 ) );
+   SetTextColor( hDC, 0 );
+
+   DeleteObject( bitmapgray );
+   DeleteDC( dcImage );
+   DeleteDC( dcTrans );
+}
+
+#include <olectl.h>
+#include <ole2.h>
+#include <ocidl.h>
+
+HB_FUNC( OPENIMAGE )
+{
+   char* cFileName = hb_parc(1);
+   BOOL  lString = (ISNIL(2))? 0 : hb_parl(2);
+   int iFileSize;
+   FILE* fp;
+   // IPicture * pPic;
+   LPPICTURE pPic;
+   IStream * pStream;
+   HGLOBAL hG;
+   HBITMAP hBitmap = 0;
+
+   if( lString )
+   {
+      iFileSize = hb_parclen( 1 );
+      hG = GlobalAlloc( GPTR,iFileSize );
+      if( !hG )
+      {
+         hb_retnl(0);
+         return;
+      }
+      memcpy( (void*)hG, (void*)cFileName,iFileSize );
+   }
+   else
+   {
+      fp = fopen( cFileName,"rb" );
+      if( !fp )
+      {
+         hb_retnl(0);
+         return;
+      }
+
+      fseek( fp,0,SEEK_END );
+      iFileSize = ftell( fp );
+      hG = GlobalAlloc( GPTR,iFileSize );
+      if( !hG )
+      {
+         fclose( fp );
+         hb_retnl(0);
+         return;
+      }
+      fseek( fp,0,SEEK_SET );
+      fread( (void*)hG, 1, iFileSize, fp );
+      fclose( fp );
+   }
+   CreateStreamOnHGlobal( hG,0,&pStream );
+   if( !pStream )
+   {
+      GlobalFree( hG );
+      hb_retnl(0);
+      return;
+   }
+
+#if !defined(__BORLANDC__) && !defined(__MINGW32__)  && !defined(__POCC__) && !defined(__XCC__)
+   OleLoadPicture( pStream,0,0,IID_IPicture,(void**)&pPic );
+   pStream->Release();
+#else
+   OleLoadPicture( pStream,0,0,&IID_IPicture,(void**)&pPic );
+   pStream->lpVtbl->Release( pStream );
+#endif
+
+   GlobalFree( hG );
+
+   if( !pPic )
+   {
+      hb_retnl(0);
+      return;
+   }
+
+#if !defined(__BORLANDC__) && !defined(__MINGW32__) && !defined(__POCC__) && !defined(__XCC__)
+   pPic->get_Handle( (OLE_HANDLE*)&hBitmap );
+#else
+   pPic->lpVtbl->get_Handle( pPic, (OLE_HANDLE*)&hBitmap );
+#endif
+
+   hb_retnl( (LONG) CopyImage( hBitmap,IMAGE_BITMAP,0,0,LR_COPYRETURNORG ) );
+#if !defined(__BORLANDC__) && !defined(__MINGW32__) && !defined(__POCC__) && !defined(__XCC__)
+   pPic->Release();
+#else
+   pPic->lpVtbl->Release( pPic );
+#endif
+}
+

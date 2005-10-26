@@ -1,5 +1,5 @@
 /*
- * $Id: misc.c,v 1.7 2004-03-22 21:15:03 rodrigo_moreno Exp $
+ * $Id: misc.c,v 1.22 2005-10-25 01:37:26 lculik Exp $
  *
  * HWGUI - Harbour Win32 GUI library source code:
  * Miscellaneous functions
@@ -28,6 +28,9 @@
 #include "hbstack.h"
 #include "item.api"
 #include "guilib.h"
+#ifdef __XHARBOUR__
+#include "hbfast.h"
+#endif
 
 void writelog( char* s )
 {
@@ -45,22 +48,22 @@ void writelog( char* s )
    hb_fsClose( handle );
 }
 
-HB_FUNC ( HWG_SETDLGRESULT )
+HB_FUNC( HWG_SETDLGRESULT )
 {
    SetWindowLong( (HWND) hb_parnl(1), DWL_MSGRESULT, hb_parni(2) );
 }
 
-HB_FUNC ( SETCAPTURE )
+HB_FUNC( SETCAPTURE )
 {
    hb_retnl( (LONG) SetCapture( (HWND) hb_parnl(1) ) );
 }
 
-HB_FUNC ( RELEASECAPTURE )
+HB_FUNC( RELEASECAPTURE )
 {
    hb_retl( ReleaseCapture() );
 }
 
-HB_FUNC ( COPYSTRINGTOCLIPBOARD )
+HB_FUNC( COPYSTRINGTOCLIPBOARD )
 {
    HGLOBAL hglbCopy;
    char * lptstrCopy;
@@ -94,17 +97,17 @@ HB_FUNC ( COPYSTRINGTOCLIPBOARD )
  
 }
 
-HB_FUNC ( GETSTOCKOBJECT )
+HB_FUNC( GETSTOCKOBJECT )
 {
    hb_retnl( (LONG) GetStockObject( hb_parni(1) ) );
 }
 
-HB_FUNC ( LOWORD )
+HB_FUNC( LOWORD )
 {
    hb_retni( (int) ( hb_parnl( 1 ) & 0xFFFF ) );
 }
 
-HB_FUNC ( HIWORD )
+HB_FUNC( HIWORD )
 {
    hb_retni( (int) ( ( hb_parnl( 1 ) >> 16 ) & 0xFFFF ) );
 }
@@ -125,7 +128,7 @@ HB_FUNC( HWG_BITANDINVERSE )
    hb_retnl( hb_parnl(1) & (~hb_parnl(2)) );
 }
 
-HB_FUNC ( SETBIT )
+HB_FUNC( SETBIT )
 {
    if( hb_pcount() < 3 || hb_parni( 3 ) )
       hb_retnl( hb_parnl(1) | ( 1 << (hb_parni(2)-1) ) );
@@ -133,7 +136,7 @@ HB_FUNC ( SETBIT )
       hb_retnl( hb_parnl(1) & ~( 1 << (hb_parni(2)-1) ) );
 }
 
-HB_FUNC ( CHECKBIT )
+HB_FUNC( CHECKBIT )
 {
    hb_retl( hb_parnl(1) & ( 1 << (hb_parni(2)-1) ) );
 }
@@ -150,14 +153,30 @@ HB_FUNC( HWG_COS )
 
 HB_FUNC( CLIENTTOSCREEN )
 {
-   POINT pt;
+   POINT pt = { 0 };
+   #ifdef __XHARBOUR__   
+   HB_ITEM_NEW( aPoint );
+   HB_ITEM_NEW( temp );
+   hb_arrayNew( &aPoint, 2 );
+   #else
    PHB_ITEM aPoint = _itemArrayNew( 2 );
    PHB_ITEM temp;
+   #endif
 
    pt.x = hb_parnl(2);
    pt.y = hb_parnl(3);
    ClientToScreen( (HWND) hb_parnl(1), &pt );
 
+   #ifdef __XHARBOUR__
+   {   
+   hb_arraySetForward( &aPoint, 1, hb_itemPutNL( &temp, pt.x ) );      
+   hb_arraySetForward( &aPoint, 2, hb_itemPutNL( &temp, pt.y ) );   
+
+   hb_itemClear( &temp );
+   hb_itemForwardValue(  hb_stackReturnItem(), &aPoint );
+   }
+   #else
+   {
    temp = _itemPutNL( NULL, pt.x );
    _itemArrayPut( aPoint, 1, temp );
    _itemRelease( temp );
@@ -168,18 +187,36 @@ HB_FUNC( CLIENTTOSCREEN )
 
    _itemReturn( aPoint );
    _itemRelease( aPoint );
+   }
+   #endif
 }
 
 HB_FUNC( SCREENTOCLIENT )
 {
-   POINT pt;
+   POINT pt = { 0 };
+   #ifdef __XHARBOUR__
+   HB_ITEM_NEW( aPoint );
+   HB_ITEM_NEW( temp );
+   hb_arrayNew( &aPoint, 2 );
+   #else
    PHB_ITEM aPoint = _itemArrayNew( 2 );
    PHB_ITEM temp;
+   #endif
 
    pt.x = hb_parnl(2);
    pt.y = hb_parnl(3);
    ScreenToClient( (HWND) hb_parnl(1), &pt );
 
+   #ifdef __XHARBOUR__
+   {   
+   hb_arraySetForward( &aPoint, 1, hb_itemPutNL( &temp, pt.x ) );   
+   hb_arraySetForward( &aPoint, 2, hb_itemPutNL( &temp, pt.y ) );   
+
+   hb_itemClear( &temp );
+   hb_itemForwardValue(  hb_stackReturnItem(), &aPoint );
+   }
+   #else
+   {
    temp = _itemPutNL( NULL, pt.x );
    _itemArrayPut( aPoint, 1, temp );
    _itemRelease( temp );
@@ -190,16 +227,35 @@ HB_FUNC( SCREENTOCLIENT )
 
    _itemReturn( aPoint );
    _itemRelease( aPoint );
+   }
+   #endif
+
 }
 
-HB_FUNC ( HWG_GETCURSORPOS )
+HB_FUNC( HWG_GETCURSORPOS )
 {
-   POINT pt;
+   POINT pt= { 0 };
+   #ifdef __XHARBOUR__
+   HB_ITEM_NEW( aPoint );
+   HB_ITEM_NEW( temp );
+   hb_arrayNew( &aPoint, 2 );
+   #else
    PHB_ITEM aPoint = _itemArrayNew( 2 );
    PHB_ITEM temp;
+   #endif
 
    GetCursorPos( &pt );
-
+   #ifdef __XHARBOUR__
+   {
+   
+   hb_arraySetForward( &aPoint, 1, hb_itemPutNL( &temp, pt.x ) );    
+   hb_arraySetForward( &aPoint, 2, hb_itemPutNL( &temp, pt.y ) );
+ 
+   hb_itemClear( &temp );
+   hb_itemForwardValue(  hb_stackReturnItem(), &aPoint );
+   }
+   #else
+   {
    temp = _itemPutNL( NULL, pt.x );
    _itemArrayPut( aPoint, 1, temp );
    _itemRelease( temp );
@@ -210,27 +266,44 @@ HB_FUNC ( HWG_GETCURSORPOS )
 
    _itemReturn( aPoint );
    _itemRelease( aPoint );
+   }
+   #endif
 
 }
 
-HB_FUNC ( GETCURRENTDIR )
+HB_FUNC( GETCURRENTDIR )
 {
    BYTE pbyBuffer[ _POSIX_PATH_MAX + 1 ];
    GetCurrentDirectory( _POSIX_PATH_MAX, ( char * ) pbyBuffer );
    hb_retc( ( char *) pbyBuffer );
 }
 
-HB_FUNC ( WINEXEC )
+HB_FUNC( WINEXEC )
 {
    hb_retni( WinExec( (LPCSTR) hb_parc(1), (UINT) hb_parni(2) ) );
 }
 
-HB_FUNC ( GETKEYBOARDSTATE )
+HB_FUNC( GETKEYBOARDSTATE )
 {
    BYTE lpbKeyState[256];
    GetKeyboardState( lpbKeyState );
    lpbKeyState[255] = '\0';
    hb_retclen( ( char *) lpbKeyState,255 );
+}
+
+HB_FUNC( GETKEYSTATE )
+{
+   hb_retni( GetKeyState( hb_parni( 1 ) ) ) ;
+}
+
+HB_FUNC( GETKEYNAMETEXT )
+{
+
+   char cText[MAX_PATH] ;
+   int iRet = GetKeyNameText( hb_parnl( 1 ), cText, MAX_PATH ) ;
+   if ( iRet )
+     hb_retclen( cText, iRet ) ;
+
 }
 
 HB_FUNC( ACTIVATEKEYBOARDLAYOUT )
@@ -251,6 +324,31 @@ HB_FUNC( ACTIVATEKEYBOARDLAYOUT )
    while( i < num );
    if( i >= num )
       ActivateKeyboardLayout( curr,0 );
+}
+
+
+/*
+ * Pts2Pix( nPoints [,hDC] ) --> nPixels
+ * Conversion from points to pixels, provided by Vic McClung.
+ */
+
+HB_FUNC( PTS2PIX )
+{
+
+   HDC hDC;
+   BOOL lDC = 1;
+
+   if( hb_pcount() > 1 && !ISNIL(1) )
+   {
+      hDC = (HDC) hb_parnl(2);
+      lDC = 0;
+   }
+   else
+      hDC = CreateDC( "DISPLAY", NULL, NULL, NULL );
+
+   hb_retni( MulDiv( hb_parni(1), GetDeviceCaps( hDC, LOGPIXELSY ), 72 ) );
+   if( lDC )
+      DeleteDC( hDC );
 }
 
 /* Functions Contributed  By Luiz Rafael Culik Guimaraes( culikr@uol.com.br) */
@@ -312,7 +410,7 @@ HB_FUNC( HB_NUMTOHEX )
 }
 #endif
 
-HB_FUNC ( POSTQUITMESSAGE )
+HB_FUNC( POSTQUITMESSAGE )
 {
   PostQuitMessage( hb_parni(1) );
 }
@@ -324,22 +422,22 @@ HB_FUNC( SHELLABOUT )
    ShellAbout( 0, hb_parc( 1 ), hb_parc( 2 ), (HICON) hb_parnl(3) );
 }
 
-HB_FUNC (GETDESKTOPWIDTH) 
+HB_FUNC( GETDESKTOPWIDTH )
 {
    hb_retni ( GetSystemMetrics(SM_CXSCREEN) ) ;
 }
 
-HB_FUNC (GETDESKTOPHEIGHT)
+HB_FUNC( GETDESKTOPHEIGHT )
 {
    hb_retni ( GetSystemMetrics(SM_CYSCREEN) ) ;
 }
 
-HB_FUNC ( GETHELPDATA )
+HB_FUNC( GETHELPDATA )
 {
    hb_retnl( (LONG) (((HELPINFO FAR *) hb_parnl(1))->hItemHandle) );
 }
 
-HB_FUNC ( WINHELP )
+HB_FUNC( WINHELP )
 {
     DWORD context;
     UINT style ;
@@ -366,5 +464,167 @@ HB_FUNC ( WINHELP )
     }
  
     hb_retni(WinHelp(( HWND )hb_parnl ( 1 ), (LPCTSTR)hb_parc( 2 ), style, context));
+}
+
+HB_FUNC( GETNEXTDLGTABITEM )
+{
+   /*
+   nextHandle := GetNextDlgTabITem ( GetActiveWindow() , GetFocus() , .t. )
+   
+   HWND GetNextDlgTabItem(HWND hDlg, HWND hCtl, BOOL bPrevious )
+   
+   hDlg - Handle to the dialog box to be searched. 
+   hCtl - Handle to the control to be used as the starting point for the search. If this parameter is NULL, the function uses the last (or first) control in the dialog box as the starting point for the search. 
+   bPrevious - Specifies how the function is to search the dialog box. If this parameter is TRUE, the function searches for the previous control in the dialog box. If this parameter is FALSE, the function searches for the next control in the dialog box. 
+   */
+   
+   hb_retnl( (LONG) GetNextDlgTabItem( (HWND) hb_parnl( 1 ), (HWND) hb_parnl( 2 ), hb_parl( 3 ) ) ) ;
+}
+
+HB_FUNC( SLEEP )
+{
+    if (hb_parinfo(1))
+        Sleep(hb_parnl(1));         
+}
+
+HB_FUNC( KEYB_EVENT )
+{
+   DWORD dwFlags = ( !(ISNIL(2)) && hb_parl(2) )? KEYEVENTF_EXTENDEDKEY : 0;
+   int bShift = ( !(ISNIL(3)) && hb_parl(3) )? TRUE : FALSE;
+
+   if( bShift )
+      keybd_event( VK_SHIFT, 0, 0, 0 );
+   keybd_event( hb_parni(1), 0, dwFlags, 0 );
+   keybd_event( hb_parni(1), 0, dwFlags | KEYEVENTF_KEYUP, 0 );
+   if( bShift )
+      keybd_event( VK_SHIFT, 0, KEYEVENTF_KEYUP, 0 );
+
+}
+
+/* SetScrollInfo( hWnd, nType, nRedraw, nPos, nPage )
+*/
+HB_FUNC( SETSCROLLINFO )
+{
+   SCROLLINFO si = { 0 };
+   UINT fMask = (hb_pcount()<4)? SIF_DISABLENOSCROLL:0;
+
+   if( hb_pcount() > 3 && !ISNIL( 4 ) )
+   {
+      si.nPos = hb_parni( 4 );
+      fMask |= SIF_POS;
+   }
+   if( hb_pcount() > 4 && !ISNIL( 5 ) )
+   {
+      si.nPage = hb_parni( 5 );
+      fMask |= SIF_PAGE;
+   }
+
+   if( hb_pcount() > 5 && !ISNIL( 6 ) )
+   {
+      si.nMin = 1;
+      si.nMax = hb_parni( 6 );
+      fMask |= SIF_RANGE;
+   }
+
+   si.cbSize = sizeof( SCROLLINFO );
+   si.fMask = fMask;
+
+   SetScrollInfo(
+    (HWND) hb_parnl( 1 ), // handle of window with scroll bar
+    hb_parni( 2 ),	  // scroll bar flags
+    &si, hb_parni( 3 )    // redraw flag
+   );
+}
+
+HB_FUNC( GETSCROLLRANGE )
+{
+
+   int MinPos, MaxPos;
+
+   GetScrollRange(
+    (HWND) hb_parnl( 1 ),	// handle of window with scroll bar
+    hb_parni( 2 ),	// scroll bar flags
+    &MinPos,	// address of variable that receives minimum position
+    &MaxPos 	// address of variable that receives maximum position
+   );
+   hb_storni( MinPos, 3 );
+   hb_storni( MaxPos, 4 );
+}
+
+HB_FUNC( GETSCROLLPOS )
+{
+
+   hb_retni( GetScrollPos(
+               (HWND) hb_parnl( 1 ),	// handle of window with scroll bar
+               hb_parni( 2 )	// scroll bar flags
+             ) );
+}
+
+HB_FUNC( SETSCROLLPOS )
+{
+
+   SetScrollPos(
+      (HWND) hb_parnl( 1 ),	// handle of window with scroll bar
+      hb_parni( 2 ),	// scroll bar flags
+      hb_parni( 3 ),
+      TRUE
+   );
+}
+
+HB_FUNC( SHOWSCROLLBAR )
+{
+   ShowScrollBar(
+      (HWND) hb_parnl( 1 ),	// handle of window with scroll bar
+      hb_parni( 2 ),	        // scroll bar flags
+      hb_parl( 3 )              // scroll bar visibility
+   );
+}
+
+
+HB_FUNC ( ISCAPSLOCKACTIVE )
+{
+   hb_retl ( GetKeyState( VK_CAPITAL ) ) ;
+}
+
+HB_FUNC ( ISNUMLOCKACTIVE )
+{
+   hb_retl ( GetKeyState( VK_NUMLOCK ) ) ;
+}
+
+HB_FUNC ( ISSCROLLLOCKACTIVE )
+{
+   hb_retl ( GetKeyState( VK_SCROLL ) ) ;
+}
+
+/* Added By Sandro Freire sandrorrfreire_nospam_yahoo.com.br*/
+
+HB_FUNC ( CREATEDIRECTORY )
+{
+   CreateDirectory( (LPCTSTR) hb_parc(1), NULL );
+}
+
+HB_FUNC( REMOVEDIRECTORY )
+{
+   hb_retl( RemoveDirectory( (LPCSTR) hb_parc( 1 ) ) );
+}
+
+HB_FUNC ( SETCURRENTDIRECTORY )
+{
+   SetCurrentDirectory( (LPCTSTR) hb_parc(1) );
+}
+
+HB_FUNC( DELETEFILE )
+{
+   hb_retl( DeleteFile( (LPCSTR) hb_parc( 1 ) ) ) ;
+}
+
+HB_FUNC( GETFILEATTRIBUTES )
+{
+   hb_retnl( (LONG) GetFileAttributes( (LPCSTR) hb_parc( 1 ) ) ) ;
+}
+ 
+HB_FUNC( SETFILEATTRIBUTES )
+{
+   hb_retl( SetFileAttributes( (LPCSTR) hb_parc( 1 ), (DWORD) hb_parnl( 2 ) ) ) ;
 }
 

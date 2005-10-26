@@ -1,5 +1,5 @@
 /*
- *$Id: message.c,v 1.5 2004-03-11 03:31:19 jamaj Exp $
+ *$Id: message.c,v 1.8 2005-10-17 21:24:35 lculik Exp $
  *
  * HWGUI - Harbour Win32 GUI library source code:
  * C level messages functions
@@ -55,6 +55,16 @@ HB_FUNC( MSGYESNO )
    hb_retl( MessageBox( h, hb_parc(1), cTitle, MB_YESNO | MB_ICONQUESTION ) == IDYES );
 }
 
+HB_FUNC( MSGNOYES )
+{
+   char* cTitle;
+   HWND h = GetActiveWindow();
+
+   cTitle = ( hb_pcount() == 1 )? "":hb_parc( 2 );
+
+   hb_retl( MessageBox( h, hb_parc(1), cTitle, MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2 ) == IDYES );
+}
+
 HB_FUNC( MSGYESNOCANCEL )
 {
    char* cTitle;
@@ -85,7 +95,7 @@ HB_FUNC( MSGRETRYCANCEL )
 
 HB_FUNC( MSGBEEP )
 {
-   MessageBeep( ( hb_pcount() == 0 )? 0xFFFFFFFF:hb_parnl(1) );
+   MessageBeep( ( hb_pcount() == 0 )? (LONG)0xFFFFFFFF:hb_parnl(1) );
 }
 
 
@@ -93,9 +103,9 @@ HB_FUNC( MSGBEEP )
 #include <richedit.h>
 HB_FUNC( MSGTEMP )
 {
-   char cres[60];
+   char cres[60] = { 0 } ;
 
-   sprintf( cres,"WS_OVERLAPPEDWINDOW: %lu NM_FIRST: %lu ",WS_OVERLAPPEDWINDOW,NM_FIRST );
+   sprintf( cres,"WS_OVERLAPPEDWINDOW: %d NM_FIRST: %d ",WS_OVERLAPPEDWINDOW,NM_FIRST );
    hb_retni( MessageBox( GetActiveWindow(), cres, "DialogBaseUnits", MB_OKCANCEL | MB_ICONQUESTION ) );
 }
 

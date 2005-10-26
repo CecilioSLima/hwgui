@@ -1,9 +1,16 @@
+@echo off
 set MINGW=c:\mingw
-set HB_INSTALL=%HB_PATH%
+set HRB_DIR=c:\dvl\hrb
 set HWGUI_INSTALL=..
+set OBJ_LIST=%1.o
 
-   %HB_INSTALL%\bin\harbour %1.prg -n -i%HB_INSTALL%\include;%HWGUI_INSTALL%\include %2
-   gcc -I. -I%HB_INSTALL%\include -mno-cygwin -Wall -c %1.c -o%1.o
-   gcc -Wall -o%1.exe %1.o  -L%MINGW%\lib -L%HB_INSTALL%\lib -L%HWGUI_INSTALL%\lib -mno-cygwin -lhwgui -lprocmisc -ldebug -lvm -lrdd -lvm -lmacro -lpp -lrtl -lpp -lrtl -llang -lcommon -lnulsys  -ldbfntx  -ldbfcdx -ldbfdbt -lgtwin -luser32 -lwinspool -lcomctl32 -lcomdlg32 -lgdi32 -lrtl
-   del %1.c
-   del %1.o
+%HRB_DIR%\bin\harbour %1.prg -n -i%HRB_DIR%\include;%HWGUI_INSTALL%\include %2
+gcc -I. -I%HRB_DIR%\include -mno-cygwin -Wall -c %1.c -o%1.o
+if not exist %1.rc goto link
+windres %1.rc %1_res.o
+set OBJ_LIST=%OBJ_LIST% %1_res.o
+:link
+gcc -Wall -o%1.exe %OBJ_LIST% -L%MINGW%\lib -L%HRB_DIR%\lib -L%HWGUI_INSTALL%\lib -mno-cygwin -Wl,--allow-multiple-definition -Wl,--start-group -lhwgui -lprocmisc -lhbxml -lvm -lrdd -lmacro -lpp -lrtl -lpp -lcodepage -llang -lcommon -lnulsys  -ldbfntx  -ldbfcdx -ldbfdbt -ldbffpt -lhbsix -lgtnul -lpcrepos -luser32 -lwinspool -lcomctl32 -lcomdlg32 -lgdi32 -lole32 -loleaut32 -luuid -Wl,--end-group
+del %1.c
+del %1.o
+if exist %1_res.o del %1_res.o 

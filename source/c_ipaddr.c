@@ -21,7 +21,7 @@
  As a special exception, you have permission for additional uses of the text 
  contained in this release of Harbour Minigui.
 
- The exception is that, if you link the Harbour Minigui library with other 
+ The exception is that, if you link the Harbour Minigui library with other
  files to produce an executable, this does not by itself cause the resulting 
  executable to be covered by the GNU General Public License.
  Your use of that executable is in no way restricted on account of linking the 
@@ -41,6 +41,9 @@
 #define _WIN32_IE      0x0500
 #define HB_OS_WIN_32_USED
 #define _WIN32_WINNT   0x0400
+#if defined(__POCC__) || defined(__XCC__)
+#include <unknwn.h>
+#endif
 #include <shlobj.h>
 
 #include <windows.h>
@@ -58,13 +61,13 @@
 #include "hbstack.h"
 #include "hbapiitm.h"
 
-HB_FUNC ( INITIPADDRESS )
+HB_FUNC( INITIPADDRESS )
 {
 	HWND hWnd;
 	HWND hIpAddress;
    int Style  ;
 
-	INITCOMMONCONTROLSEX  i;
+   INITCOMMONCONTROLSEX  i= { 0 };
 	i.dwSize = sizeof(INITCOMMONCONTROLSEX);
 	i.dwICC = ICC_INTERNET_CLASSES;
 	InitCommonControlsEx(&i);
@@ -81,7 +84,7 @@ HB_FUNC ( INITIPADDRESS )
 	hb_retnl ( (LONG) hIpAddress );
 }
 
-HB_FUNC ( SETIPADDRESS )
+HB_FUNC( SETIPADDRESS )
 {
 	HWND hWnd;
 	BYTE v1, v2, v3, v4;
@@ -96,7 +99,7 @@ HB_FUNC ( SETIPADDRESS )
 	SendMessage(hWnd, IPM_SETADDRESS, 0, MAKEIPADDRESS(v1,v2,v3,v4));
 }
 
-HB_FUNC ( GETIPADDRESS )
+HB_FUNC( GETIPADDRESS )
 {
 	HWND hWnd;
 	DWORD pdwAddr;
@@ -118,7 +121,7 @@ HB_FUNC ( GETIPADDRESS )
 	hb_storni( (INT) v4, -1, 4 );
 }
 
-HB_FUNC ( CLEARIPADDRESS )
+HB_FUNC( CLEARIPADDRESS )
 {
 	HWND hWnd;
 

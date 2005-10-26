@@ -1,17 +1,20 @@
 /*
+ * $Id: hgraph.prg,v 1.6 2005-10-26 07:43:26 omm Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * HGraph class
  *
  * Copyright 2002 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #include "windows.ch"
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "guilib.ch"
 
-CLASS HGraph INHERIT HStatic
+CLASS HGraph INHERIT HControl
 
+   CLASS VAR winclass   INIT "STATIC"
    DATA aValues
    DATA nGraphs INIT 1
    DATA nType
@@ -24,10 +27,10 @@ CLASS HGraph INHERIT HStatic
    DATA xmax, ymax, xmin, ymin PROTECTED
 
    METHOD New( oWndParent,nId,aValues,nLeft,nTop,nWidth,nHeight,oFont, ;
-                  bSize,ctoolt,tcolor,bcolor )
+                  bSize,ctooltip,tcolor,bcolor )
    METHOD Activate()
    METHOD Redefine( oWndParent,nId,aValues,oFont, ;
-                  bSize,ctoolt,tcolor,bcolor )
+                  bSize,ctooltip,tcolor,bcolor )
    METHOD Init()
    METHOD CalcMinMax()
    METHOD Paint()
@@ -36,52 +39,35 @@ CLASS HGraph INHERIT HStatic
 ENDCLASS
 
 METHOD New( oWndParent,nId,aValues,nLeft,nTop,nWidth,nHeight,oFont, ;
-                  bSize,ctoolt,tcolor,bcolor ) CLASS HGraph
+                  bSize,ctooltip,tcolor,bcolor ) CLASS HGraph
 
-   // ::classname:= "HGRAPH"
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := Iif( nId==Nil,::NewId(), nId )
-   ::style   := WS_VISIBLE+WS_CHILD+SS_OWNERDRAW
-   ::oFont   := oFont
-   ::nLeft   := nLeft
-   ::nTop    := nTop
-   ::nWidth  := nWidth
-   ::nHeight := nHeight
-   ::bSize   := bSize
-   ::tooltip := ctoolt
-   ::SetColor( Iif( tcolor==Nil,Vcolor("FFFFFF"),tcolor ),Iif( bcolor==Nil,0,bcolor ) )
-
-   ::bPaint  := {|o,lpdis|o:Paint(lpdis)}
+   Super:New( oWndParent,nId,SS_OWNERDRAW,nLeft,nTop,nWidth,nHeight,oFont,, ;
+                  bSize,{|o,lpdis|o:Paint(lpdis)},ctooltip, ;
+                  Iif( tcolor==Nil,Vcolor("FFFFFF"),tcolor ),Iif( bcolor==Nil,0,bcolor ) )
 
    ::aValues := aValues
    ::nType   := 1
    ::nGraphs := 1
 
    ::Activate()
-   ::oParent:AddControl( Self )
 
 Return Self
 
 METHOD Redefine( oWndParent,nId,aValues,oFont, ;
-                  bSize,ctoolt,tcolor,bcolor )  CLASS HGraph
-   // ::classname:= "HGRAPH"
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := nId
-   ::style   := ::nLeft := ::nTop := ::nWidth := ::nHeight := 0
-   ::oFont   := oFont
-   ::bSize   := bSize
-   ::tooltip := ctoolt
-   ::bPaint  := {|o,lpdis|o:Paint(lpdis)}
+                  bSize,ctooltip,tcolor,bcolor )  CLASS HGraph
+
+   Super:New( oWndParent,nId,SS_OWNERDRAW,0,0,0,0,oFont,, ;
+                  bSize,{|o,lpdis|o:Paint(lpdis)},ctooltip, ;
+                  Iif( tcolor==Nil,Vcolor("FFFFFF"),tcolor ),Iif( bcolor==Nil,0,bcolor ) )
 
    ::aValues := aValues
 
-   ::oParent:AddControl( Self )
 Return Self
 
 METHOD Activate CLASS HGraph
    IF ::oParent:handle != 0
       ::handle := CreateStatic( ::oParent:handle, ::id, ;
-                  ::style, ::nLeft, ::nTop, ::nWidth, ::nHeight, ::title )
+                  ::style, ::nLeft, ::nTop, ::nWidth, ::nHeight )
       ::Init()
    ENDIF
 Return Nil
@@ -170,7 +156,7 @@ Local px1, px2, py1, py2, nWidth
             py2 := Round(y2-(::aValues[i,j,2]-::ymin)/::scaleY,0)
             IF px2 != px1 .OR. py2 != py1
                Drawline( hDC, px1, py1, px2, py2 )
-            ENDIF   
+            ENDIF
          NEXT
       ELSEIF ::nType == 2
          IF ::tbrush == Nil

@@ -1,18 +1,20 @@
 /*
+ * $Id: hsplit.prg,v 1.9 2005-10-19 10:04:27 alkresin Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * HSplitter class
  *
  * Copyright 2003 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #include "windows.ch"
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "guilib.ch"
 
 CLASS HSplitter INHERIT HControl
 
-   CLASS VAR winclass   INIT "PANEL"
+   CLASS VAR winclass INIT "STATIC"
 
    DATA aLeft
    DATA aRight
@@ -20,11 +22,12 @@ CLASS HSplitter INHERIT HControl
    DATA hCursor
    DATA lCaptured INIT .F.
    DATA lMoved INIT .F.
-   // DATA oPenLight, oPenGray
+   DATA bEndDrag
 
    METHOD New( oWndParent,nId,nLeft,nTop,nWidth,nHeight, ;
                   bSize,bPaint,color,bcolor,aLeft,aRight )
    METHOD Activate()
+   METHOD onEvent( msg, wParam, lParam )
    METHOD Init()
    METHOD Paint( lpdis )
    METHOD Drag( lParam )
@@ -35,42 +38,64 @@ ENDCLASS
 METHOD New( oWndParent,nId,nLeft,nTop,nWidth,nHeight, ;
                   bSize,bDraw,color,bcolor,aLeft,aRight ) CLASS HSplitter
 
-   // ::classname:= "HSPLITTER"
+   Super:New( oWndParent,nId,WS_CHILD+WS_VISIBLE+SS_OWNERDRAW,nLeft,nTop,nWidth,nHeight,,, ;
+                  bSize,bDraw,,color,bcolor )
+
    ::title   := ""
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := Iif( nId==Nil,::NewId(), nId )
-   ::style   := WS_CHILD+WS_VISIBLE+SS_OWNERDRAW
-   ::nLeft   := nLeft
-   ::nTop    := nTop
-   ::nWidth  := nWidth
-   ::nHeight := nHeight
-   ::bSize   := bSize
-   ::bPaint  := bDraw
-   ::tcolor  := color
-   ::bcolor  := bcolor
    ::aLeft   := Iif( aLeft==Nil, {}, aLeft )
    ::aRight  := Iif( aRight==Nil, {}, aRight )
    ::lVertical := ( ::nHeight > ::nWidth )
-   // ::oPenLight := HPen():Add( BS_SOLID,1,GetSysColor(COLOR_3DHILIGHT) )
-   // ::oPenGray  := HPen():Add( BS_SOLID,1,GetSysColor(COLOR_3DSHADOW) )
 
    ::Activate()
-   ::oParent:AddControl( Self )
 
 Return Self
 
-METHOD Activate()
+METHOD Activate() CLASS HSplitter
    IF ::oParent:handle != 0
-      ::handle := CreatePanel( ::oParent:handle, ::id, ;
+      ::handle := CreateStatic( ::oParent:handle, ::id, ;
                   ::style, ::nLeft, ::nTop, ::nWidth, ::nHeight )
       ::Init()
    ENDIF
 Return Nil
 
+METHOD onEvent( msg, wParam, lParam ) CLASS HSplitter
+
+   IF msg == WM_MOUSEMOVE
+      IF ::hCursor == Nil
+         ::hCursor := LoadCursor( Iif( ::lVertical,IDC_SIZEWE,IDC_SIZENS ) )
+      ENDIF
+      Hwg_SetCursor( ::hCursor )
+      IF ::lCaptured
+         ::Drag( lParam )
+      ENDIF
+   ELSEIF msg == WM_PAINT
+      ::Paint()
+   ELSEIF msg == WM_LBUTTONDOWN
+      Hwg_SetCursor( ::hCursor )
+      SetCapture( ::handle )
+      ::lCaptured := .T.
+   ELSEIF msg == WM_LBUTTONUP
+      ReleaseCapture()
+      ::DragAll()
+      ::lCaptured := .F.
+      IF ::bEndDrag != Nil
+         Eval( ::bEndDrag,Self )
+      ENDIF
+   ELSEIF msg == WM_DESTROY
+      ::End()
+   ENDIF
+
+Return -1
+
 METHOD Init CLASS HSplitter
-   Super:Init()
-   SetWindowObject( ::handle,Self )
-   Hwg_InitSplitProc( ::handle )
+
+   IF !::lInit
+      Super:Init()
+      ::nHolder := 1
+      SetWindowObject( ::handle,Self )
+      Hwg_InitWinCtrl( ::handle )
+   ENDIF
+
 Return Nil
 
 METHOD Paint( lpdis ) CLASS HSplitter
@@ -130,7 +155,7 @@ Local i, oCtrl, nDiff
          oCtrl:nTop += nDiff
          oCtrl:nHeight -= nDiff
       ENDIF
-      MoveWindow( oCtrl:handle,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight )
+      oCtrl:Move( oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight )
    NEXT
    FOR i := 1 TO Len( ::aLeft )
       oCtrl := ::aLeft[i]
@@ -141,33 +166,9 @@ Local i, oCtrl, nDiff
          nDiff := ::nTop - ( oCtrl:nTop + oCtrl:nHeight )
          oCtrl:nHeight += nDiff
       ENDIF
-      MoveWindow( oCtrl:handle,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight )
+      oCtrl:Move( oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight )
    NEXT
    ::lMoved := .F.
 
 Return Nil
 
-Function DefSplitterProc( hCtrl, msg, wParam, lParam )
-Local oCtrl
-   // writelog( "DefSplitterProc: " + Str(hCtrl,10)+"|"+Str(msg,6)+"|"+Str(wParam,10)+"|"+Str(lParam,10) )
-   oCtrl := GetWindowObject( hCtrl )
-   IF msg == WM_MOUSEMOVE
-      IF oCtrl:hCursor == Nil
-         oCtrl:hCursor := LoadCursor( Iif( oCtrl:lVertical,IDC_SIZEWE,IDC_SIZENS ) )
-      ENDIF
-      Hwg_SetCursor( oCtrl:hCursor )
-      IF oCtrl:lCaptured
-         oCtrl:Drag( lParam )
-      ENDIF
-   ELSEIF msg == WM_PAINT
-      oCtrl:Paint()
-   ELSEIF msg == WM_LBUTTONDOWN
-      Hwg_SetCursor( oCtrl:hCursor )
-      SetCapture( hCtrl )
-      oCtrl:lCaptured := .T.
-   ELSEIF msg == WM_LBUTTONUP
-      ReleaseCapture()
-      oCtrl:DragAll()
-      oCtrl:lCaptured := .F.
-   ENDIF
-Return -1

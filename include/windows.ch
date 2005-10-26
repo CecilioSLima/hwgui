@@ -1,5 +1,5 @@
 /*
- *$Id: windows.ch,v 1.8 2004-03-22 21:15:03 rodrigo_moreno Exp $
+ *$Id: windows.ch,v 1.23 2005-10-25 12:14:24 alkresin Exp $
  */
 
 #define WM_CREATE                       1
@@ -20,6 +20,7 @@
 #define WM_ERASEBKGND                   20   // 0x0014
 #define WM_ENDSESSION                   22   // 0x0016
 #define WM_GETMINMAXINFO                36   // 0x0024
+#define WM_NEXTDLGCTL                   40   // 0x0028
 #define WM_DRAWITEM                     43   // 0x002B
 #define WM_SETFONT                      48   // 0x0030
 
@@ -100,6 +101,7 @@
 #define IDYES               6
 #define IDNO                7
 
+#define DS_ABSALIGN         1        // 0x01L
 #define DS_CENTER           2048     // 0x0800L
 
 /*
@@ -129,6 +131,7 @@
 #define EN_HSCROLL          1537   // 0x0601
 #define EN_VSCROLL          1538   // 0x0602
 #define EN_SELCHANGE        1794   // 0x0702
+#define EN_PROTECTED        1796   // 0x0702
 
 /*
  * Combo Box messages
@@ -302,6 +305,7 @@
 #define WS_MINIMIZEBOX      131072     // 0x00020000L
 #define WS_MAXIMIZEBOX      65536      // 0x00010000L
 #define WS_SIZEBOX          WS_THICKFRAME
+#define WS_OVERLAPPEDWINDOW WS_OVERLAPPED + WS_CAPTION + WS_SYSMENU + WS_THICKFRAME + WS_MINIMIZEBOX + WS_MAXIMIZEBOX
 
 #define WS_EX_DLGMODALFRAME     1      // 0x00000001L
 #define WS_EX_NOPARENTNOTIFY    4      // 0x00000004L
@@ -373,6 +377,7 @@
 #define IDC_SIZEWE          32644
 #define IDC_SIZENS          32645
 #define IDC_UPARROW         32516
+#define IDC_HAND            32649
 
 /*
  * Key State Masks for Mouse Messages
@@ -411,6 +416,10 @@
 #define PSN_QUERYCANCEL         -209   // (PSN_FIRST-9)
 
 #define TCN_SELCHANGE           -551   // (TCN_FIRST - 1)
+#define TCN_CLICK               -2
+#define TCN_SETFOCUS            -550
+#define TCN_GETFOCUS            -552
+#define TCN_KILLFOCUS           -552
 
 /*
  * Combo Box styles
@@ -556,6 +565,7 @@
 
 #define ENM_CHANGE             1        // 0x00000001
 #define ENM_SELCHANGE          524288   // 0x00080000
+#define ENM_PROTECTED			0x00200000
 
 #define IMAGE_BITMAP        0
 #define IMAGE_ICON          1
@@ -644,11 +654,15 @@
 #define FCONTROL  8   // 0x08
 #define FALT     16   // 0x10
 
+#define VK_BACK           0x08
+#define VK_TAB            0x09
+#define VK_RETURN         0x0D
 #define VK_SHIFT          0x10
 #define VK_CONTROL        0x11
 #define VK_MENU           0x12
 #define VK_PAUSE          0x13
 #define VK_CAPITAL        0x14
+#define VK_ESCAPE         0x1B
 
 #define VK_SPACE          0x20
 #define VK_PRIOR          0x21
@@ -827,3 +841,48 @@
 #define LB_GETLOCALE            0x01A6
 #define LB_SETCOUNT             0x01A7
 
+
+#define DS_3DLOOK               4       // 0x4L
+#define BS_NOTIFY               16384   // 0x00004000L
+
+// more messages
+#define WM_NEXTMENU                     0x0213
+#define WM_SIZING                       0x0214
+#define WM_CAPTURECHANGED               0x0215
+#define WM_MOVING                       0x0216
+#define GWL_ID (-12)
+
+#define WM_MOUSEWHEEL  0x020A
+
+#define TB_LINEUP               0
+#define TB_LINEDOWN             1
+#define TB_PAGEUP               2
+#define TB_PAGEDOWN             3
+#define TB_THUMBPOSITION        4
+#define TB_THUMBTRACK           5
+#define TB_TOP                  6
+#define TB_BOTTOM               7
+#define TB_ENDTRACK             8
+
+#define TBM_GETPOS              (WM_USER)
+#define TBM_GETTIC              (WM_USER+3)
+#define TBM_SETPOS              (WM_USER+5)
+#define TBM_GETTICPOS           (WM_USER+15)
+#define TBM_GETNUMTICS          (WM_USER+16)
+
+#define CW_USEDEFAULT           2147483648          // 0x80000000
+#define CCM_FIRST               0x2000      // Common control shared messages
+#define CCM_LAST                (CCM_FIRST + 0x200)
+
+
+#define CCM_SETBKCOLOR          (CCM_FIRST + 1) // lParam is bkColor
+#define PBM_SETBARCOLOR         (WM_USER+9)             // lParam = bar color
+#define PBM_SETBKCOLOR          CCM_SETBKCOLOR  // lParam = bkColor
+#define DEFAULT_QUALITY         0
+#define DRAFT_QUALITY           1
+#define PROOF_QUALITY           2
+#define WM_SETCURSOR                    0x0020
+
+#define WM_REFLECT_BASE 0xBC00
+#define WM_CTLCOLOR     0x0019
+#define WM_CTLCOLOR_REFLECT  WM_CTLCOLOR+WM_REFLECT_BASE

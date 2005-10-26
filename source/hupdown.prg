@@ -1,15 +1,15 @@
 /*
- * $Id: hupdown.prg,v 1.3 2004-03-15 18:51:17 alkresin Exp $
+ * $Id: hupdown.prg,v 1.6 2005-10-26 07:43:26 omm Exp $
  *
  * HWGUI - Harbour Win32 GUI library source code:
  * HUpDown class
  *
  * Copyright 2002 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #include "windows.ch"
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "guilib.ch"
 
 #define UDS_SETBUDDYINT     2
@@ -27,7 +27,7 @@ CLASS HUpDown INHERIT HControl
    DATA lChanged    INIT .F.
 
    METHOD New( oWndParent,nId,vari,bSetGet,nStyle,nLeft,nTop,nWidth,nHeight, ;
-         oFont,bInit,bSize,bPaint,bGfocus,bLfocus,ctoolt,tcolor,bcolor,nUpDWidth,nLower,nUpper )
+         oFont,bInit,bSize,bPaint,bGfocus,bLfocus,ctooltip,tcolor,bcolor,nUpDWidth,nLower,nUpper )
    METHOD Activate()
    METHOD Init()
    METHOD Refresh()
@@ -35,12 +35,13 @@ CLASS HUpDown INHERIT HControl
 ENDCLASS
 
 METHOD New( oWndParent,nId,vari,bSetGet,nStyle,nLeft,nTop,nWidth,nHeight, ;
-         oFont,bInit,bSize,bPaint,bGfocus,bLfocus,ctoolt,tcolor,bcolor,   ;
+         oFont,bInit,bSize,bPaint,bGfocus,bLfocus,ctooltip,tcolor,bcolor,   ;
          nUpDWidth,nLower,nUpper ) CLASS HUpDown
 
-   // ::classname:= "HUPDOWN"
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := Iif( nId==Nil,::NewId(), nId )
+   nStyle   := Hwg_BitOr( Iif( nStyle==Nil,0,nStyle ), WS_TABSTOP )
+   Super:New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight,oFont,bInit, ;
+                  bSize,bPaint,ctooltip,tcolor,bcolor )
+
    ::idUpDown := ::NewId()
    IF vari != Nil
       IF Valtype(vari) != "N"
@@ -50,24 +51,14 @@ METHOD New( oWndParent,nId,vari,bSetGet,nStyle,nLeft,nTop,nWidth,nHeight, ;
       ::title := Str(vari)
    ENDIF
    ::bSetGet := bSetGet
-   ::style   := Hwg_BitOr( Iif( nStyle==Nil,0,nStyle ), WS_CHILD+WS_VISIBLE+WS_TABSTOP )
+
    ::styleUpDown := UDS_SETBUDDYINT+UDS_ALIGNRIGHT
-   ::oFont   := oFont
-   ::nLeft   := nLeft
-   ::nTop    := nTop
-   ::nWidth  := nWidth
-   ::nHeight := nHeight
-   ::bInit   := bInit
-   ::bSize   := bSize
-   ::bPaint  := bPaint
-   ::tooltip := ctoolt
+
    IF nLower != Nil ; ::nLower := nLower ; ENDIF
    IF nUpper != Nil ; ::nUpper := nUpper ; ENDIF
    IF nUpDWidth != Nil ; ::nUpDownWidth := nUpDWidth ; ENDIF
-   ::SetColor( tcolor,Iif( bcolor==Nil,GetSysColor( COLOR_BTNHIGHLIGHT ),bcolor ) )
 
    ::Activate()
-   ::oParent:AddControl( Self )
 
    IF bSetGet != Nil
       ::bGetFocus := bGFocus
@@ -119,7 +110,7 @@ Return Nil
 Static Function __When( oCtrl )
 
    oCtrl:Refresh()
-   IF oCtrl:bGetFocus != Nil 
+   IF oCtrl:bGetFocus != Nil
       Return Eval( oCtrl:bGetFocus, Eval( oCtrl:bSetGet ), oCtrl )
    ENDIF
 

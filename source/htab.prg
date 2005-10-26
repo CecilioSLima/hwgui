@@ -1,15 +1,15 @@
 /*
- *$Id: htab.prg,v 1.4 2004-03-15 18:51:17 alkresin Exp $
+ *$Id: htab.prg,v 1.18 2005-09-20 10:09:12 alkresin Exp $
  *
  * HWGUI - Harbour Win32 GUI library source code:
  * HTab class
  *
  * Copyright 2002 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #include "windows.ch"
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "guilib.ch"
 
 #define TCM_SETCURSEL           4876     // (TCM_FIRST + 12)
@@ -17,6 +17,7 @@
 #define TCM_GETCURFOCUS         4911     // (TCM_FIRST + 47)
 #define TCM_GETITEMCOUNT        4868     // (TCM_FIRST + 4)
 
+#define TCM_SETIMAGELIST        4867
 //- HTab
 
 CLASS HTab INHERIT HControl
@@ -25,48 +26,62 @@ CLASS HTab INHERIT HControl
    DATA  aTabs
    DATA  aPages  INIT {}
    DATA  bChange, bChange2
+   DATA  hIml, aImages, Image1, Image2
    DATA  oTemp
+   DATA  bAction
 
    METHOD New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight, ;
-                  oFont,bInit,bSize,bPaint,aTabs,bChange )
+                  oFont,bInit,bSize,bPaint,aTabs,bChange,aImages,lResour,nBC,;
+                  bClick, bGetFocus, bLostFocus )
    METHOD Activate()
    METHOD Init()
    METHOD SetTab( n )
    METHOD StartPage( cname )
    METHOD EndPage()
    METHOD ChangePage( nPage )
+   METHOD DeletePage( nPage )
    METHOD HidePage( nPage )
    METHOD ShowPage( nPage )
    METHOD GetActivePage( nFirst,nEnd )
-   METHOD  End()
 
    HIDDEN:
-     DATA  nActive           // Active Page
+     DATA  nActive  INIT 0         // Active Page
 
 ENDCLASS
 
 METHOD New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight, ;
-                  oFont,bInit,bSize,bPaint,aTabs,bChange ) CLASS HTab
+                  oFont,bInit,bSize,bPaint,aTabs,bChange,aImages,lResour,nBC,bClick, bGetFocus, bLostFocus  ) CLASS HTab
+LOCAL i, aBmpSize
 
-   // ::classname:= "HTAB"
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := Iif( nId==Nil,::NewId(), nId )
+   nStyle   := Hwg_BitOr( Iif( nStyle==Nil,0,nStyle ), WS_CHILD+WS_VISIBLE+WS_TABSTOP )
+   Super:New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight,oFont,bInit, ;
+                  bSize,bPaint )
+
    ::title   := ""
-   ::style   := Hwg_BitOr( Iif( nStyle==Nil,0,nStyle ), WS_CHILD+WS_VISIBLE+WS_TABSTOP )
    ::oFont   := Iif( oFont==Nil, ::oParent:oFont, oFont )
-   ::nLeft   := nLeft
-   ::nTop    := nTop
-   ::nWidth  := nWidth
-   ::nHeight := nHeight
-   ::bInit   := bInit
-   ::bSize   := bSize
-   ::bPaint  := bPaint
    ::aTabs   := Iif( aTabs==Nil,{},aTabs )
    ::bChange := bChange
    ::bChange2 := bChange
 
+   ::bGetFocus :=IIf( bGetFocus==Nil, Nil, bGetFocus)
+   ::bLostFocus:=IIf( bLostFocus==Nil, Nil, bLostFocus)
+   ::bAction   :=IIf( bClick==Nil, Nil, bClick)
+
+   IF aImages != Nil
+      ::aImages := {}
+      FOR i := 1 TO Len( aImages )
+         Aadd( ::aImages, Upper(aImages[i]) )
+         aImages[i] := Iif( lResour,LoadBitmap( aImages[i] ),OpenBitmap( aImages[i] ) )
+      NEXT
+      aBmpSize := GetBitmapSize( aImages[1] )
+      ::himl := CreateImageList( aImages,aBmpSize[1],aBmpSize[2],12,nBC )
+      ::Image1 := 0
+      IF Len( aImages ) > 1
+         ::Image2 := 1
+      ENDIF
+   ENDIF
+
    ::Activate()
-   ::oParent:AddControl( Self )
 
 Return Self
 
@@ -83,8 +98,14 @@ Local i
 
    IF !::lInit
       Super:Init()
-      InitTabControl( ::handle,::aTabs )
+      InitTabControl( ::handle,::aTabs,IF( ::himl != Nil,::himl,0 ))
+      ::nHolder := 1
       SetWindowObject( ::handle,Self )
+
+      IF ::himl != Nil
+         SendMessage( ::handle, TCM_SETIMAGELIST, 0, ::himl )
+      ENDIF
+
       FOR i := 2 TO Len( ::aPages )
          ::HidePage( i )
       NEXT
@@ -99,26 +120,24 @@ METHOD SetTab( n ) CLASS HTab
 Return Nil
 
 METHOD StartPage( cname ) CLASS HTab
-Local i := Ascan( ::aTabs,cname )
-Local lNew := ( i == 0 )
 
    ::oTemp := ::oDefaultParent
    ::oDefaultParent := Self
-   IF lNew
-      Aadd( ::aTabs,cname )
-      i := Len( ::aTabs )
+
+   IF Len( ::aTabs ) > 0 .AND. Len( ::aPages ) == 0
+      ::aTabs := {}
    ENDIF
-   DO WHILE Len( ::aPages ) < i
-      Aadd( ::aPages, { Len( ::aControls ),0,lNew } )
-   ENDDO
-   ::nActive := i
+   Aadd( ::aTabs,cname )
+
+   Aadd( ::aPages, { Len( ::aControls ),0 } )
+   ::nActive := Len( ::aPages )
 
 Return Nil
 
 METHOD EndPage() CLASS HTab
 
    ::aPages[ ::nActive,2 ] := Len( ::aControls ) - ::aPages[ ::nActive,1 ]
-   IF ::aPages[ ::nActive,3 ] .AND. ::handle != Nil .AND. ::handle > 0
+   IF ::handle != Nil .AND. ::handle > 0
       AddTab( ::handle,::nActive,::aTabs[::nActive] )
    ENDIF
    IF ::nActive > 1 .AND. ::handle != Nil .AND. ::handle > 0
@@ -191,42 +210,21 @@ METHOD GetActivePage( nFirst,nEnd ) CLASS HTab
 
 Return ::nActive
 
-METHOD End() CLASS HTab
-Local aControls := ::aControls, nControls := Len( aControls ), i
-   FOR i := 1 TO nControls
-      IF __ObjHasMsg( aControls[i],"END" )
-         aControls[i]:End()
-      ENDIF
-   NEXT
-Return Nil
+METHOD DeletePage( nPage ) CLASS HTab
 
-Function DefTabProc( hTab, msg, wParam, lParam )
-Local oTab, iParHigh := HiWord( wParam ), iParLow := LoWord( wParam ), iItem, res, nCode
+   DeleteTab( ::handle, nPage-1 )
 
-   // writelog( "TabProc: " + Str(hTab,10)+"|"+Str(msg,6)+"|"+Str(wParam,10)+"|"+Str(lParam,10) )
-   oTab := GetWindowObject( hTab )
-   IF msg == WM_COMMAND
-      // oTab := FindSelf( hTab )
-      // writelog( "DefTabProc "+str(Len(oTab:aEvents)) )
-      IF oTab:aEvents != Nil .AND. ;
-         ( iItem := Ascan( oTab:aEvents, {|a|a[1]==iParHigh.and.a[2]==iParLow} ) ) > 0
-         Eval( oTab:aEvents[ iItem,3 ],oTab,iParLow )
-      ENDIF
-      Return 1
-   ELSEIF msg == WM_NOTIFY
-      nCode := GetNotifyCode( lParam )
-      IF oTab:aNotify != Nil .AND. ;
-         ( iItem := Ascan( oTab:aNotify, {|a|a[1]==nCode.and.a[2]==wParam} ) ) > 0
-         IF ( res := Eval( oTab:aNotify[ iItem,3 ],oTab,wParam ) ) != Nil
-            Return res
-         ENDIF
-      ENDIF
-   ELSEIF msg == WM_DRAWITEM
-      Return DlgDrawItem( oTab,wParam,lParam )
-   ELSEIF msg == WM_CTLCOLORSTATIC
-      Return DlgCtlColor( oTab,wParam,lParam )
-   ELSE
-      DefProc( oTab, msg, wParam, lParam )
+   Adel( ::aPages, nPage )
+
+   Asize( ::aPages, len( ::aPages ) - 1 )
+
+   IF nPage > 1
+      ::nActive := nPage - 1
+      ::SetTab( ::nActive )
+   ELSEIF Len( ::aPages ) > 0
+      ::nActive := 1
+      ::SetTab( 1 )
    ENDIF
 
-Return -1
+Return ::nActive
+

@@ -1,4 +1,6 @@
 /*
+ * $Id: drawwidg.prg,v 1.6 2005-08-29 08:33:54 alkresin Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * Pens, brushes, fonts, bitmaps, icons handling
  *
@@ -6,7 +8,7 @@
  * www - http://www.geocities.com/alkresin/
 */
 
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "windows.ch"
 #include "guilib.ch"
 
@@ -128,6 +130,7 @@ CLASS HPen INHERIT HObject
    DATA nCounter   INIT 1
 
    METHOD Add( nStyle,nWidth,nColor )
+   METHOD Get( nStyle,nWidth,nColor )
    METHOD Release()
 
 ENDCLASS
@@ -137,7 +140,7 @@ Local i
 
    nStyle := Iif( nStyle == Nil,BS_SOLID,nStyle )
    nWidth := Iif( nWidth == Nil,1,nWidth )
-   nColor := Iif( nColor == Nil,Vcolor("000000"),nColor )
+   nColor := Iif( nColor == Nil,0,nColor )
 
    #ifdef __XHARBOUR__
    For EACH i in ::aPens 
@@ -168,6 +171,35 @@ Local i
    Aadd( ::aPens, Self )
 
 Return Self
+
+METHOD Get( nStyle,nWidth,nColor ) CLASS HPen
+Local i
+
+   nStyle := Iif( nStyle == Nil,PS_SOLID,nStyle )
+   nWidth := Iif( nWidth == Nil,1,nWidth )
+   nColor := Iif( nColor == Nil,0,nColor )
+
+   #ifdef __XHARBOUR__
+   For EACH i in ::aPens 
+      IF i:style == nStyle .AND. ;
+         i:width == nWidth .AND. ;
+         i:color == nColor
+
+         Return i
+      ENDIF
+   NEXT
+   #else
+   For i := 1 TO Len( ::aPens )
+      IF ::aPens[i]:style == nStyle .AND. ;
+         ::aPens[i]:width == nWidth .AND. ;
+         ::aPens[i]:color == nColor
+
+         Return ::aPens[i]
+      ENDIF
+   NEXT
+   #endif
+
+Return Nil
 
 METHOD Release() CLASS HPen
 Local i, nlen := Len( ::aPens ), p
@@ -311,7 +343,6 @@ Local lPreDefined := .F., i, aBmpSize
       ENDIF
    NEXT
    #endif
-   // ::classname:= "HBITMAP"
    ::handle :=   LoadBitmap( Iif( lPreDefined, Val(name),name ) )
    ::name   := name
    aBmpSize  := GetBitmapSize( ::handle )
@@ -339,8 +370,11 @@ Local i, aBmpSize
       ENDIF
    NEXT
    #endif
-   // ::classname:= "HBITMAP"
-   ::handle :=   OpenBitmap( name, hDC )
+   IF Lower( Right( name,4 ) ) == ".bmp"
+      ::handle := OpenBitmap( name, hDC )
+   ELSE
+      ::handle := OpenImage( name )
+   ENDIF
    ::name := name
    aBmpSize  := GetBitmapSize( ::handle )
    ::nWidth  := aBmpSize[1]
@@ -352,7 +386,6 @@ Return Self
 METHOD AddWindow( oWnd,lFull ) CLASS HBitmap
 Local i, aBmpSize
 
-   // ::classname:= "HBITMAP"
    ::handle := Window2Bitmap( oWnd:handle,lFull )
    ::name := Ltrim( Str( oWnd:handle ) )
    aBmpSize  := GetBitmapSize( ::handle )

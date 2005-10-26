@@ -1,4 +1,6 @@
 /*
+ * $Id: hprogres.prg,v 1.5 2004-09-29 05:24:52 alkresin Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * HProgressBar class
  *
@@ -7,7 +9,7 @@
 */
 
 #include "windows.ch"
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "guilib.ch"
 
 CLASS HProgressBar INHERIT HControl
@@ -19,7 +21,7 @@ CLASS HProgressBar INHERIT HControl
    DATA  nLimit
 
    METHOD New( oWndParent,nId,nLeft,nTop,nWidth,nHeight,maxPos,nRange )
-   METHOD NewBox( cTitle,nLeft,nTop,nWidth,nHeight,maxPos,nRange )
+   METHOD NewBox( cTitle,nLeft,nTop,nWidth,nHeight,maxPos,nRange,bExit )
    METHOD Activate()
    METHOD Increment() INLINE UpdateProgressBar( ::handle )
    METHOD Step()
@@ -47,7 +49,7 @@ METHOD New( oWndParent,nId,nLeft,nTop,nWidth,nHeight,maxPos,nRange ) CLASS HProg
 
 Return Self
 
-METHOD NewBox( cTitle,nLeft,nTop,nWidth,nHeight,maxPos,nRange ) CLASS HProgressBar
+METHOD NewBox( cTitle,nLeft,nTop,nWidth,nHeight,maxPos,nRange,bExit ) CLASS HProgressBar
 
    // ::classname:= "HPROGRESSBAR"
    ::style   := WS_CHILD+WS_VISIBLE
@@ -66,7 +68,8 @@ METHOD NewBox( cTitle,nLeft,nTop,nWidth,nHeight,maxPos,nRange ) CLASS HProgressB
 
    INIT DIALOG ::oParent TITLE cTitle       ;
         AT nLeft,nTop SIZE nWidth,nHeight   ;
-        STYLE WS_POPUP+WS_VISIBLE+WS_CAPTION+WS_SYSMENU+WS_SIZEBOX+Iif( nTop==0,DS_CENTER,0 )
+        STYLE WS_POPUP+WS_VISIBLE+WS_CAPTION+WS_SYSMENU+WS_SIZEBOX+Iif( nTop==0,DS_CENTER,0 ) ;
+        ON EXIT bExit
 
    ACTIVATE DIALOG ::oParent NOMODAL
 

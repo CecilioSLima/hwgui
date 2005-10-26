@@ -1,15 +1,15 @@
 /*
- * $Id: hipedit.prg,v 1.3 2004-03-15 18:51:17 alkresin Exp $
+ * $Id: hipedit.prg,v 1.7 2004-10-19 05:43:42 alkresin Exp $
  *
  * HWGUI - Harbour Win32 GUI library source code:
  * HTab class
  *
  * Copyright 2002 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #include "windows.ch"
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "guilib.ch"
 
 #define  IPN_FIELDCHANGED   4294966436
@@ -41,25 +41,20 @@ ENDCLASS
 METHOD New( oWndParent,nId,aValue,bSetGet, nStyle,nLeft,nTop,nWidth,nHeight, ;
                   oFont,bGetFocus,bKillFocus ) CLASS HIPedit
 
-   // ::classname:= "HIPedit"
-   ::oParent := Iif( oWndParent==Nil, ::oDefaultParent, oWndParent )
-   ::id      := Iif( nId==Nil,::NewId(), nId )
+   nStyle   := Hwg_BitOr( Iif( nStyle==Nil,0,nStyle ), WS_TABSTOP )
+   Super:New( oWndParent,nId,nStyle,nLeft,nTop,nWidth,nHeight,oFont )
+
    ::title   := ""
-   ::style   := Hwg_BitOr( Iif( nStyle==Nil,0,nStyle ), WS_CHILD+WS_VISIBLE+WS_TABSTOP )
-   ::oFont   := Iif( oFont==Nil, ::oParent:oFont, oFont )
-   ::nLeft   := nLeft
-   ::nTop    := nTop
-   ::nWidth  := nWidth
-   ::nHeight := nHeight
+
    ::bSetGet := bSetGet
    DEFAULT aValue := {0,0,0,0}
    ::aValue  := aValue
    ::bGetFocus  := bGetFocus
    ::bKillFocus := bKillFocus
 
+   HWG_InitCommonControlsEx()
    ::Activate()
 
-   ::oParent:AddControl( Self )
 
    IF Valtype(bSetGet) == "B"
       // WriteLog("hIpEdit:New() -> bSetGet == Block")
@@ -100,18 +95,15 @@ Return Nil
 METHOD SetValue( aValue ) CLASS HIPedit
    SETIPADDRESS(::handle , aValue[1], aValue[2], aValue[3], aValue[4])
    ::aValue := aValue
-   // writelog( "SetValue()" )
 Return Nil
 
 
 METHOD GetValue( ) CLASS HIPedit
    ::aValue := GETIPADDRESS(::handle)
-   // writelog(  )
 Return (::aValue)
 
 METHOD Clear( ) CLASS HIPedit
    CLEARIPADDRESS(::handle)
-   // writelog(  )
    ::aValue := { 0,0,0,0 }
 Return (::aValue)
 
@@ -119,6 +111,7 @@ Return (::aValue)
 METHOD End() CLASS HIPedit
 
    // Nothing to do here, yet!
+   Super:End()
 
 Return Nil
 
@@ -137,31 +130,23 @@ Static Function __Valid( oCtrl )
       SetFocus( oCtrl:handle )
    ENDIF
 
-   WriteLog("Saindo de valid do IP")
-
 Return .T.
 
 Static Function __GetFocus( oCtrl )
    Local xRet
-   WriteLog("Entrando em GetFocus do IP")
 
    IF Valtype(oCtrl:bGetFocus) == "B" 
       xRet := Eval( oCtrl:bGetFocus,oCtrl )
    ENDIF
-
-   WriteLog("Saindo de GetFocus do IP")
 
 Return xRet
 
 
 Static Function __KillFocus( oCtrl )
    Local xRet
-   WriteLog("Entrando em KillFocus do IP")
 
    IF Valtype(oCtrl:bKillFocus) == "B" 
       xRet := Eval( oCtrl:bKillFocus,oCtrl )
    ENDIF
-
-   WriteLog("Saindo de KillFocus do IP")
 
 Return xRet

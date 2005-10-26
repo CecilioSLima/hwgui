@@ -1,0 +1,38 @@
+/*
+ * $Id: Suggestions,v 1.4 2004-09-08 16:52:29 sandrorrfreire Exp $
+ */
+
+/
+ * The archive if destines to inform new suggestions to be done
+ * Use This format
+ *
+ * Suggest By Name   DATE  UTC
+ * Suggestion
+ * Analyzed for          
+ * Made For
+ /
+
+2004-09-08 14-00 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
+New class similar to TBROWSE
+
+
+2004-08-13 12-30 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
+DESIGNER
+Open and save project in format PRG
+New control HGrid
+
+
+2004-07-23 08-50 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
+In GET(hEdit)  include the comand ON ENTER that it does not depend on
+ONLOSTFOCUS (VALID) that it needs .T. or .F. return
+Suggestion by Frank Lenon
+Analyzed for ->
+Made For     ->
+It's possible (  ) Yes   (  ) No
+
+2004-07-22 08-44 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
+In Browse include the comand ON CLICKHEADER
+Analyzed for ->
+Made For     ->
+It's possible (  ) Yes   (  ) No
+

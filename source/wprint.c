@@ -1,9 +1,11 @@
 /*
+ * $Id: wprint.c,v 1.9 2005-10-25 01:37:26 lculik Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * C level print functions
  *
  * Copyright 2001 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
 #define HB_OS_WIN_32_USED
@@ -22,6 +24,10 @@
 #include "hbapiitm.h"
 #include "hbvm.h"
 #include "hbstack.h"
+#ifdef __XHARBOUR__
+#include "hbfast.h"
+#endif
+
 
 HB_FUNC( HWG_OPENPRINTER )
 {
@@ -30,38 +36,180 @@ HB_FUNC( HWG_OPENPRINTER )
 
 HB_FUNC( HWG_OPENDEFAULTPRINTER )
 {
-  DWORD            dwNeeded, dwReturned ;
-  HDC              hDC;
-  PRINTER_INFO_4 * pinfo4;
-  PRINTER_INFO_5 * pinfo5;
+   DWORD            dwNeeded, dwReturned ;
+   HDC              hDC;
+   PRINTER_INFO_4 * pinfo4;
+   PRINTER_INFO_5 * pinfo5;
 
-  if (GetVersion () & 0x80000000)         // Windows 98
-  {
-     EnumPrinters (PRINTER_ENUM_DEFAULT, NULL, 5, NULL,
-           0, &dwNeeded, &dwReturned) ;
+   if( GetVersion() & 0x80000000 )         // Windows 98
+   {
+      EnumPrinters( PRINTER_ENUM_DEFAULT, NULL, 5, NULL,
+            0, &dwNeeded, &dwReturned );
 
-     pinfo5 = (PRINTER_INFO_5*)malloc (dwNeeded) ;
+      pinfo5 = (PRINTER_INFO_5*)malloc( dwNeeded );
 
-     EnumPrinters (PRINTER_ENUM_DEFAULT, NULL, 5, (PBYTE) pinfo5,
-           dwNeeded, &dwNeeded, &dwReturned) ;
-     hDC = CreateDC (NULL, pinfo5->pPrinterName, NULL, NULL) ;
+      EnumPrinters( PRINTER_ENUM_DEFAULT, NULL, 5, (PBYTE) pinfo5,
+            dwNeeded, &dwNeeded, &dwReturned );
 
-     free (pinfo5) ;
-  }
-  else                                    // Windows NT
-  {
-     EnumPrinters (PRINTER_ENUM_LOCAL, NULL, 4, NULL,
-           0, &dwNeeded, &dwReturned) ;
+      hDC = CreateDC( NULL, pinfo5->pPrinterName, NULL, NULL );
+      if( hb_pcount() > 0 )
+         hb_storc( pinfo5->pPrinterName,1 );
 
-     pinfo4 = (PRINTER_INFO_4*)malloc (dwNeeded) ;
+      free (pinfo5) ;
+   }
+   else                                    // Windows NT
+   {
+      EnumPrinters( PRINTER_ENUM_LOCAL, NULL, 4, NULL,
+            0, &dwNeeded, &dwReturned );
 
-     EnumPrinters (PRINTER_ENUM_LOCAL, NULL, 4, (PBYTE) pinfo4,
-           dwNeeded, &dwNeeded, &dwReturned) ;
-     hDC = CreateDC (NULL, pinfo4->pPrinterName, NULL, NULL) ;
+      pinfo4 = (PRINTER_INFO_4*)malloc( dwNeeded );
 
-     free (pinfo4) ;
-  }
-  hb_retnl( (LONG) hDC );   
+      EnumPrinters( PRINTER_ENUM_LOCAL, NULL, 4, (PBYTE) pinfo4,
+            dwNeeded, &dwNeeded, &dwReturned );
+      hDC = CreateDC( NULL, pinfo4->pPrinterName, NULL, NULL );
+      if( hb_pcount() > 0 )
+         hb_storc( pinfo4->pPrinterName,1 );
+
+      free( pinfo4 );
+   }
+   hb_retnl( (LONG) hDC );   
+}
+
+HB_FUNC( HWG_GETPRINTERS )
+{
+   DWORD            dwNeeded, dwReturned ;
+   PBYTE            pBuffer = NULL;
+   PRINTER_INFO_4 * pinfo4 = NULL;
+   PRINTER_INFO_5 * pinfo5 = NULL;
+   #ifdef __XHARBOUR__
+   HB_ITEM_NEW( aMetr );
+   HB_ITEM_NEW( temp );
+   #else
+   PHB_ITEM aMetr, temp;
+   #endif
+
+   if (GetVersion () & 0x80000000)         // Windows 98
+   {
+      EnumPrinters( PRINTER_ENUM_LOCAL, NULL, 5, NULL,
+            0, &dwNeeded, &dwReturned );
+      if( dwNeeded )
+      {
+         pBuffer = (PBYTE) malloc( dwNeeded );
+         pinfo5  = (PRINTER_INFO_5*) pBuffer;
+         EnumPrinters( PRINTER_ENUM_LOCAL, NULL, 5, pBuffer,
+             dwNeeded, &dwNeeded, &dwReturned );
+      }
+   }
+   else                                    // Windows NT
+   {
+      EnumPrinters( PRINTER_ENUM_LOCAL, NULL, 4, NULL,
+            0, &dwNeeded, &dwReturned );
+      if( dwNeeded )
+      {
+         pBuffer = (PBYTE) malloc( dwNeeded );
+         pinfo4  = (PRINTER_INFO_4*) pBuffer;
+         EnumPrinters( PRINTER_ENUM_LOCAL, NULL, 4, pBuffer,
+             dwNeeded, &dwNeeded, &dwReturned );
+      }
+   }
+   if( dwReturned )
+   {
+      int i;
+      #ifdef __XHARBOUR__
+      hb_arrayNew( &aMetr,dwReturned );
+      #else
+      aMetr = hb_itemArrayNew( dwReturned );
+      #endif
+      for( i=0; i<(int)dwReturned; i++ )
+      {
+         if( pinfo4 )
+         {
+            #ifdef __XHARBOUR__
+            hb_itemPutC( &temp, pinfo4->pPrinterName );
+            #else
+            temp = hb_itemPutC( NULL, pinfo4->pPrinterName );
+            #endif
+            pinfo4++;
+         }
+         else
+         {
+            #ifdef __XHARBOUR__
+            hb_itemPutC( &temp, pinfo5->pPrinterName );
+            #else
+            temp = hb_itemPutC( NULL, pinfo5->pPrinterName );
+            #endif
+            pinfo5++;
+         }
+         #ifdef __XHARBOUR__
+         {
+         hb_arraySetForward( &aMetr, i+1, &temp );
+         hb_itemClear( &temp );
+         }
+         #else
+         {
+         hb_itemArrayPut( aMetr, i+1, temp );
+         hb_itemRelease( temp );
+         }
+         #endif
+      }
+      #ifdef __XHARBOUR__
+      hb_itemForwardValue( hb_stackReturnItem(), &aMetr );
+      #else
+      {
+      hb_itemReturn( aMetr );
+      hb_itemRelease( aMetr );
+      }
+      #endif
+   }
+   else
+      hb_ret();
+
+   if( pBuffer )
+      free( pBuffer );
+
+}
+
+HB_FUNC( SETPRINTERMODE )
+{
+   LPTSTR pPrinterName = (LPTSTR) hb_parc(1);
+   HANDLE hPrinter = (ISNIL(2))? (HANDLE)NULL : (HANDLE)hb_parnl(2);
+   long int nSize;
+   PDEVMODE pdm;
+
+   if( !hPrinter )
+      if( !OpenPrinter( pPrinterName, &hPrinter, NULL ) )
+      {
+         return;
+      }
+
+   /* Determine the size of DEVMODE structure */
+   nSize = DocumentProperties( NULL, hPrinter, pPrinterName, NULL, NULL, 0 );
+   pdm = (PDEVMODE)GlobalAlloc( GPTR, nSize );
+
+   /* Get the printer mode */
+   DocumentProperties( NULL, hPrinter, pPrinterName, pdm, NULL, DM_OUT_BUFFER );
+    
+   /* Changing of values */
+   if( !ISNIL(3) )
+   {
+      pdm->dmOrientation = hb_parni(3);
+      pdm->dmFields = pdm->dmFields | DM_ORIENTATION;
+   }
+
+   // Call DocumentProperties() to change the values
+   DocumentProperties( NULL, hPrinter, pPrinterName, 
+                      pdm, pdm, DM_OUT_BUFFER | DM_IN_BUFFER );
+
+   // создадим контекст устройства принтера  
+   hb_retnl( (LONG) CreateDC( NULL, pPrinterName, NULL, pdm ) );
+   hb_stornl( (LONG)hPrinter,2 );
+   GlobalFree( pdm );
+}
+
+HB_FUNC( CLOSEPRINTER )
+{
+   HANDLE hPrinter = (HANDLE)hb_parnl(1);
+   ClosePrinter( hPrinter );
 }
 
 HB_FUNC( HWG_STARTDOC )
@@ -91,12 +239,55 @@ HB_FUNC( HWG_ENDPAGE )
    hb_retnl( (LONG) EndPage( (HDC) hb_parnl( 1 ) ) );
 }
 
-HB_FUNC ( GETDEVICEAREA )
+/*
+ * HORZRES	Width, in pixels, of the screen.
+ * VERTRES	Height, in raster lines, of the screen.
+ * HORZSIZE	Width, in millimeters, of the physical screen.
+ * VERTSIZE	Height, in millimeters, of the physical screen.
+ * LOGPIXELSX	Number of pixels per logical inch along the screen width.
+ * LOGPIXELSY	Number of pixels per logical inch along the screen height.
+ *
+ */
+HB_FUNC( GETDEVICEAREA )
 {
    HDC hDC = (HDC) hb_parnl( 1 );
-   PHB_ITEM aMetr = hb_itemArrayNew( 7 );
-   PHB_ITEM temp;
+   #ifdef __XHARBOUR__
+   HB_ITEM_NEW( aMetr) ;
+   HB_ITEM_NEW( temp);
 
+   #else
+   PHB_ITEM aMetr = hb_itemArrayNew( 9 );
+   PHB_ITEM temp;
+   #endif
+
+   #ifdef __XHARBOUR__
+   {
+   hb_arrayNew( &aMetr, 9 );
+   
+   hb_arraySetForward( &aMetr, 1, hb_itemPutNL( &temp, GetDeviceCaps( hDC,HORZRES ) ) );
+      
+   hb_arraySetForward( &aMetr, 2, hb_itemPutNL( &temp, GetDeviceCaps( hDC,VERTRES ) ) );   
+   
+   hb_arraySetForward( &aMetr, 3, hb_itemPutNL( &temp, GetDeviceCaps( hDC,HORZSIZE ) ) );
+   
+   hb_arraySetForward( &aMetr, 4, hb_itemPutNL( &temp, GetDeviceCaps( hDC,VERTSIZE ) ) );
+   
+   hb_arraySetForward( &aMetr, 5, hb_itemPutNL( &temp, GetDeviceCaps( hDC,LOGPIXELSX ) ) );
+   
+   hb_arraySetForward( &aMetr, 6, hb_itemPutNL( &temp, GetDeviceCaps( hDC,LOGPIXELSY ) ) );
+   
+   hb_arraySetForward( &aMetr, 7, hb_itemPutNL( &temp, GetDeviceCaps( hDC,RASTERCAPS ) ) );
+   
+   hb_arraySetForward( &aMetr, 8, hb_itemPutNL( &temp, GetDeviceCaps( hDC,PHYSICALWIDTH ) ) );
+   
+   hb_arraySetForward( &aMetr, 9, hb_itemPutNL( &temp, GetDeviceCaps( hDC,PHYSICALHEIGHT ) ) );
+
+   hb_itemClear( &temp );
+   hb_itemForwardValue( hb_stackReturnItem(), &aMetr );
+   }
+
+   #else
+   {
    temp = hb_itemPutNL( NULL, GetDeviceCaps( hDC,HORZRES ) );
    hb_itemArrayPut( aMetr, 1, temp );
    hb_itemRelease( temp );
@@ -125,8 +316,18 @@ HB_FUNC ( GETDEVICEAREA )
    hb_itemArrayPut( aMetr, 7, temp );
    hb_itemRelease( temp );
 
+   temp = hb_itemPutNL( NULL, GetDeviceCaps( hDC,PHYSICALWIDTH ) );
+   hb_itemArrayPut( aMetr, 8, temp );
+   hb_itemRelease( temp );
+
+   temp = hb_itemPutNL( NULL, GetDeviceCaps( hDC,PHYSICALHEIGHT ) );
+   hb_itemArrayPut( aMetr, 9, temp );
+   hb_itemRelease( temp );
+
    hb_itemReturn( aMetr );
    hb_itemRelease( aMetr );
+   }
+   #endif
 }
 
 HB_FUNC( CREATEENHMETAFILE )

@@ -1,4 +1,6 @@
 /*
+ * $Id: hfreeimg.prg,v 1.6 2005-10-26 07:43:26 omm Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * HFreeImage - Image handling class
  *
@@ -8,10 +10,10 @@
  *          Hervé Drolon (drolon@infonie.fr)
  *
  * Copyright 2003 Alexander S.Kresin <alex@belacy.belgorod.su>
- * www - http://www.geocities.com/alkresin/
+ * www - http://kresin.belgorod.su
 */
 
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "windows.ch"
 #include "guilib.ch"
 
@@ -25,6 +27,7 @@ CLASS HFreeImage INHERIT HObject
    DATA nCounter   INIT 1
 
    METHOD AddFile( name )
+   METHOD AddFromVar( cImage,cType )
    METHOD FromBitmap( oBitmap )
    METHOD Draw( hDC,nLeft,nTop,nWidth,nHeight )
    METHOD Release()
@@ -58,7 +61,17 @@ Local i, aBmpSize
 
 Return Self
 
-METHOD FromBitmap( oBitmap )
+METHOD AddFromVar( cImage,cType ) CLASS HFreeImage
+
+   ::handle := FI_LoadFromMem( cImage,cType )
+   ::name := Ltrim( Str( ::handle ) )
+   ::nWidth  := FI_GetWidth( ::handle )
+   ::nHeight := FI_GetHeight( ::handle )
+   Aadd( ::aImages,Self )
+
+Return Self
+
+METHOD FromBitmap( oBitmap ) CLASS HFreeImage
 
    ::handle := FI_Bmp2FI( oBitmap:handle )
    ::name := Ltrim( Str( oBitmap:handle ) )
@@ -112,47 +125,70 @@ Return Nil
 
 CLASS HSayFImage INHERIT HSayImage
 
+   DATA nOffsetV  INIT 0
+   DATA nOffsetH  INIT 0
+   DATA nZoom
+
    METHOD New( oWndParent,nId,nLeft,nTop,nWidth,nHeight,Image,bInit, ;
-                  bSize,ctoolt )
-   METHOD Redefine( oWndParent,nId,Image,bInit,bSize,ctoolt )
+                  bSize,ctooltip )
+   METHOD Redefine( oWndParent,nId,Image,bInit,bSize,ctooltip )
+   METHOD ReplaceImage( Image )
    METHOD Paint( lpdis )
 
 ENDCLASS
 
 METHOD New( oWndParent,nId,nLeft,nTop,nWidth,nHeight,Image,bInit, ;
-                  bSize,ctoolt ) CLASS HSayFImage
+                  bSize,ctooltip,cType ) CLASS HSayFImage
 
-   ::oImage := Iif( Valtype(Image) == "C", HFreeImage():AddFile( Image ), Image )
-   IF nWidth == Nil
-      nWidth  := ::oImage:nWidth
-      nHeight := ::oImage:nHeight
+   IF Image != Nil
+      ::oImage := Iif( Valtype(Image) == "C", ;
+           Iif( cType!=Nil, HFreeImage():AddFromVar( Image,cType ), HFreeImage():AddFile( Image ) ), Image )
+      IF nWidth == Nil
+         nWidth  := ::oImage:nWidth
+         nHeight := ::oImage:nHeight
+      ENDIF
    ENDIF
-   Super:New( oWndParent,nId,nLeft,nTop,nWidth,nHeight,bInit,bSize,ctoolt )
+   Super:New( oWndParent,nId,SS_OWNERDRAW,nLeft,nTop,nWidth,nHeight,bInit,bSize,ctooltip )
    // ::classname:= "HSAYFIMAGE"
 
-   ::style   += SS_OWNERDRAW
    ::bPaint  := {|o,lpdis|o:Paint(lpdis)}
 
    ::Activate()
 
 Return Self
 
-METHOD Redefine( oWndParent,nId,Image,bInit,bSize,ctoolt ) CLASS HSayFImage
+METHOD Redefine( oWndParent,nId,Image,bInit,bSize,ctooltip ) CLASS HSayFImage
 
    ::oImage := Iif( Valtype(Image) == "C", HFreeImage():AddFile( Image ), Image )
 
-   Super:Redefine( oWndParent,nId,bInit,bSize,ctoolt )
+   Super:Redefine( oWndParent,nId,bInit,bSize,ctooltip )
    // ::classname:= "HSAYFIMAGE"
 
    ::bPaint  := {|o,lpdis|o:Paint(lpdis)}
 
 Return Self
 
+METHOD ReplaceImage( Image, cType )
+
+   IF ::oImage != Nil
+      ::oImage:Release()
+   ENDIF
+   ::oImage := Iif( Valtype(Image) == "C", ;
+        Iif( cType!=Nil, HFreeImage():AddFromVar( Image,cType ), HFreeImage():AddFile( Image ) ), Image )
+
+Return Nil
+
 METHOD Paint( lpdis ) CLASS HSayFImage
 Local drawInfo := GetDrawItemInfo( lpdis )
 Local hDC := drawInfo[3], x1 := drawInfo[4], y1 := drawInfo[5], x2 := drawInfo[6], y2 := drawInfo[7]
 
-   ::oImage:Draw( hDC, 0, 0, ::nWidth, ::nHeight )
+   IF ::oImage != Nil
+      IF ::nZoom == Nil
+         ::oImage:Draw( hDC, ::nOffsetH, ::nOffsetV, ::nWidth, ::nHeight )
+      ELSE
+         ::oImage:Draw( hDC, ::nOffsetH, ::nOffsetV, ::oImage:nWidth*::nZoom, ::oImage:nHeight*::nZoom )
+      ENDIF
+   ENDIF
 
 Return Self
 
@@ -169,3 +205,4 @@ Local i
    FI_End()
 
 Return
+

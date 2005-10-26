@@ -1,5 +1,5 @@
 /*
- * $Id: Changelog,v 1.63 2004-03-31 19:31:59 sandrorrfreire Exp $
+ * $Id: Changelog,v 1.438 2005-10-26 11:46:09 omm Exp $
  */
 
 /* Use this format for the entry headers:
@@ -8,555 +8,651 @@
    2002-12-01 23:12 UTC+0100 Foo Bar <foo.bar@foobar.org>
 */
 
-2004-03-31 16-40 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * samples/designer/hformgen.prg
-    * it was recording the inverted size of Dialogs, in save files .prg
+2005-10-26 14:06 UTC+0200 Alexey Myronenko <atzct@obukhov.kiev.ua>
+   *source/ hcheck.prg
+   *source/ hcombo.prg
+   *source/ hcontrol.prg
+   *source/ hdatepic.prg
+   *source/ hedit.prg
+   *source/ hfreeimg.prg
+   *source/ hgraph.prg
+   *source/ hhyper.prg
+   *source/ hmonthc.prg
+   *source/ hnice.prg
+   *source/ hradio.prg
+   *source/ hriched.prg
+   *source/ hsayimg.prg
+   *source/ htrackbr.prg
+   *source/ hupdown.prg
+   *source/ hwindow.prg
+     * Now Designer allow to use Tooltip
+       ctooltip is used now instead of ctoolt
+   *source/ hfrmtmpl.prg
+     + added processing of cTooltip clause
+   *utils/designer/resource/widgets.xml
+     + added properties ToolTip support
+     ! small fix on monthcalendar class
 
-2004-03-31 15:50 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * source/hbrowse.prg
-    * Some improvements of the recently added code.
+2005-10-26 12:42 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+   * source/xml/xmlparse.c
+     ! Small fix
 
-2004-03-31 15:00 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * source/hbrowse.prg
-    * Handling of SB_THUMBPOSITION and SB_THUMBTRACK is left to the user's
-      bScrollPos codeblock.
-    * bScrollPos is initialized with a call to VScrollPos() function in
-      InitBrw() in case of array browse. VScrollPos() may serve as a sample
-      for other bScrollPos implementations.
+2005-10-25 14:00 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * source/hbrowse.prg
+     ! updated to use an colorblock
+   * samples/colrbloc.prg
+     ! new Zebra example, show how to create browse like zebra colors
+   * include/guilib.ch
+     ! changes to browses commands. All changes above provided by Marcelo Sturm
 
-2004-03-31 11:40 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * source/hbrowse.prg
-    * Few changes, proposed by Vlad:
-      - bScrollPos variable has been added to HBrowse to handle the vertical
-        scroll position;
-      - SB_PAGELEFT and SB_PAGERIGHT handling added to DoHScroll();
-      - handling of bEnter is changed.
-  * source/hdatepic.prg
-    ! Small fix, provided by Alexey Mironenko.
+2005-10-25 16:15 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+   * include/windows.ch
+     - removed #define TRANSPARENT, because it interferes with OWNERBUTTON
+       declaration
+   * source/window.c
+     * hwg_ProcessMessage(): PeekMessage() is used now instead of GetMessage(),
+       for to not stop the program execution. Second parameter is added - nSleep,
+       which is a number of milliseconds the thread to sleep ( default = 1 ).
 
-2004-03-29 10:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+2005-10-24 23:35 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   *source/misc.c
+    source/commond.c
+    source/wprint.c
+    source/prnalone.c
+    ! changed all call to &(HB_VM_STACK).Return to hb_stackReturnItem() under xharbour
+
+2005-10-24 23:25 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * source/xml/xmlparse.c
+     ! updated header include files when using xharbour from current cvs
+
+2005-10-24 15:20 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+   * source/hhyper.prg
+   * source/hdc.prg
+     ! Fixed few warnings, bugs and some Harbour incompatibility
+
+2005-10-22 11:20 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * source/hhyper.prg
+     ! source for an static text with hyper link control
+   * source/hdc.prg
+     ! an class with some HDC functions wrappers
+   * include/guilib.ch
+     ! Added Command for @ SAY link
+   * makefile.*
+     ! Updated to reflect new files added
+   * samples/a.prg
+     ! changed openabout function To add two links on the dialog
+
+2005-10-22 00:20 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * source/drawtext.c
+     + New functions
+   * include/windows.ch
+     + New messages
+
+2005-10-21 13:25 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+   * source/hbrowse.prg
+     * Added handling of keyboard events, defined with SET KEY
+   * source/hedit.prg
+     * Handling of keyboard events, defined with SET KEY, is allowed for simple
+       ( non GET ) EDITBOX, too.
+
+2005-10-21 12:50 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+   * gtk/commond.c
+   * gtk/control.c
+   * gtk/draw.c
+   * gtk/drawtext.c
+   * gtk/window.c
+     ! Some fixes, related to __GTK_USE_POINTER__
+   * gtk/hbrowse.prg
+   * gtk/hcheck.prg
+   * gtk/hcombo.prg
+   * gtk/hcontrol.prg
+   * gtk/hedit.prg
+   * gtk/hgraph.prg
+   * gtk/hradio.prg
+   * gtk/htab.prg
+   * gtk/hupdown.prg
+   * gtk/menu.prg
+     * #ifdef __GTK_USE_POINTER__ has been removed
+   * gtk/hdialog.prg
+     ! Fixed problem with EndDialog(), which appeared with __GTK_USE_POINTER__
+
+2005-10-20 11:20 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+   * makefile.gcc
+   * makemngw.bat
+     ! Small fixes
+   * source/control.c
+   * source/grid.c
+   * source/richedit.c
+     ! Few warnings fixed.
+
+2005-10-20 10:25 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+   * source/xml/xmlparse.c
+     ! Few warnings fixed.
+
+2005-10-19 17:50 UTC+0200 Lorenzo Fiorini <lorenzo_fiorini/at/teamwork.it>
+  * include/Makefile
+    * install windows.ch and hwgui.ch
+  * source/freeimg.c
+    * added some #ifdefs for OpenWatcom
+
+2005-10-19 14:05 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+   * source/window.c
+   * source/richedit.c
+   * source/control.c
+   * source/dialog.c
+   * source/hbrowse.prg
+   * source/hcwindow.prg
+   * source/hownbtn.prg
+   * source/hpanel.prg
+   * source/hsplit.prg
+   * source/htree.prg
+     * Changed internal handling of objects, keeping as window data,
+       due to advice of Przemyslaw Czerpak
+   * source/hedit.prg
+     ! Small fix
+   * source/xml/xmlparse.c
+     ! Small fix
+   * utils/dbc/dbchw.prg
+     ! Small fix
+
+2005-10-17 13:20 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * source/hbrowse.prg
+     ! minor fix on  ButtonDown(  ) method.now designer work again
+
+2005-10-17 19:40 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * source/window.c
+     source/richedit.c
+     source/shellapi.c
+     source/prnalone.c
+     source/nice.c
+     source/misc.c
+     source/message.c
+     source/menu_c.c
+     source/media_c.c
+     source/grid.c
+     source/drawtext.c
+     source/draw.c
+     source/dialog.c
+     source/control.c
+     source/commond.c
+     source/c_ipaddr.c
+     ! Changes to init the structure as 0
+
+2005-10-17 13:20 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * source/hbrowse.prg
+     ! minor change on initbrw() method
+
+2005-09-23 12:36 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * source/freeimg.c
+     ! Fix compilation Error
+
+2005-09-23 14:20 UTC+0200 Maurilio Longo <maurilio.longo@libero.it>
+   * include/guilib.ch
+     + added valid clause to @ x,y GET COMBOBOX
+   * source/hcombo.prg
+     + added valid clause to HComboBox
+   * source/control.c
+     * changed SetTimer() to accept a 4th NULL parameter to be able
+       to receive WM_TIMER messages
+   * source/freeimg.c
+     + added a few functions(), changed FI_2DIB() into FI_FI2DIB() to be
+       more consisten with the naming convention of functions inside the file.
+   * source/hbrowse.prg
+     ! ::MouseDown() could cause that a phantom column to the left of the last
+       one was selected when clicking just to the left of it.
+     * When a combobox is used to ::Edit() a column the ::bValid of the column is
+       used to validate it and it is created with a font smaller than the one used
+       for the browse or else the combobox is taller than the row where it is painted.
+   * source/window.c
+     + added hwg_PeekMessage() which calls PeekMessage() but it is not able to remove
+       a message from the queue, just to test if it is waiting.
+
+
+2005-09-21 18:10 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * gtk/control.c
+     gtk/hedit.prg
+     gtk/hcwindow.prg
+     gtk/hdialog.prg
+     gtk/hcontrol.prg
+     gtk/htab.prg
+     gtk/hgraph.prg
+     gtk/hcombo.prg
+     gtk/hradio.prg
+     gtk/menu.prg
+     gtk/hbrowse.prg
+     gtk/drawwidg.prg
+     gtk/hwindow.prg
+     gtk/hupdown.prg
+     gtk/hcheck.prg
+     gtk/htimer.prg
+     gtk/hwinprn.prg
+     ! Minor fix on defines names,
+       Now all samples work when compiled with -D__GTK_USE_POINTER__
+
+2005-09-21 10:20 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+   * gtk/control.c
+     gtk/hedit.prg
+     gtk/hcwindow.prg
+     gtk/hdialog.prg
+     gtk/hcontrol.prg
+     gtk/htab.prg
+     gtk/hgraph.prg
+     gtk/hcombo.prg
+     gtk/hradio.prg
+     gtk/menu.prg
+     gtk/hbrowse.prg
+     gtk/drawwidg.prg
+     gtk/hwindow.prg
+     gtk/hupdown.prg
+     gtk/hcheck.prg
+     gtk/htimer.prg
+     gtk/hwinprn.prg
+     ! Change to use  [x]harbour Pointers types.Changes protect by __GTK_USE_POINTER__.
+      This is an work in progress
+
+2005-09-21 16:15 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source/control.c
+  * source/dialog.c
+  * source/nice.c
+  * source/richedit.c
+  * source/windows.c
+    * hb_itemGetNL( (PHB_ITEM) hb_stackReturnItem() ) are replaced with
+      hb_retnl( -1 ), as adviced Przemyslaw Czerpak
+  * source/hownbtn.prg
+    * Reverted a last modification ( 2005-09-16 18:55 UTC+0200 )
+
+2005-09-20 14:20 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+  * gtk/misc.c
+    gtk/windows.c
+    gtk/draw.c
+    gtk/drawtext.c
+    gtk/menu_c.c
+    ! Change to use  [x]harbour Pointers types.Changes protect by __GTK_USE_POINTER__.
+    This is an work in progress
+
+
+2005-09-20 11:10 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+  * gtk/commond.c
+    gtk/control.c
+    ! Change to use  [x]harbour Pointers types.Changes protect by __GTK_USE_POINTER__.
+    This is an work in progress
+
+2005-09-20 14:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source/htab.prg
+    ! Some fixes
+
+2005-09-20 11:25 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source/hedit.prg
+    * Allows the operation of the keys Ctrl+C Ctrl+V Ctrl+X
+    * Allows the operation of the keys shift+keyleft e Ctrl+keyleft
+      by suggestion of Paulo Flecha pfflecha@yahoo.com.br
+
+2005-09-20 10:45 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
   * source/hbrowse.prg
-    ! Bug fixed, reported by Vlad
+    * Removed WS_HSCROLL, because sometimes horizontal bar was not necessary
+      by suggestion of Paulo Flecha pfflecha@yahoo.com.br
+    ! Fixed - some small letters ( g, y, p, q, ç, j ) wasn't displayed
+      correctly - lowermost pixels was cut.
+    * HColumn:bColorBlock => Codeblock that determines color of data items
+      bColorBlock must return an array containing four colors values
+      by suggestion of Paulo Flecha pfflecha@yahoo.com.br
+    * added new variable - bRecnoLog - a block calculating the logical
+      record number to be used in VScrollPos ( the same was introduced in
+      GTK version recently ).
+      Now to force the VSCROLL to work with indexed files, you need to write:
+        oBrw:bRcou := &( "{||" + oBrw:alias + "->(ORDKEYCOUNT())}" )
+        oBrw:bRecnoLog := &( "{||" + oBrw:alias + "->(ORDKEYNO())}" )
+        oBrw:bScrollPos := {|o,n,lEof,nPos|VScrollPos(o,n,lEof,nPos)}
+
+  + samples/colrbloc.prg
+      * Show how to use the new parameter bColorBlock (HColumn class)
+      by Paulo Flecha pfflecha@yahoo.com.br changed by Marcelo Sturm masturmbr@yahoo.com.br
+
+2005-09-19 18:40 UTC+0200 Lorenzo Fiorini <lorenzo_fiorini/at/teamwork.it>
+  + samples/testsdi.prg
+    * now it uses a window
+  * source/htab.prg
+    * changed ::DeletePage
+
+2005-09-19 15:30 UTC+0200 Lorenzo Fiorini <lorenzo_fiorini/at/teamwork.it>
+  + samples/testsdi.prg
+    * new example for sdi interface
+  * source/htab.prg
+    * added ::DeletePage method
+     * source/control.c
+    * added DeleteTab function
+  * Still a work in progress committed to show the GPF instead the RT error
+
+2005-09-18 17:00 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source/repexec.prg
+    * Some changes to allow the function PrintReport() be called,
+      even if a main window doesn't exist ( from console applications )
+      by suggestion of Sauli Bueno <saulibueno@yahoo.com.br>
+
+2005-09-18 14:00 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source/hsplit.prg
+    ! Bug fixed, which prevented using of a splitter in a dialog box
+  * samples/testtree.prg
+    * Some enhancements to demonstrate tree resizing
+
+2005-09-18 09:58 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/window.c
+    * Changed the "policy" of a windows and dialogs - they behaves now more
+      closely to windows version.
+  * gtk/Makefile.linux
+    * reorganized - thanks to Przemyslaw Czerpak
+
+2005-09-16 18:55 UTC+0200 Lorenzo Fiorini <lorenzo_fiorini/at/teamwork.it>
+  * gtk/samples/bldgw.bat
+  * samples/bldgw.bat
+    * added -lhbsix for latest xHarbour CVS
+  * source/hownbtn.prg
+  * source/hnice.prg
+    * added ::nOrder properties
+     * added Self as first parameter of Eval( ::bClick, Self, ... )
   * source/menu.prg
-    ! Hwg_AddMenuItem() has been fixed.
-  * source/xml/hxmldoc.prg
-    * Find() method has been added to HXMLNODE class
+    * declared local var
 
-2004-03-25 10:30 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * source/hbrowse.prg
-    ! Bug fixed, reported by Alexey Mironenko.
+2005-09-16 15:38 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/samples/dbview.prg
+  * samples/dbview.prg
+    * samples synhronized
 
-2004-03-24 16:50 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+2005-09-16 15:32 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/samples/a.prg
+    ! Some fixes and enhancements
+  * gtk/samples/build.sh
+    * libgnomeprint libraries added.
+
+2005-09-16 15:12 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/hbrowse.prg
+    * bHeadClick variable added to the HColumn class - synhronized with
+      Windows version.
+  * gtk/drawwidg.prg
+    * HFont():Add() - converting nHeight with Abs() - to provide compatibility
+      with Windows version.
+  * gtk/hdialog.prg
+    ! Small fixes
+  * gtk/hprinter.prg
+    * Added Preview() method - empty for now.
+  * gtk/menu.prg
+  * gtk/menu_c.c
+    * CheckMenuItem() and IsCheckedMenuItem() functions implemented.
+  * source/menu_c.c
+    ! CheckMenuItem() and IsCheckedMenuItem() functions fixed.
+
+2005-09-15 21:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/hwindow.prg
+  * gtk/hcwindow.prg
+  * gtk/window.c
+    ! Small fixes.
+    * onMove event has been implemented.
+
+2005-09-15 11:30 UTC+0200 Lorenzo Fiorini <lorenzo_fiorini/at/teamwork.it>
+  * gtk/hwindow.prg
+  * gtk/window.c
+  * gtk/menu.prg
+  * gtk/menu_c.c
+  * gtk/samples/bldgw.bat
+    * synced with win32 modifications
+  + gtk/samples/a.prg
+  + samples/dbview.prg
+    * tests to show the cross-platform features
+
+2005-09-14 17:30 UTC+0200 Lorenzo Fiorini <lorenzo_fiorini/at/teamwork.it>
+  * samples/a.prg
+    * added MAXIMIZED to ACTIVATE WINDOW
+  * samples/bldgw.bat
+    * added -lcodepage to support codepages
+  * source/menu.prg
+    * added strtran( cItem, "\t", chr(9) ) to easy the tab insert
+
+2005-09-14 11:15 UTC+0200 Lorenzo Fiorini <lorenzo_fiorini/at/teamwork.it>
+  * Makefile
+  + include/Makefile
+    * added install of guilib.ch
+  * include/guilib.ch
+  * source/hwindow.prg
+  * source/window.c
+    * added MAXIMIZED and MINIMIZED to ACTIVATE WINDOW
+     * removed MAXIMIZE from INIT WINDOW
+     * added management to message WM_ENDSESSION
+  * source/Makefile
+    * added missed sources
+  * gtk/samples/bldgw.bat
+  * samples/bldgw.bat
+    * fixed for latest xHarbour
+  * gtk/control.c
+  * gtk/errorsys.prg
+    * fixed warnigns
+
+2005-09-14 13:08 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  + gtk/htab.prg
+    + It seems that I didn't add it at 2005-09-07 09:10
+  * gtk/makefile
+    * Changed due to adding htab.prg
+
+2005-09-13 15:05 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source/control.c
+  * source/dialog.c
+  * source/nice.c
+  * source/richedit.c
+  * source/windows.c
+  * source/xml/xmlparse.c
+  * source/hmonthc.prg
+    * #ifdef HARBOUR_CVS_VERSION is replaced with #ifndef HARBOUR_OLD_VERSION
+      to eliminate using of outdated HARBOUR_CVS_VERSION
+  * Makefile
+  * make_b32.bat
+  * make_vc.bat
+    - removed setting of HARBOUR_CVS_VERSION environment variable.
+    Now you need to set the HARBOUR_OLD_VERSION if you use HwGUI with an old
+    ( before the autumn 2004 ) [x]Harbour version.
+
+2005-09-13 09:30 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/control.c
+    * Multiline edit controls has been implemented
+  * gtk/errorsys.prg
+    * ErrorPreview() function now works as in Windows version
+  * source/htree.prg
+    ! Small fix
+  * source/hfrmtmpl.prg
+  * utils/designer/editor.prg
+    ! Small fixes, provided by Alexey Myronenko
+
+2005-09-12 14:40 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/hedit.prg
+    ! Small fix
+  * gtk/samples/dbview.prg
+    * Possibility to modify structure has been added.
+
+2005-09-12 10:00 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/hdialog.prg
+  * gtk/hwindow.prg
+    ! Small fix
+
+2005-09-11 21:20 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/hbrowse.prg
+  * gtk/hcwindow.prg
+    ! Some fixes and enhancements
+  * gtk/hdialog.prg
+  * gtk/hwindow.prg
+    * Windows and dialogs now can be centered, maximized, minimized as in
+      Win32 version.
+  * gtk/window.c
+    * New functions added: Hwg_WindowMaximize(), Hwg_WindowRestore(), Hwg_WindowMinimize()
+    ! Some fixes
+  * gtk/samples/dbview.prg
+    * Some enhancements
+
+2005-09-09 08:30 UTC+0200 Lorenzo Fiorini <lorenzo_fiorini/at/teamwork.it>
+  * gtk/Makefile
+  * gtk/Makefile.contrib
+  * gtk/build.sh
+    * Makefile renamed to Makefile.linux and Makefile.contrib renamed Makefile
+  * gtk/commond.c
+  * gtk/control.c
+  * gtk/menu_c.c
+  * gtk/window.c
+  * source/freeimg.c
+  * source/message.c
+  * source/nice.c
+  * source/window.c
+  * source/xml/xmlparse.c
+  * source/procmisc/arr2str.c
+    * fixed warnings for mingw32
+  * gtk/wprint.c
+    * added #ifndef __MINGW32__
+  * gtk/hbrowse.prg
+  * gtk/hdialog.prg
+  * gtk/menu.prg
+    * fixed warnings for -W
+
+2005-09-08 16:40 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/commond.c
+    ! SelectFile() fixed
+  * gtk/hedit.prg
+    ! Fixed input of national characters
+    * added new class variable - bAnyEvent - to make it possible to catch
+      all edit control events from outside - probably, it may be useful for
+      Windows version, too.
+  * gtk/hbrowse.prg
+    * Edit() method implemented. Now the HBrowse() class seems to be fully
+      functional in Linux GTK version.
+
+2005-09-07 09:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/control.c
+  * gtk/window.c
+    * Changed internal handling of a fixed box.
+    + Added few internal functions for tab control
+  * gtk/drawtext.c
+    * Implemented text alignment and wrapping in DrawText() function
+  * gtk/misc.c
+    - Removed stub function.
+  + gtk/htab.prg
+    + Added implementation of a tab control
+  * gtk/makefile
+  * gtk/makefile.contrib
+    * Changed due to adding htab.prg
+
+2005-09-06 20:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source/hwindow.prg
+    ! Minor fix
+  * source/shellapi.c
+    + New function added - ShellModifyIcon( hWnd, hIcon, cTooltip ),
+      provided by Alex Strickland
+
+2005-09-05 17:00 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/hbrowse.prg
+    ! Some fixes for the right/left movement
+
+2005-09-05 15:00 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/control.c
+    ! Some fixes in hwg_MoveWidget() function.
+
+2005-09-05 14:12 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/samples/build.sh
+    * codepage library added to the list
+  + gtk/samples/dbview.prg
+    + added new sample - dbf browse
+
+2005-09-05 09:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * gtk/control.c
+  * gtk/gtkmain.prg
+  * gtk/hbrowse.prg
+    * HBrowse() significantly improved - scroll bars works now.
+  * gtk/hcontrol.prg
+  * gtk/hdialog.prg
+  * gtk/hwindow.prg
+  * gtk/window.c
+    * Implementation of onSize event added.
+
+2005-09-03 20:00 UTC-0300 Luiz Rafael Culik <culikr at brturbo.com.br>
+  * source/commond.c
+    source/wprint.c
+    source/prnalone.c
+    source/misc.c
+     ! optimized some functions for xharbour (using xharbour api)
+
+2005-09-03 16:35 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * utils/designer/resource/widgets.xml
+    ! Small.fix
+
+2005-08-31 15:15 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  + source/xml/xmlparse.c
+    * Added support for &#nn items
+
+2005-08-29 13:35 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  + gtk/wprint.c
+  + gtk/hprinter.prg
+  + gtk/hwinprn.prg
+    + Printing subsystem, based on libgnomeprint library and compatible with
+      the Windows version, added.
+  * gtk/hbrowse.prg
+    ! Small fixes
+  * gtk/gtkmain.prg
+    ! Some fixes. Wchoice() function works now.
+  * gtk/menu.prg
+  * gtk/menu_c.c
+    * Added support for menu check items
+  * gtk/hcheck.prg
+    ! Small fixes
+
+2005-08-29 13:05 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  + source/hwinprn.prg
+    + New class added - HWinPrn. It intended for printing old DOS reports to
+      any available printer in graphical mode, as some 3-rd party utilities
+      ( winprn, dosprn, ... ) do. This solves the problems with USB printers,
+      Winprinters. The program converts characters from OEM to ANSI, pseudo-
+      graphic symbols - to a line drawing and understands some most usable
+      EPSON printers codes. It works identically in Windows and Linux GTK
+      versions ( the GTK version will be added a bit later ).
+  * source/Makefile
+  * makedll.bc
+  * makefile.bc
+  * makefile.gcc
+  * makefile.pc
+  * makefile.vc
+  * makefile.wc
+    * Makefiles updated due to hwinprn.prg adding
+  * samples/testchild.prg
+    ! Bugs fixed
+  + samples/winprn.prg
+    + HWinPrn class sample added.
+
+2005-08-29 12:33 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source/window.c
+  * source/hwindow.prg
+  * include/guilib.ch
+    * Some changes in Child windows handling, provided by Alex Strickland
+  * source/errorsys.prg
+    * ES_READONLY added to the error dialog edit box styles, as suggested by Alex Strickland
+  * source/hprinter.prg
+    * Name of the printer added to the default preview dialog title
+  * source/drawwidg.prg
+    * Minor changes
+
+2005-07-19 17:05 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * include/guilib.ch
+    + Command added MENUITEMCHECK to make using of check menu items more
+      convenient and to provide better compatibility with gtk version
+    * Changed ADD STATUS command as was suggested by Alex Strickland
+  * include/windows.ch
+    + added #define CW_USEDEFAULT
   * source/menu.prg
   * source/menu_c.c
-    ! Small fix
-    * New function has been added: SetMenuCaption( hMenu, nMenuId, cCaption ),
-      which allows to change the menu item caption.
-      hMenu is a handle of the submenu where that menu item is, it can be
-      found using the Hwg_GetSubMenuHandle( aMenu,nMenuId )
-
-2004-03-23 12-45 UTC-0300 Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-  * hdialog.prg
-    * DlgHelp, use the helpid of window parent if not found in control
-  * hwindow.prg
-    * Add HelpId parameter to HWindow:new()
-  * include/guilib.ch
-    + Changed init window and init dialog to handle helpid
-  * samples/helpdemo.prg
-    * Changed to show how to use help when set the property helpid on Init Dialog
-  * doc/hwgdoc.htm
-    * Change documentation about help on INIT WINDOW and INIT DIALOG
-    
-2004-03-23 10-30 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  + source/hsplash.prg
-    New class for Splash
-  * include/guilib.ch
-    New command
-            SPLASH [<osplash> TO]  <oBitmap> ;
-            [<res: FROM RESOURCE>]         ;
-            [ TIME <otime> ]               
-  * makefile.bc
-    Update new dependencie
-  + samples/tstsplash.prg
-  + samples/hwgui.bmp
-    Demo HSplash
-
-2004-03-23 13:55 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * source/dialog.c
-    * some tricks added to force it work properly with Mingw compiler.
-  * source/xml/xmlparse.c
-    * Small changes.
-
-2004-03-22 18-30 UTC-0300 Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-  * hdialog.prg
-    + Add DlgHelp event handler for help
-  * hwindow.prg
-    + Add HelpId property
-    * Changed HWindow:New() to set the Help File Name
-  * guimain.prg
-    + Add New Function SetHelpFileName() to handle help filename
-  * include/guilib.ch
-    + Changed init window, add suport for Help Filename
-  * include/windows.ch
-    + add WM_HELP definition
-  * misc.c
-    + Gethelpdata()
-    + WinHelp()
-  + samples/helpdemo.prg
-  + samples/helpdemo.cnt
-  + samples/helpdemo.hlp
-  * doc/funclist.txt
-    
-2004-03-22 13:05 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * include/guilib.ch
-    + New command has been added to define accelerators independently of
-      menu items:
-
-         #xcommand ACCELERATOR <flag>, <key>       ;
-                     [ ID <nId> ]                  ;
-                     ACTION <act>
-      This command may be used inside MENU OF ... ENDMENU only.
-
-  * source/hbrowse.prg
-    + oFont variable is added to the HColumn class, it is possible now to have
-      different fonts for columns in browse.
-
-  * source/menu.prg
-    * Support of ACCELERATOR command is added
-
-  * source/misc.c
-    + ActivateKeyboardLayout( cLayout ) function has been added. It is intended
-      to switch the keyboard between English and national layouts, which are set
-      in the system ( cLayout = "00000409" for English, "00000419" for Russian ).
-
-2004-03-19 19:30 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * source/richedit.c
-    ! fix GPF on RE_SETDEFAULT function
-
-2004-03-19 10-04 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * samples/testini.prg
-    * Sample to use ini file
-
-2004-03-18 13-22 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * samples/hwreport/hwreport.prg
-    * Bug fix, line 47
-
-2004-03-18 14:40 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  + include/hxml.ch
-    + xml library header file
-
-2004-03-18 14:30 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  + source/xml/
-  + source/xml/hxmldoc.prg
-  + source/xml/xmlparse.c
-  + source/xml/xmlparse.c
-  + source/xml/Makefile
-    + XML support library has been added.
-  * makefile.bc
-  * makefile.vc
-  * Makefile
-    * Makefiles has been updated.
-
-2004-03-18 12:35 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * source/hedit.prg
-  * source/richtext.prg
-  * samples/testrtf.prg
-    ! Some fixes.
-
-2004-03-18 10:30 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * source/hprinter.prg
-    * New variables has been added to HPrinter class: nWidth, nHeight -
-      the size of a printer device in pixels, they are initialized
-      in HPrinter():New() method.
-
-2004-03-17 11-50 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * samples/hwreport/propert.prg
-    * Bug fix, remove de coment in line 147 and 155
-
-2004-03-17 14:05 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * Makefile
-  * source/Makefile
-  * samples/bldgw.bat
-    * files for building HwGUI with Mingw compiler, provided by Lorenzo Fiorini
-  * source/control.c
-  * source/hdatepic.prg
-    ! Fix, provided by Marcos Antonio Gambeta
-  * samples/demoHList.prg
-    ! small fix
-
-2004-03-16 16-11 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * source/guimain.prg
-    new functions Hwg_getini and Hwg_writeini
-  * source/commond.c   
-    new functions Getprivateprofilestring and writeprivateprofilestring
-
-2004-03-16 21:45 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
   * source/hdialog.prg
-    * New method is added to HDialog class : GetActive(), it returns the
-      currently active GET item object. This method may be useful, for example,
-      in function, defined in SET KEY ... TO ... statement to define an
-      action for a certain GET item.
-
-2004-03-16 19:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
   * source/hwindow.prg
-    ! small fix in ReleaseAllWindows()
+    * Changes, related to check menu items
+  * source/hradio.prg
+    + added GetValue() method
+  * source/hcheck.prg
+    + added GetValue() and SetValue() methods
 
-2004-03-16 11-10 UTC-0300 Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-  * make_b32.bat
-    * create obj and lib dirs if doesnt exists
-
-2004-03-16 10-30 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * make_B32.bat
-  * makefile.bc
-      updated to include new dependencies
-  * samples/demodbf.prg
-    * New samples for using command NOEXIT, and navigation for Tab DBF
-
-2004-03-16 09-15 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * samples/hwedit/bld.bat
-    * for build hwedit sample
-    * The sample in project.            
-
-2004-03-16 15:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * include/guilib.h
-  * source/control.c
-  * source/media_c.c
-  * source/resource.c
-  * source/window.c
-    * Few warnings fixed, duplicated functions deleted from control.c ( they
-      was in misc.c, too )
-
-2004-03-16 14:00 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  * source/hwindow.prg
-    * The ReleaseAllWindows() fixed and uncommented - it seems to be really
-      needed if child windows are used.
-
-2004-03-15 21:55 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-  - include/commctrl.ch
-  - source/_winmsg.c
-    - removed
-  * include/guilib.h
-  * include/guilib.ch
-  * include/window.ch
-  * source/commond.c
-  * source/control.c
-  * source/guimain.prg
+2005-07-13 20:10 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
   * source/hbrowse.prg
-  * source/hdatepic.prg
-  * source/hipedit.prg
-  * source/hmonthc.prg
-  * source/htab.prg
-  * source/htree.prg
-  * source/hupdown.prg
-  * source/hwindow.prg
-  * source/media_c.c
-  * source/menu.prg
-  * source/misc.c
-  * source/richedit.c
-  * source/wbrowse.c
-  * source/window.c
-    * some cleanup, warnings and errors are fixed.
-
-2004-03-11 09-40 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * doc/printdos.txt
-    * Doc for use the class PrintDos            
-
-2004-03-10 09-20 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * source/hedit.prg
-    * Bug fixed in line 526 Argument Error LEFT.
-
-2004-03-10 08-30 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * source/hwindow.prg
-    * Add new method Restore()
-
-2004-03-08 16-20 UTC-0300 Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-  * source/hcombo.prg
-     Changed method Refresh()
-  * source/hdatepic.prg
-  * source/hcheck.prg
-    * Add new method Refresh()
-  
-2004-03-08 08-40 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  + samples\hwedit\editor.prg
-  + samples\hwedit\hbtemp.c
-  + samples\hwedit\editor.rc
-  + samples\hwedit\editor.ico
-  + samples\hwedit\child.ico
-  + samples\hwedit\richedit.h
-  + samples\hwedit\ft_funcs.prg
-  + samples\hwedit\fclass1.prg
-  + samples\hwedit\ffile1.prg
-  + samples\hwedit\hbdocdef.ch
-  + samples\hwedit\ssay.ch
-  + samples\hwedit\config.dat
-  + samples\hwedit\changelog.txt
-  + samples\hwedit\pesqtxt.prg
-  + samples\hwedit\editor.bc
-      The editor of font using HwGUI
-    All provided by  Rodnei Hernandes Lino <lhr@enetec.com.br> 
-
-2004-03-07 17-50 UTC-0300 Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-  * source/hedit.prg
-    * changed focus, now enter/tab stop on all controls, and skip if control is disabled
-  * source/hcheck.prg
-  * source/hcombo.prg
-  * source/hdatepic.prg
-    * eval on bsetget, send oCtrl on evaluation, implemented on above control
-
-2004-03-03 09-20 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  + source\hlistbox.prg
-  + source\listbox.c
-    The class for use HListBox
-  + samples\demohlist.prg
-    The sample for use hlistbox class
-  * include\guilib.ch
-    new comands @ <x>, <y> LISTBOX and  REDEFINE LISTBOX
-  * include\guilib.h
-  * makefile.bc
-      updated to include new dependencies
-    All provided by  Vitor Mclung 
- 
-2004-03-01 11-47 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * errorsys.prg
-    it presents the error in the screen with xHarbour
-
-2004-02-26 16-20 UTC-0300 Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  * makefile.bc
-      updated to include new dependencies
-
-2004-02-25 09-20 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * Merged all changes while hwgui was on xharbour cvs per entries bellow
-
-2004-02-20 07:00 UTC+0700 Andi Jahja <xharbour@cbn.net.id>
-  * source/procmisc/blowfish.c
-    * casting for MSVC
-
-2004-02-20 05:30 UTC+0700 Andi Jahja <xharbour@cbn.net.id>
-  * source/printdos.prg
-  * source/htree.prg
-  * source/htab.prg
-  * source/hdatepic.prg
-  * source/hupdown.prg
-  * source/control.c
-    * fix compiler warnings on defines
-   
-  * source/shellapi.c
-    * define BIF_USENEWUI if not defined
-    * define BIF_NEWDIALOGSTYLE if not defined
-
-  * source/window.c
-  * source/draw.c
-  * source/media_c.c
-    * casting for MSVC
-
-2004-02-19 09:00 UTC-0300 Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-  * source/hcombo.prg
-    ! Add new method, refresh(), setitem()
-
-2004-02-20 16:00 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  + ADD files QHTM
-    + source/qhtm/qhtm.h
-  + source/richtext.prg Autor Tom Marchiori
-  + samples/testrtf.prg
-  + include/richtext.ch
-  * makefile.bc
-      updated to include new dependencies
-    All provided by  Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-  
-2004-02-18 08:40 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  + source/hmonthc.prg
-    !New class HMonthCalendar
-     Method New, Say, Activate, Init, SetValue, GetValue
-  * include/guilib.ch
-    !new commands
-    #xcommand @ <x>,<y> MONTHCALENDAR [ <oMonthCalendar> ] ;
-            [ OF <oWnd> ]                              ;
-            [ ID <nId> ]                               ;
-            [ SIZE <nWidth>,<nHeight> ]                ;
-            [ INIT <dInit> ]                           ;
-            [ ON INIT <bInit> ]                        ;
-            [ ON CHANGE <bChange> ]                    ;
-            [ STYLE <nStyle> ]                         ;
-            [ FONT <oFont> ]                           ;
-            [ TOOLTIP <cTooltip> ]                     ;
-            [ < notoday : NOTODAY > ]                  ;
-            [ < notodaycircle : NOTODAYCIRCLE > ]      ;
-            [ < weeknumbers : WEEKNUMBERS > ]          ;
-  * samples/testHMonth.prg
-    !The samples for use the new Class HMonthCalendar
-    All provided by Marcos Antonio Gambeta <marcos_gambeta@hotmail.com>
-
-2004-02-16 15:00 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * include/guilib.ch
-    !new clauses to browse command
-       APPEND
-       AUTOEDIT
-       UPDATE
-       KEYDOWN
-       POSCHANGE
-     !new clauses to add column command
-       JUSTIFY HEAD
-       JUSTIFY LINE
-       PICTURE
-       VALID
-       WHEN
-       ITEMS
-       BITMAP
-  + samples/browse_1.prg
-    test files to new clauses to browse
-    All provided by  Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-
-2004-02-16 08:50 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  + source/printdos.prg
-    !New class PrintDos
-     Method New, Say, Eject, SetPrc, Preview, PrintFile
-    !New functions
-     wProw(<>), wPcol(<>), wSetPrc(x,y,<>)
-  * include/guilib.ch
-    !new commands
-     SET PRINTER TO <> OF <>
-     @ x, y PSAY <> PICTURE <> OF <>
-     EJECT OF <>
-     END PRINTER <>
-  * samples/tstprdos.prg
-    !The samples for use the new Class PrintDos
-    All provided by  Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-
-2004-02-08 10:10 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  + samples/test1.prg
-    Test File to show how new functions works
-    All provided by  Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-
-2004-02-07 13:30 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * source/hcontrol.prg
-    !new method SetFocus
-    All provided by  Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-
-2004-02-07 12:30 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * source/message.c
-    !new function MsgBoxExclamation       
-    !new function MsgBoxRetry    
-  * source/misc.c
-    !new function Getwindowsdir 
-    !new function Getsystemdir 
-    !new function Gettempdir 
-    !new function Shellabout 
-    !new function Getdesktopwidth
-    !new function Getdesktopheight    
-  * source/hcontrol.prg
-    !new method Disable
-    !new method Enable
-    !new method IsEnabled
-  * source/hwindow.prg
-    !new method Close
-  * source/hdialog.prg
-    !new method Close
-    All provided by  Rodrigo Moreno <rodrigo_moreno@yahoo.com>
-
-2004-02-06 09:34 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * source/commond.c
-    !new function GetSerialNumber       
-    !new function HDGetSerial     
-  * source/guimain.prg
-    !new function HDSerial(Drive)      
-  * samples/textget2.prg
-    !Demo for using HdSerial function
-    Using HDSerial("C:\") Return de number of serie HD     
- 
-2004-02-05 14:00 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * source/control.c
-    !new function Gettooltiphandle      
-    !new function SettooltipBallon
-     .T. ballon is true   .t. ballon is false
-  * samples/textget2.prg
-    !Demo for using Tooltip in format Ballon
-    All provided by  Marcos A. Gamgeta MAG <marcosgambeta@uol.com.br>
-
-
-2004-01-26 11:30 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * source/hwindow.prg
-    !minor fix
-    New class Maximize()
-    New class Minimize()
-  * source/window.C
-    !new function Hwg_ActiveMainWMaxim  
-    !new function Hwg_ActiveMDIWMaxim  
-  * include/guilib.ch
-    New command MAXIMIZE in INIT WINDOW
-  * samples/demomaximize.prg
-    All provided by  Sandro R. R. Freire <sandrorrfreire@yahoo.com.br>
-
-
-2003-12-30 00:00 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  * source/hwindow.prg
-    !minor fix
-  * include/guilib.h
-    include/guilib.ch
-    minor update
-    All provided by  Jos‚ Algusto Junior
-
-2003-12-29 18:20 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-  + source/c_ipaddr.c
-    source/_winmsg.c
-     New function to get ip. Provided by Jos‚ Augusto Junior
-  * source/hwindow.prg
-    Changes: Modified the the DefXXXWndProc ( hWindow.prg ) and  MainWndProc  (window.c) 
-       The unprocessed messages of the windows return 0, not -1
-   + source/HIpEdit.prg
-     * Ip classe
-   * include/guimain.ch
-      New Command @ x,y GET IPADDRESS <oIP> VAR <vari>
-|  * makefile.bc
-      updated to include new dependencies
-
-
- 
-     
-2003-12-01 11:00 UTC-0300 Luiz Rafael Culik <culikr@brturbo.com>
-   * makefile.bc
-     makefile.gcc
-     makefile.vc
-     ! added new files dependencies
-   * include/guilib.ch
-     + Set Resource command 
-   * include/windows.ch
-     + defined to video
-   + source/resource.c
-     ! function to use resource dll and strings inside resource (in .exe or .dll)
-   + source/tcmi.prg
-     source/video.prg
-     + Video and mci controls to hwgui
-   * source/dialog.c
-     ! enhaced to use dialogs, or from resource dll or from exes
-
-2003-11-30 20:40 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-   * source/hbrowse.prg
-     * Many additions, implemented by Pavel Tsarenko:
-       MouseWheel support;
-       DATA cGrid, lSpandHead, lSpandFoot has been added to HColumn class,
-       DATA lAdjRight, nHeadRows, nFootRows and METHOD FooterOut( hDC ) has 
-       been added to HBrowse class for multiline headers and footers support.
-     ! ButtonDown() fixed for ::freeze>0.        
-
-2003-11-15 11:35 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-   * source/hedit.prg
-     ! small fixes ( ::lCtrl calls removed )
-     * Small fix for double byte strings support, suggested by NightWalker
-
-2003-11-14 10:40 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
-   * include/guilib.ch
-   * include/windows.ch
-   * samples/testget2.prg
-
-   * source/dialog.c
-   * source/hbrowse.prg
-   * source/hdatepic.prg
-   * source/hdialog.prg
-   * source/hedit.prg
-   * source/htab.prg
-   * source/hwindow.prg
-   * source/message.c
-   * source/window.c
-   * source/Makefile
-   + source/misc.c
-     * Committed changes, included in the patch (29.10.2003)
+    ! Bug fixed in HBrowse():End() method.
+  + ChangeLog
+    + Started a new ChangeLog.
+  * ChangeLog.001
+    * Renamed old ChangeLog, due to the file size.

@@ -1,4 +1,6 @@
 /*
+ * $Id: tmci.prg,v 1.3 2004-09-29 05:24:52 alkresin Exp $
+ *
  * HWGUI - Harbour Win32 GUI library source code:
  * Windows errorsys replacement
  *
@@ -7,7 +9,7 @@
 */
 
 
-#include "HBClass.ch"
+#include "hbclass.ch"
 #include "windows.ch"
 #include "guilib.ch"
 #include "common.ch"
