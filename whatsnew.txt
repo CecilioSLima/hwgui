@@ -3,11 +3,224 @@
                        What's new in the last version
                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[!] Important
-[+] New
-[-] Fixed error
-[*] Changes
+HWGUI 2.22 build 4 ( 26.04.2019 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[!] Fixes.
 
+HWGUI 2.22 build 3 ( 26.02.2019 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] Added fourth parameter to hwg_SelectFileEx() - logical bMulti, which allows multiply files selection
+[*] hwg_Version(4) now returns 0 for winapi version and 1 for gtk.
+[*] Few Debugger and Designer enhancements.
+[!] Fixes, corrections.
+
+HWGUI 2.22 build 2 ( 23.12.2018 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] Designer: splitter, top panel, status panel, static link controls added.
+    Grid implemented.
+[*] GTK3 support mostly implemented.
+[!] Fixes, corrections.
+
+HWGUI 2.22 build 1 ( 13.12.2018 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[+] HGraph: :aColors, :aPens added to draw graphs with different colors.
+[+] hwg_SaveBitmap( cFileName, hBitmap ) function added.
+[+] New class added, HPanelHea, and appropiate command ADD HEADER PANEL as a
+    customizable alternative for a window title bar.
+[+] HPanel: new variable added :lDragWin. If .t., dragging the panel you move the window.
+[+] New cross-platform window styles added: WND_NOTITLE, WND_NOSYSMENU, WND_NOSIZEBOX.
+[+] HSTYLE clause added to the @ ... SPLITTER command.
+[+] :lResizable logical variable added to HColumn.
+[+] :oStyleFoot, :oStyleCell added to HBrowse and HColumn.
+[*] :FindControl() can now look for an :objname, passed as a first parameter.
+[*] HBrowse: if you set the negative column length, it is interpreted as a width in pixels.
+[*] Designer: added support for Anchor, HStyle, AStyles.
+[!] Fixes, corrections, Gtk/Winapi versions compatibility improvements.
+
+HWGUI 2.21 build 6 ( 15.11.2018 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] HIcon():AddFile() automatically adds file extension (ico or png) if it isn't defined.
+[*] Added support of the icon in a main window for Designer's forms.
+[!] Fixes, corrections.
+
+HWGUI 2.21 build 5 ( 02.11.2018 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] Now you may define a negative size value of a window or dialog, this mean that
+    absolute value of the size is the size of client area, not a whole window rectangle.
+[+] ON CLICK, ON DBLCLICK clauses added to @...BITMAP and @...ICON commands.
+[*] compatibility of gtk and winapi versions improved.
+[!] Few important fixes.
+
+HWGUI 2.21 build 4 ( 19.10.2018 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] XML parsing procedure catch more errors and doesn't hang on them now.
+[*] HTree, HTreeNode: bAction is renamed to bClick.
+[+] nBorder variable added to HSayBmp class to draw the border, if needed.
+[+] cFormName variable added to the HRepTmpl class to keep the path and name
+[!] Few bugs and compile time warnings fixed.
+
+HWGUI 2.21 build 3 ( 05.09.2018 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] HSTYLES clause added to OWNERBUTTON command instead of STYLE
+[*] :objname class variable moved to HObject class
+[!] Few bugs fixed.
+
+HWGUI 2.21 build 1 ( 31.08.2018 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] HSTYLE clause added to @ ... PANEL and ADD TOP PANEL commands
+[*] GTK version: improved compatibility with winapi version.
+[!] Bug fixes, cleanup and improvements
+
+HWGUI 2.20 build 3 ( 17.09.2016 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] Documentation files synhronized with actual state.
+[!] Few bugs fixed.
+
+HWGUI 2.20 build 2 ( 12.09.2016 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is a bug fix release
+[*] Styles added to the Tutorial and Dbc to make them a bit more nice.
+[*] Hwreport moved from utils/ to contrib/ directory.
+[!] Few bugs fixed
+
+HWGUI 2.20 build 1 ( 09.09.2016 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[+] HBitmap():AddStandard( cId ) method added for GTK version. Now it is possible to use
+    stock icons in GTK version as predefined bitmaps in WinAPI.
+[+] :nRowHeight variable added to HBrowse to set row height.
+[+] :aPaintCB variable and SetPaintCB( nId, block, cId ) method added to
+    HPanel to support user defined codeblocks for painting.
+[+] :aPaintCB variable and SetPaintCB( nId, block, cId ) method added to
+    HColumn to support user defined codeblocks for painting browse items
+    ( header, lines, footers )
+[*] Color in Focus handling has been changed for HEdit.
+[*] Double buffering implemented for HBrowse in Windows version, logical :lBuffering
+    variable ( default value is .F. ) added to HBrowse to handle buffering.
+[*] HBrowse cleaned, a part of a code, related to filtering, moved to
+    a new HBrwFlt class, New command added for this class: @ ... BROWSE ... FILTER.
+[*] Changed a list of parameters, passed to some codeblocks for unification.
+[*] ON DRAW changed to ON PAINT for OWNERBUTTON and SHADEBUTTON
+[-] ON PAINT clause deleted from EDITBOX and RICHEDIT commands.
+[-] hwg_ParentGetDialog() removed, hwg_getParentForm() should be used instead.
+[+] :oStyleHead variable added to HBrowse and HColumn classes: It is possible
+    now to have styled browse headers.
+[+] :Draw( hDC, nWidth, nHeight ) method added to HStyle to draw styled control.
+[+] New class added HPanelSts, inherited from HPanel to implement STATUS PANEL.
+[+] Two commands added: ADD TOP PANEL, ADD STATUS PANEL.
+[+] BACKCOLOR added as preferrable alternative for COLOR clause in INIT WINDOW,
+    INIT DIALOG commands.
+[*] Tutorial extended with new chapters and modules.
+[!] Many bug fixes and improvements
+
+
+HWGUI 2.19 build 6 ( 01.02.2016 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    This is a bug fix release - The Designer was partially broken, because
+    of some changes in release 5 core code.
+[*] Small Designer improvements
+[!] Bug fixes.
+
+HWGUI 2.19 build 5 ( 21.01.2016 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] Rich syntax text editor extended ( access control to paragraphs and spans,
+    copy/paste the text with formatting info, search, etc. )
+[*] COLOR clause added to the @ ... BITMAP command to set the transparency color
+[*] ONCE clause added to SET TIMER function - use it when you need to
+    run the timer procedure one time only
+[*] HWonButton: new variable added - :aRadius - an array ( empty by default ) of 4
+    values - radiuses of corners, if you need rounded button.
+[*] hwg_DrawGradient(): added support for rounded corners and other types of
+    gragient ( diagonal, radial )
+[!] Many bug fixes and improvements
+
+HWGUI 2.19 build 4 ( 25.06.2015 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] Rich syntax text editor significantly extended
+[*] New modules added to the tutorial
+[+] HStyle class added, :aStyle variable added to HOwnButton class to draw
+    3-state gradient buttons
+[*] HSplitter class enhanced
+[+] hwg_getFontsList() function added
+[+] hwg_ColorN2C() and hwg_ColorN2RGB() functions added
+[*] hwg_VColor() renamed to hwg_ColorC2N(), hwg_RGB() - to hwg_ColorRGB2N(),
+[+] hwg_drawGradient() function added for both gtk and winapi versions
+[!] Some bug fixes and many improvements
+
+
+HWGUI 2.19 build 3 ( 08.05.2015 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[+] Rich syntax text editor has been added to utils
+[*] Improved compatibility with 2.17 version.
+[!] Some bug fixes and improvements
+
+HWGUI 2.19 build 2 ( 27.01.2015 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] :Enabled() SETGET method is introduced for all controls (HControl class),
+    :isEnabled() has been removed.
+[*] :GetValue(), :SetValue() methods was removed and new :Value SETGET method is
+    introduced instead for those controls, which may input from the user.
+[*] Improved compatibility with 2.17 version.
+[!] Some bug fixes
+
+HWGUI 2.19 ( 20.12.2014 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] Real Unicode (utf-8) support.
+[*] Binary containers added as a crossplatform alternative for resources ( rc files ).
+[*] A virtual printer ".buffer" added. It allows to create a print
+    metafile and preview it if no one printer is installed
+[*] Many improvements in utils ( dbc, debugger, designer, tutorial ).
+[*] GTK version: significantly extended, improved compatibility with winapi version.
+[*] Improved compatibility with 2.17 version.
+[!] Some bug fixes, as usual
+
+
+HWGUI 2.18 build 2 ( 03.04.2014 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[+] The debugger: array inspector, object inspector, commands support
+    has been added.
+[+] Duplex printing support added.
+[*] The editor and the tutorial are gtk compatible now
+[*] Processing of hot keys is implemented via hook procedures in both
+    winapi and gtk versions and works for any control now.
+    SET KEY GLOBAL command added.
+[*] Combobox control can accept now multidimensional arrays.
+[*] Improved compatibility with 2.17 version.
+[!] Some bug fixes
+
+HWGUI 2.18 ( 19.07.2013 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[*] There was a lot of changes since last release, I can't now make
+    a well structured list of them, maybe, later ...
+    For now, see the Changelog.
+
+HWGUI 2.16 ( 14.09.2006 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[+] Native Win32 Toolbar, extended Grid control (HGridEX) has been added.
+
+[*] GTK's HBrowse, HPanel and HOwnButton synchronized with Win32 version.
+
+[!] Three class variables in HBrowse has been renamed for better readability:
+       kolz  --> nRecords
+       tekzp --> nCurrent
+       msrec --> aArray
+    so you need to make search and replace in your programs to rename them.
+
+[*] Many bug fixes and enhancements in both GTK and Win32 versions - 
+    see Changelog for details.
+
+HWGUI 2.15 ( 07.06.2006 )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[+] Linux GTK version of HwGUI has been implemented. It haven't yet all
+    functionality of the Windows version, but most of the main subsystems
+    ( GET system, browse, printing, ... ) are ready to use.
+
+[+] Some new classes has been added, including HWinPrn.
+    New functions has been added. See Changelog for the details.
+
+[*] Important changes and fixes in core functions.
+
+[!] Many bug fixes and enhancements - see Changelog for details.
 
 HWGUI 2.14 ( 14.12.2004 )
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

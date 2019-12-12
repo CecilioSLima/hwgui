@@ -1,0 +1,13 @@
+#
+# $Id$
+#
+
+..\..\hwgui.hbc
+-n -w
+designer.prg
+hctrl.prg
+hformgen.prg
+inspect.prg
+editor.prg
+
+designer.rc

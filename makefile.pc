@@ -1,4 +1,4 @@
-# $Id: makefile.pc,v 1.12 2005-10-22 13:14:22 lculik Exp $
+# $Id$
 # makefile for Pelles C 32 bits
 # Building of hwgui.lib - Harbour Win32 GUI library
 
@@ -9,8 +9,9 @@ HRB_DIR = $(HB_PATH)
 INCLUDE_DIR = include;$(HRB_DIR)\include
 OBJ_DIR = obj
 LIB_DIR = lib
-SRC_DIR = source
-
+SRC_DIR = source\winapi
+PROCMISC_DIR = source\common\procmisc
+EDITOR_DIR = source\common\editor
 HARBOUR_EXE = HARBOUR
 CC_EXE = $(POCCMAIN)\BIN\POCC.EXE
 LIB_EXE = $(POCCMAIN)\BIN\POLIB.EXE
@@ -30,28 +31,31 @@ DEL = del
 HWGUI_LIB = $(LIB_DIR)\hwgui.lib
 PROCMISC_LIB = $(LIB_DIR)\procmisc.lib
 XML_LIB = $(LIB_DIR)\hbxml.lib
-QHTM_LIB = $(LIB_DIR)\hwg_qhtm.lib
+DEBUG_LIB = $(LIB_DIR)\hwgdebug.lib
 
 all: \
    $(HWGUI_LIB) \
    $(PROCMISC_LIB) \
    $(XML_LIB) \
-   $(QHTM_LIB)
+   $(DEBUG_LIB)
 
 XML_LIB_OBJS = \
    $(OBJ_DIR)\hxmldoc.obj \
    $(OBJ_DIR)\xmlparse.obj
 
-QHTM_LIB_OBJS = \
-   $(OBJ_DIR)\hwg_qhtm.obj \
-   $(OBJ_DIR)\hqhtm.obj
+DEBUG_LIB_OBJS = \
+   $(OBJ_DIR)\dbgdop.obj \
+   $(OBJ_DIR)\dbgconnect.obj \
+   $(OBJ_DIR)\debugger.obj
 
 PROCMISC_LIB_OBJS = \
-   $(OBJ_DIR)\arr2str.obj \
-   $(OBJ_DIR)\blowfish.obj \
    $(OBJ_DIR)\procini.obj \
    $(OBJ_DIR)\procs7.obj \
-   $(OBJ_DIR)\procscri.obj
+   $(OBJ_DIR)\procscri.obj \
+   $(OBJ_DIR)\scrdebug.obj \
+   $(OBJ_DIR)\hcedit.obj \
+   $(OBJ_DIR)\hcedit_w.obj \
+   $(OBJ_DIR)\hilight.obj
 
 HWGUI_LIB_OBJS = \
    $(OBJ_DIR)\hipedit.obj \
@@ -66,15 +70,19 @@ HWGUI_LIB_OBJS = \
    $(OBJ_DIR)\message.obj \
    $(OBJ_DIR)\misc.obj \
    $(OBJ_DIR)\nice.obj \
+   $(OBJ_DIR)\pager.obj \
    $(OBJ_DIR)\registry.obj \
    $(OBJ_DIR)\richedit.obj \
    $(OBJ_DIR)\shellapi.obj  \
    $(OBJ_DIR)\window.obj \
    $(OBJ_DIR)\wprint.obj \
    $(OBJ_DIR)\drawwidg.obj \
-   $(OBJ_DIR)\errorsys.obj \
+   $(OBJ_DIR)\herrsys.obj \
    $(OBJ_DIR)\guimain.obj \
+   $(OBJ_DIR)\barcode.obj \
+   $(OBJ_DIR)\hbincnt.obj \
    $(OBJ_DIR)\hbrowse.obj \
+   $(OBJ_DIR)\hbrwflt.obj \
    $(OBJ_DIR)\hcheck.obj \
    $(OBJ_DIR)\hcombo.obj \
    $(OBJ_DIR)\hcontrol.obj \
@@ -90,6 +98,8 @@ HWGUI_LIB_OBJS = \
    $(OBJ_DIR)\hnice.obj \
    $(OBJ_DIR)\hownbtn.obj \
    $(OBJ_DIR)\hpanel.obj \
+   $(OBJ_DIR)\hrebar.obj \
+   $(OBJ_DIR)\hpager.obj \
    $(OBJ_DIR)\hprinter.obj \
    $(OBJ_DIR)\hprogres.obj \
    $(OBJ_DIR)\hradio.obj \
@@ -97,6 +107,7 @@ HWGUI_LIB_OBJS = \
    $(OBJ_DIR)\hsayimg.obj \
    $(OBJ_DIR)\hsplit.obj \
    $(OBJ_DIR)\htab.obj \
+   $(OBJ_DIR)\htool.obj \
    $(OBJ_DIR)\htimer.obj \
    $(OBJ_DIR)\htree.obj \
    $(OBJ_DIR)\hupdown.obj \
@@ -107,23 +118,18 @@ HWGUI_LIB_OBJS = \
    $(OBJ_DIR)\c_ipaddr.obj \
    $(OBJ_DIR)\listbox.obj \
    $(OBJ_DIR)\resource.obj \
-   $(OBJ_DIR)\repexec.obj \
    $(OBJ_DIR)\printdos.obj \
-   $(OBJ_DIR)\richtext.obj \
    $(OBJ_DIR)\hlistbox.obj \
    $(OBJ_DIR)\hsplash.obj \
    $(OBJ_DIR)\hmonthc.obj \
    $(OBJ_DIR)\hgrid.obj \
    $(OBJ_DIR)\grid.obj  \
    $(OBJ_DIR)\hdc.obj  \
-   $(OBJ_DIR)\hhyper.obj 
+   $(OBJ_DIR)\hhyper.obj
 $(HWGUI_LIB) : $(HWGUI_LIB_OBJS)
    $(LIB_EXE) /out:$@ $**
 
 $(PROCMISC_LIB) : $(PROCMISC_LIB_OBJS)
-   $(LIB_EXE) /out:$@ $**
-
-$(QHTM_LIB) : $(QHTM_LIB_OBJS)
    $(LIB_EXE) /out:$@ $**
 
 $(XML_LIB) : $(XML_LIB_OBJS)
@@ -140,10 +146,10 @@ $(OBJ_DIR)\drawwidg.c : $(SRC_DIR)\drawwidg.prg
 $(OBJ_DIR)\drawwidg.obj : $(OBJ_DIR)\drawwidg.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
-$(OBJ_DIR)\errorsys.c : $(SRC_DIR)\errorsys.prg
+$(OBJ_DIR)\herrsys.c : $(SRC_DIR)\herrsys.prg
    $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
 
-$(OBJ_DIR)\errorsys.obj : $(OBJ_DIR)\errorsys.c
+$(OBJ_DIR)\herrsys.obj : $(OBJ_DIR)\herrsys.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
 $(OBJ_DIR)\guimain.c : $(SRC_DIR)\guimain.prg
@@ -152,10 +158,22 @@ $(OBJ_DIR)\guimain.c : $(SRC_DIR)\guimain.prg
 $(OBJ_DIR)\guimain.obj : $(OBJ_DIR)\guimain.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
+$(OBJ_DIR)\hbincnt.c : $(SRC_DIR)\hbincnt.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\hbincnt.obj : $(OBJ_DIR)\hbincnt.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
 $(OBJ_DIR)\hbrowse.c : $(SRC_DIR)\hbrowse.prg
    $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
 
 $(OBJ_DIR)\hbrowse.obj : $(OBJ_DIR)\hbrowse.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+$(OBJ_DIR)\hbrwflt.c : $(SRC_DIR)\hbrwflt.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\hbrwflt.obj : $(OBJ_DIR)\hbrwflt.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
 $(OBJ_DIR)\hcheck.c : $(SRC_DIR)\hcheck.prg
@@ -290,6 +308,18 @@ $(OBJ_DIR)\hpanel.c : $(SRC_DIR)\hpanel.prg
 $(OBJ_DIR)\hpanel.obj : $(OBJ_DIR)\hpanel.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
+$(OBJ_DIR)\hpager.c : $(SRC_DIR)\hpager.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\hpager.obj : $(OBJ_DIR)\hpager.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+$(OBJ_DIR)\hrebar.c : $(SRC_DIR)\hrebar.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\hrebar.obj : $(OBJ_DIR)\hrebar.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
 $(OBJ_DIR)\htrackbr.obj : $(OBJ_DIR)\htrackbr.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
@@ -341,6 +371,12 @@ $(OBJ_DIR)\htab.c : $(SRC_DIR)\htab.prg
 $(OBJ_DIR)\htab.obj : $(OBJ_DIR)\htab.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
+$(OBJ_DIR)\htool.c : $(SRC_DIR)\htool.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\htool.obj : $(OBJ_DIR)\htool.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
 $(OBJ_DIR)\htimer.c : $(SRC_DIR)\htimer.prg
    $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
 
@@ -386,18 +422,6 @@ $(OBJ_DIR)\printdos.c : $(SRC_DIR)\printdos.prg
 $(OBJ_DIR)\printdos.obj : $(OBJ_DIR)\printdos.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
-$(OBJ_DIR)\repexec.c : $(SRC_DIR)\repexec.prg
-   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
-
-$(OBJ_DIR)\repexec.obj : $(OBJ_DIR)\repexec.c
-   $(CC_EXE) $(CFLAGS) /Fo$@ $**
-
-$(OBJ_DIR)\richtext.c : $(SRC_DIR)\richtext.prg
-   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
-
-$(OBJ_DIR)\richtext.obj : $(OBJ_DIR)\richtext.c
-   $(CC_EXE) $(CFLAGS) /Fo$@ $**
-
 $(OBJ_DIR)\tmci.c : $(SRC_DIR)\tmci.prg
    $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
 
@@ -417,6 +441,9 @@ $(OBJ_DIR)\c_ipaddr.obj : $(SRC_DIR)\c_ipaddr.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
 $(OBJ_DIR)\nice.obj : $(SRC_DIR)\nice.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+$(OBJ_DIR)\pager.obj : $(SRC_DIR)\pager.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
 $(OBJ_DIR)\commond.obj : $(SRC_DIR)\commond.c
@@ -479,48 +506,42 @@ $(OBJ_DIR)\hhyper.c : $(SRC_DIR)\hhyper.prg
 $(OBJ_DIR)\hhyper.obj : $(OBJ_DIR)\hhyper.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
-
-# ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-# ³ QHTM.LIB Dependencies  ³Û
-# ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÛ
-#  ßßßßßßßßßßßßßßßßßßßßßßßßßß
-
-$(OBJ_DIR)\hqhtm.c : $(SRC_DIR)\qhtm\hqhtm.prg
-   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
-
-$(OBJ_DIR)\hqhtm.obj : $(OBJ_DIR)\hqhtm.c
-   $(CC_EXE) $(CFLAGS) /Fo$@ $**
-
-$(OBJ_DIR)\hwg_qhtm.obj : $(SRC_DIR)\qhtm\hwg_qhtm.c
-   $(CC_EXE) $(CFLAGS) /Fo$@ $**
-
 # ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # ³ PROCMISC.LIB Dependencies ³Û
 # ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÛ
 #  ßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 
-$(OBJ_DIR)\arr2str.obj : $(SRC_DIR)\procmisc\arr2str.c
-   $(CC_EXE) $(CFLAGS) /Fo$@ $**
-
-$(OBJ_DIR)\blowfish.obj : $(SRC_DIR)\procmisc\blowfish.c
-   $(CC_EXE) $(CFLAGS) /Fo$@ $**
-
-$(OBJ_DIR)\procini.c : $(SRC_DIR)\procmisc\procini.prg
+$(OBJ_DIR)\procini.c : $(PROCMISC_DIR)\procini.prg
    $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
 
 $(OBJ_DIR)\procini.obj : $(OBJ_DIR)\procini.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
-$(OBJ_DIR)\procs7.c : $(SRC_DIR)\procmisc\procs7.prg
+$(OBJ_DIR)\procs7.c : $(PROCMISC_DIR)\procs7.prg
    $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
 
 $(OBJ_DIR)\procs7.obj : $(OBJ_DIR)\procs7.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
-$(OBJ_DIR)\procscri.c : $(SRC_DIR)\procmisc\procscri.prg
+$(OBJ_DIR)\procscri.c : $(PROCMISC_DIR)\procscri.prg
    $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
 
 $(OBJ_DIR)\procscri.obj : $(OBJ_DIR)\procscri.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+$(OBJ_DIR)\hcedit_w.obj : $(EDITOR_DIR)\hcedit_w.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+$(OBJ_DIR)\hcedit.c : $(EDITOR_DIR)\hcedit.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\hcedit.obj : $(OBJ_DIR)\hcedit.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+$(OBJ_DIR)\hilight.c : $(EDITOR_DIR)\hilight.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\hilight.obj : $(OBJ_DIR)\hilight.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
 # ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -535,4 +556,24 @@ $(OBJ_DIR)\hxmldoc.obj : $(OBJ_DIR)\hxmldoc.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**
 
 $(OBJ_DIR)\xmlparse.obj : $(SRC_DIR)\xml\xmlparse.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+# ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# ³ HWGDEBUG.LIB Dependencies   ³Û
+# ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙÛ
+#  ßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+$(OBJ_DIR)\debugger.c : $(SRC_DIR)\xml\debugger.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\debugger.obj : $(OBJ_DIR)\debugger.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+$(OBJ_DIR)\dbgconnect.c : $(SRC_DIR)\xml\dbgconnect.prg
+   $(HARBOUR_EXE) $(HARBOURFLAGS) $** -o$@
+
+$(OBJ_DIR)\dbgconnectr.obj : $(OBJ_DIR)\dbgconnect.c
+   $(CC_EXE) $(CFLAGS) /Fo$@ $**
+
+$(OBJ_DIR)\dbgdop.obj : $(SRC_DIR)\xml\dbgdop.c
    $(CC_EXE) $(CFLAGS) /Fo$@ $**

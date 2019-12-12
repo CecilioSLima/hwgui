@@ -11,22 +11,26 @@
       <property name="FormType" type="C" value="dlgModal" />
       <property name="lClipper" type="L" value="False"/>
       <property name="lExitOnEnter" type="L" value="False"/>
+      <property name="lDebug" type="L" value="False"/>
       <property name="Variables" type="A" />
       <property name="FromStyle" type="C" value="Popup" />
-      <property name="Bitmap" type="C"  />
-      <property name="Modal" type="L" value="False" />
+      <property name="Icon" type="C" value=""/>
+      <property name="Bitmap" type="C" />
+      <property name="BackColor" type="N" value="-1" />
+      <property name="NoModal" type="L" value="False" />
       <property name="SystemMenu" type="L" value="True" />
       <property name="Minimizebox" type="L" value="False" />
       <property name="Maximizebox" type="L" value="False" />
       <property name="AbsAlignent" type="L" value="True" />
       <property name="SizeBox" type="L" value="True" />
       <property name="Visible" type="L" value="True" />
-      <property name="3DLook" type="L" value="False" />     
+      <property name="3DLook" type="L" value="False" />
       <property name="Clipsiblings" type="L" value="False" />
       <property name="Clipchildren" type="L" value="False" />
       <method name="common" />
       <method name="onFormInit" />
       <method name="onDlgInit" />
+      <method name="onDlgActivate" />
       <method name="onPaint" />
       <method name="onDlgExit" />
       <method name="onFormExit" />
@@ -35,8 +39,11 @@
       <widget class="label" name="Static text" bmp="BMP_STATIC">
          <paint>
             <![CDATA[
-            FillRect( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,oCtrl:brush:handle )
-            DrawText( hDC,oCtrl:title,2,2,oCtrl:nWidth,oCtrl:nHeight )
+            Private pArray, nJust
+            hwg_Fillrect( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,oCtrl:brush:handle )
+            pArray := oDesigner:aDataDef[Ascan(oDesigner:aDataDef,{|a|a[1]=="justify"}),6]
+            nJust := Ascan(pArray,oCtrl:GetProp("Justify"))-1
+            hwg_Drawtext( hDC,oCtrl:title,2,2,oCtrl:nWidth,oCtrl:nHeight,nJust )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -45,13 +52,15 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="80" />
          <property name="Height" type="N" value="22" />
-         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(GetSysColor(8))) ]]></property>
-         <property name="BackColor" type="N"><![CDATA[ Ltrim(Str(GetSysColor(15))) ]]></property>
+         <property name="Anchor" type="N" value="-1" />
+         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(8))) ]]></property>
+         <property name="BackColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(15))) ]]></property>
          <property name="Font" type="O" />
          <property name="Border" type="L" value="False"/>
          <property name="Justify" type="C" value="Left"/>
          <property name="3DLook" type="L" value="False" />
-		 <property name="ToolTip" type="C" value=""/>
+         <property name="Transparent" type="L" value="False" />
+         <property name="ToolTip" type="C" value=""/>
          <method name="onInit" />
          <method name="onSize" />
          <method name="onPaint" />
@@ -59,9 +68,9 @@
       <widget class="editbox" name="Edit control" bmp="BMP_EDIT">
          <paint>
             <![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
-            FillRect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,oCtrl:brush:handle )
-            DrawText( hDC,oCtrl:title,2,2,oCtrl:nWidth,oCtrl:nHeight )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,oCtrl:brush:handle )
+            hwg_Drawtext( hDC,oCtrl:title,2,2,oCtrl:nWidth,oCtrl:nHeight )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -70,7 +79,8 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="80" />
          <property name="Height" type="N" value="24" />
-         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(GetSysColor(8))) ]]></property>
+         <property name="Anchor" type="N" value="-1" />
+         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(8))) ]]></property>
          <property name="BackColor" type="N" value="16777215" />
          <property name="Font" type="O" />
          <property name="Password" type="L" value="False"/>
@@ -79,6 +89,7 @@
          <property name="Border" type="L" value="True"/>
          <property name="Justify" type="C" value="Left"/>
          <property name="cPicture" type="C" />
+		 <property name="nMaxLength" type="N" />
          <property name="varName" type="C" />
          <property name="ToolTip" type="C" value=""/>
          <property name="3DLook" type="L" value="False" />
@@ -91,8 +102,8 @@
       <widget class="button" name="Push button" bmp="BMP_BUTTON">
          <paint>
             <![CDATA[
-            DrawButton( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
-            DrawText( hDC,oCtrl:title,0,0,oCtrl:nWidth,oCtrl:nHeight,37 )
+            hwg_Drawbutton( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
+            hwg_Drawtext( hDC,oCtrl:title,0,0,oCtrl:nWidth,oCtrl:nHeight,37 )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -101,6 +112,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="80" />
          <property name="Height" type="N" value="32" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="3DLook" type="L" value="False" />
 		 <property name="ToolTip" type="C" value=""/>
          <method name="onInit" />
@@ -110,9 +122,9 @@
       <widget class="checkbox" name="CheckBox" bmp="BMP_CHECK">
          <paint>
             <![CDATA[
-            DrawEdge( hDC,2,4,16,18,10 )
-            FillRect( hDC,4,6,14,16,21 )
-            DrawText( hDC,oCtrl:title,20,2,oCtrl:nWidth,oCtrl:nHeight )
+            hwg_Drawedge( hDC,2,4,16,18,10 )
+            hwg_Fillrect( hDC,4,6,14,16,21 )
+            hwg_Drawtext( hDC,oCtrl:title,20,2,oCtrl:nWidth,oCtrl:nHeight )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -121,9 +133,10 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="110" />
          <property name="Height" type="N" value="22" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="lInitValue" type="L" value="False"/>
          <property name="varName" type="C" />
-         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(GetSysColor(8))) ]]></property>
+         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(8))) ]]></property>
          <property name="BackColor" type="N" value="16777215" />
          <property name="3DLook" type="L" value="False" />
 		 <property name="ToolTip" type="C" value=""/>
@@ -134,8 +147,8 @@
       <widget class="radiobutton" name="RadioButton" bmp="BMP_RADIO">
          <paint>
             <![CDATA[
-            Ellipse( hDC,4,6,14,16 )
-            DrawText( hDC,oCtrl:title,20,2,oCtrl:nWidth,oCtrl:nHeight )
+            hwg_Ellipse( hDC,4,6,14,16 )
+            hwg_Drawtext( hDC,oCtrl:title,20,2,oCtrl:nWidth,oCtrl:nHeight )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -144,8 +157,9 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="110" />
          <property name="Height" type="N" value="22" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="lInitValue" type="L" value="False"/>
-         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(GetSysColor(8))) ]]></property>
+         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(8))) ]]></property>
          <property name="BackColor" type="N" value="16777215" />
          <property name="3DLook" type="L" value="False" />
          <property name="ToolTip" type="C" value=""/>
@@ -153,11 +167,11 @@
          <method name="onSize" />
          <method name="onClick" />
       </widget>
-      <widget class="group" name="Group box" bmp="BMP_GROUP">
+      <widget class="group" name="Group Box" bmp="BMP_GROUP">
          <paint>
             <![CDATA[
-            DrawEdge( hDC,0,8,oCtrl:nWidth,oCtrl:nHeight,6 )
-            DrawText( hDC,oCtrl:title,6,0,oCtrl:nWidth-9,oCtrl:nHeight )
+            hwg_Drawedge( hDC,0,8,oCtrl:nWidth,oCtrl:nHeight,6 )
+            hwg_Drawtext( hDC,oCtrl:title,6,0,oCtrl:nWidth-9,oCtrl:nHeight )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -166,6 +180,10 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="100" />
          <property name="Height" type="N" value="80" />
+         <property name="Anchor" type="N" value="-1" />
+         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(8))) ]]></property>
+         <property name="BackColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(15))) ]]></property>
+         <property name="Font" type="O" />
          <property name="3DLook" type="L" value="False" />
          <method name="onInit" />
          <method name="onSize" />
@@ -173,8 +191,8 @@
       <widget class="radiogroup" name="Radio group" bmp="BMP_RGROUP">
          <paint>
             <![CDATA[
-            DrawEdge( hDC,0,8,oCtrl:nWidth,oCtrl:nHeight,6 )
-            DrawText( hDC,oCtrl:title,6,0,oCtrl:nWidth-9,oCtrl:nHeight )
+            hwg_Drawedge( hDC,0,8,oCtrl:nWidth,oCtrl:nHeight,6 )
+            hwg_Drawtext( hDC,oCtrl:title,6,0,oCtrl:nWidth-9,oCtrl:nHeight )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -183,6 +201,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="100" />
          <property name="Height" type="N" value="80" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="nInitValue" type="N" value="1"/>
          <property name="varName" type="C" />
          <property name="3DLook" type="L" value="False" />
@@ -192,9 +211,11 @@
       <widget class="combobox" name="ComboBox" bmp="BMP_COMBO">
          <paint bmp="32752">
             <![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
-            FillRect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,21 )
-            DrawBitmap( hDC,oCtrl:oBitmap:handle,,oCtrl:nWidth-oCtrl:oBitmap:nWidth-2,2 )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,21 )
+            if !Empty(oCtrl:oBitmap)
+              hwg_Drawbitmap( hDC,oCtrl:oBitmap:handle,,oCtrl:nWidth-oCtrl:oBitmap:nWidth-2,2 )
+            endif
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -202,14 +223,16 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="110" />
          <property name="Height" type="N" value="24" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="Items" type="A" />
          <property name="nInitValue" type="N" value="1"/>
          <property name="nMaxLines" type="N" value="4"/>
+         <property name="lText" type="L" value="False" />
          <property name="varName" type="C" />
-         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(GetSysColor(8))) ]]></property>
+         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(8))) ]]></property>
          <property name="BackColor" type="N" value="16777215" />
          <property name="3DLook" type="L" value="False" />
-		 <property name="ToolTip" type="C" value=""/>
+         <property name="ToolTip" type="C" value=""/>
          <method name="onInit" />
          <method name="onSize" />
       </widget>
@@ -217,9 +240,9 @@
          <paint>
             <![CDATA[
             if oCtrl:oBitmap != Nil
-              DrawBitmap( hDC,oCtrl:oBitmap:handle,,0,0,oCtrl:nWidth,oCtrl:nHeight )
+              hwg_Drawbitmap( hDC,oCtrl:oBitmap:handle,,0,0,oCtrl:nWidth,oCtrl:nHeight )
             else
-              DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
+              hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
             endif
             ]]>
          </paint>
@@ -228,8 +251,11 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="60" />
          <property name="Height" type="N" value="60" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="Bitmap" type="C" value="" />
          <property name="lResource" type="L" value="False" />
+         <property name="Transparent" type="L" value="False" />
+         <property name="TrColor" type="N" value="16777215" />
 		 <property name="ToolTip" type="C" value=""/>
          <method name="onInit" />
          <method name="onSize" />
@@ -238,9 +264,9 @@
          <paint>
             <![CDATA[
             if oCtrl:oBitmap != Nil
-              DrawIcon( hDC,oCtrl:oBitmap:handle,0,0 )
+              hwg_Drawicon( hDC,oCtrl:oBitmap:handle,0,0 )
             else
-              DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
+              hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
             endif
             ]]>
          </paint>
@@ -257,7 +283,7 @@
       </widget>
       <widget class="menu" name="Menu" bmp="BMP_MENU">
          <create>
-            <![CDATA[BuildMenu( {{{||EditMenu()},"Menu",32000,.t.}},oCtrl:oParent:handle,oCtrl:oParent )
+            <![CDATA[hwg_BuildMenu( {{{|| EditMenu()},"Menu",32000,.t.}},oCtrl:oParent:handle,oCtrl:oParent )
             ]]>
          </create>
          <property name="Name" type="C" />
@@ -272,9 +298,9 @@
       <widget class="richedit" name="Rich Edit control" bmp="BMP_RICH">
          <paint>
             <![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
-            FillRect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,oCtrl:brush:handle )
-            DrawText( hDC,oCtrl:title,2,2,oCtrl:nWidth,oCtrl:nHeight )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,oCtrl:brush:handle )
+            hwg_Drawtext( hDC,oCtrl:title,2,2,oCtrl:nWidth,oCtrl:nHeight )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -283,6 +309,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="80" />
          <property name="Height" type="N" value="24" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="TextColor" type="N" value="0"/>
          <property name="BackColor" type="N" value="16777215" />
          <property name="Font" type="O" />
@@ -298,9 +325,11 @@
       <widget class="updown" name="UpDown control" bmp="BMP_UPDOWN">
          <paint bmp="32739">
             <![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
-            FillRect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,21 )
-            DrawBitmap( hDC,oCtrl:oBitmap:handle,,oCtrl:nWidth-oCtrl:oBitmap:nWidth-2,2 )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,21 )
+            if !Empty(oCtrl:oBitmap)
+              hwg_Drawbitmap( hDC,oCtrl:oBitmap:handle,,oCtrl:nWidth-oCtrl:oBitmap:nWidth-2,2 )
+            endif
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -308,6 +337,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="80" />
          <property name="Height" type="N" value="24" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="nInitValue" type="N" value="1"/>
          <property name="nLower" type="N" value="1"/>
          <property name="nUpper" type="N" value="100"/>
@@ -320,11 +350,13 @@
       <widget class="datepicker" name="DatePicker control" bmp="BMP_DATE">
          <paint bmp="32752">
             <![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
-            FillRect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,21 )
-            SetBkColor( hDC,16777215 )
-            DrawText( hDC,Dtoc(Date()),2,3,oCtrl:nWidth,oCtrl:nHeight )
-            DrawBitmap( hDC,oCtrl:oBitmap:handle,,oCtrl:nWidth-oCtrl:oBitmap:nWidth-2,2 )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,21 )
+            hwg_Setbkcolor( hDC,16777215 )
+            hwg_Drawtext( hDC,Dtoc(Date()),2,3,oCtrl:nWidth,oCtrl:nHeight )
+            if !Empty(oCtrl:oBitmap)
+              hwg_Drawbitmap( hDC,oCtrl:oBitmap:handle,,oCtrl:nWidth-oCtrl:oBitmap:nWidth-2,2 )
+            endif
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -332,6 +364,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="80" />
          <property name="Height" type="N" value="24" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="varName" type="C" />
          <property name="3DLook" type="L" value="False" />
 		 <property name="ToolTip" type="C" value=""/>
@@ -340,7 +373,7 @@
       </widget>
       <widget class="monthcalendar" name="Month Calendar control" bmp="BMP_CALEN">
          <create>
-            <![CDATA[InitMonthCalendar(oCtrl:oParent:handle,oCtrl:id,oCtrl:style,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight)
+            <![CDATA[hwg_initmonthcalendar(oCtrl:oParent:handle,oCtrl:id,oCtrl:style,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight)
             ]]>
          </create>
          <property name="Name" type="C" />
@@ -348,6 +381,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="240" />
          <property name="Height" type="N" value="195" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="lNoToday" type="L" value="True" />
          <property name="lNoTodayCircle" type="L" value="True" />
          <property name="lWeekNumber" type="L" value="True" />
@@ -358,7 +392,7 @@
       </widget>
       <widget class="trackbar" name="Track Bar control" bmp="BMP_TRACK">
          <create>
-            <![CDATA[InitTrackBar(oCtrl:oParent:handle,oCtrl:id,oCtrl:style,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight,0,100)
+            <![CDATA[hwg_inittrackbar(oCtrl:oParent:handle,oCtrl:id,oCtrl:style,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight,0,100)
             ]]>
          </create>
          <property name="Name" type="C" />
@@ -366,6 +400,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="150" />
          <property name="Height" type="N" value="40" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="nInitValue" type="N" value="1" />
          <property name="nLower" type="N" value="1"/>
          <property name="nUpper" type="N" value="100"/>
@@ -379,7 +414,7 @@
       </widget>
       <widget class="page" name="Page control" bmp="BMP_PAGE" container="Yes">
          <create>
-            <![CDATA[CreateTabControl(oCtrl:oParent:handle,oCtrl:id,oCtrl:style,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight,0,100)
+            <![CDATA[hwg_Createtabcontrol(oCtrl:oParent:handle,oCtrl:id,oCtrl:style,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight,0,100)
             ]]>
          </create>
          <property name="Name" type="C" />
@@ -387,6 +422,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="280" />
          <property name="Height" type="N" value="160" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="Font" type="O" />
          <property name="Tabs" type="A" />
          <method name="onInit" />
@@ -395,8 +431,8 @@
       <widget class="tree" name="TreeView control" bmp="BMP_TREE">
          <paint>
             <![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
-            FillRect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,23 )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,23 )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -404,6 +440,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="150" />
          <property name="Height" type="N" value="160" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="Font" type="O" />
          <property name="aImages" type="A" />
          <property name="lResource" type="L" value="False" />
@@ -416,7 +453,7 @@
       <widget class="status" name="Status control" bmp="BMP_STATUS">
          <paint>
             <![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
             ]]>
          </paint>
          <property name="Name" type="C" />
@@ -434,7 +471,7 @@
       <widget class="animation" name="Animation control" bmp="BMP_ANIM">
          <paint>
             <![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
             ]]>
          </paint>
          <property name="Left" type="N" value="0"/>
@@ -453,9 +490,9 @@
          <paint>
             <![CDATA[
             if oCtrl:GetProp( "lVertical" ) == "True"
-              DrawEdge( hDC,1,0,1,oCtrl:nHeight,6 )
+              hwg_Drawedge( hDC,1,0,1,oCtrl:nHeight,6 )
             else
-              DrawEdge( hDC,0,1,oCtrl:nWidth,1,6 )
+              hwg_Drawedge( hDC,0,1,oCtrl:nWidth,1,6 )
             endif
             ]]>
          </paint>
@@ -464,6 +501,7 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="100" />
          <property name="Height" type="N" value="2" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="lVertical" type="L" value="False" />
          <property name="3DLook" type="L" value="False" />
          <method name="onInit" />
@@ -473,17 +511,23 @@
       <widget class="ownerbutton" name="Owner drawn button" bmp="BMP_BUTTON">
          <paint>
             <![CDATA[
-            private xt := Max(Val(oCtrl:GetProp("TextLeft")),2),yt
-            DrawButton( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
-            if ( yt := Val(oCtrl:GetProp("TextTop")) ) == 0
-              DrawText( hDC,oCtrl:title,xt,0,oCtrl:nWidth-xt*2,oCtrl:nHeight,37 )
+            private xt := Max(Val(oCtrl:GetProp("TextLeft")),2),yt, aStyles:=oCtrl:GetProp("Styles")
+            if aStyles == Nil
+              hwg_Drawbutton( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
             else
-              DrawText( hDC,oCtrl:title,xt,yt,oCtrl:nWidth-xt*2,yt+GetTextMetric(hDC)[1],37 )
+              aStyles[1]:Draw(hDC,0,0,oCtrl:nWidth,oCtrl:nHeight)
             endif
+            hwg_Settransparentmode( hDC, .T. )
+            if ( yt := Val(oCtrl:GetProp("TextTop")) ) == 0
+              hwg_Drawtext( hDC,oCtrl:title,xt,0,oCtrl:nWidth-xt*2,oCtrl:nHeight,37 )
+            else
+              hwg_Drawtext( hDC,oCtrl:title,xt,yt,oCtrl:nWidth-xt*2,yt+hwg_Gettextmetric(hDC)[1],37 )
+            endif
+            hwg_Settransparentmode( hDC, .F. )
             if oCtrl:oBitmap != Nil
               xt := Iif( (xt:=Val(oCtrl:GetProp("BmpLeft")))==0,(oCtrl:nWidth-oCtrl:oBitmap:nWidth)/2,xt )
               yt := Iif( (yt:=Val(oCtrl:GetProp("BmpTop")))==0,(oCtrl:nHeight-oCtrl:oBitmap:nHeight)/2,yt )
-              DrawBitmap( hDC,oCtrl:oBitmap:handle,,xt,yt,oCtrl:oBitmap:nWidth,oCtrl:oBitmap:nHeight )
+              hwg_Drawbitmap( hDC,oCtrl:oBitmap:handle,,xt,yt,oCtrl:oBitmap:nWidth,oCtrl:oBitmap:nHeight )
             endif
             ]]>
          </paint>
@@ -493,16 +537,20 @@
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="28" />
          <property name="Height" type="N" value="28" />
+         <property name="Anchor" type="N" value="-1" />
          <property name="Flat" type="L" value="False"/>
          <property name="Font" type="O" />
-         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(GetSysColor(8))) ]]></property>
+         <property name="Styles" type="A" />
+         <property name="TextColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(8))) ]]></property>
          <property name="TextLeft" type="N" value="0" />
          <property name="TextTop" type="N" value="0" />
          <property name="BtnBitmap" type="C" value="" />
          <property name="lResource" type="L" value="False" />
+         <property name="Transparent" type="L" value="False" />
+         <property name="trColor" type="N" value="16777215" />
          <property name="BmpLeft" type="N" value="0" />
          <property name="BmpTop" type="N" value="0" />
-		 <property name="ToolTip" type="C" value=""/>
+	     <property name="ToolTip" type="C" value=""/>
          <method name="onInit" />
          <method name="onSize" />
          <method name="onPaint" />
@@ -510,19 +558,27 @@
       </widget>
       <widget class="browse" name="Browse" bmp="BMP_BROWSE">
          <paint><![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
-            FillRect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,21 )
-            DrawButton( hDC,2,2,20,20,5 )
-            DrawButton( hDC,21,2,70,20,5 )
-            DrawButton( hDC,2,21,20,50,5 )
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,10 )
+            hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,21 )
+            hwg_Drawbutton( hDC,2,2,20,20,5 )
+            hwg_Drawbutton( hDC,21,2,70,20,5 )
+            hwg_Drawbutton( hDC,2,21,20,50,5 )
          ]]></paint>
          <property name="Name" type="C" />
          <property name="Left" type="N" value="0" />
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="200" />
          <property name="Height" type="N" value="150" />
+         <property name="Anchor" type="N" value="-1" />
+         <property name="Hstylehead" type="O" />
+         <property name="Hstylefoot" type="O" />
+         <property name="Hstylecell" type="O" />
          <property name="Font" type="O" />
          <property name="BrwType" type="C" value="Dbf" />
+         <property name="lNoVScroll" type="L" value="False"/>
+         <property name="lNoBorder" type="L" value="False"/>
+         <property name="lAppend" type="L" value="False"/>
+         <property name="lMultiSelect" type="L" value="False"/>
          <method name="onInit" />
          <method name="onSize" />
          <method name="onPaint" />
@@ -530,17 +586,127 @@
          <method name="onGetFocus" />
          <method name="onLostFocus" />
          <method name="onUpdate" />
+         <method name="onPosChg" />
+         <method name="onRClick" />
       </widget>
       <widget class="toolbar" name="Toolbar" bmp="BMP_PANEL"  container="Yes">
          <paint><![CDATA[
-            DrawEdge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
+            private xp
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
+            if (xp := oCtrl:GetProp("hstyle")) != Nil
+              xp:Draw(hDC,0,0,oCtrl:nWidth,oCtrl:nHeight)
+            elseif Valtype(xp := oCtrl:GetProp("backcolor")) == "C" .and. Val(xp) >= 0
+              hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,oCtrl:brush:handle )
+            endif
          ]]></paint>
          <property name="Name" type="C" />
          <property name="Left" type="N" value="0" />
          <property name="Top" type="N" value="0" />
          <property name="Width" type="N" value="200" />
          <property name="Height" type="N" value="50" />
+         <property name="Anchor" type="N" value="-1" />
+         <property name="BackColor" type="N" value="-1" />
+         <property name="Hstyle" type="O" />
+         <method name="onInit" />
+         <method name="onSize" />
+         <method name="onPaint" />
+      </widget>
+      <widget class="toolbartop" name="Top toolbar" bmp="BMP_PANETOP" container="Yes">
+         <paint><![CDATA[
+            private xp
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
+            if (xp := oCtrl:GetProp("hstyle")) != Nil
+              xp:Draw(hDC,0,0,oCtrl:nWidth,oCtrl:nHeight)
+            elseif Valtype(xp := oCtrl:GetProp("backcolor")) == "C" .and. Val(xp) >= 0
+              hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,oCtrl:brush:handle )
+            endif
+         ]]></paint>
+         <init><![CDATA[
+            oCtrl:anchor := 11
+            oCtrl:nTop := oCtrl:nLeft := 0
+            oCtrl:nWidth := oCtrl:oParent:nWidth
+         ]]></init>
+         <property name="Name" type="C" />
+         <property name="Height" type="N" value="48" />
+         <property name="BackColor" type="N" value="-1" />
+         <property name="Hstyle" type="O" />
+         <method name="onInit" />
+         <method name="onPaint" />
+      </widget>
+      <widget class="toolbarbot" name="Status toolbar" bmp="BMP_PANEBOT" container="Yes">
+         <paint><![CDATA[
+            private xp
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
+            if (xp := oCtrl:GetProp("hstyle")) != Nil
+              xp:Draw(hDC,0,0,oCtrl:nWidth,oCtrl:nHeight)
+            elseif Valtype(xp := oCtrl:GetProp("backcolor")) == "C" .and. Val(xp) >= 0
+              hwg_Fillrect( hDC,2,2,oCtrl:nWidth-2,oCtrl:nHeight-2,oCtrl:brush:handle )
+            endif
+         ]]></paint>
+         <init><![CDATA[
+            private a := hwg_getClientRect(oCtrl:oParent:handle)
+            oCtrl:anchor := 10
+            oCtrl:bSize := {|o,w,h|o:Move( 0, h - o:nHeight )}
+            oCtrl:nTop := a[4]-a[2] - oCtrl:nHeight
+            oCtrl:nLeft := 0
+            oCtrl:nWidth := oCtrl:oParent:nWidth
+         ]]></init>
+         <property name="Name" type="C" />
+         <property name="Height" type="N" value="48" />
+         <property name="BackColor" type="N" value="-1" />
+         <property name="Hstyle" type="O" />
+         <method name="onInit" />
+         <method name="onPaint" />
+      </widget>
+      <widget class="splitter" name="Splitter" bmp="BMP_VLINE">
+         <paint><![CDATA[
+            private xp
+            hwg_Drawedge( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,5 )
+         ]]></paint>
+         <property name="Name" type="C" />
+         <property name="Left" type="N" value="0" />
+         <property name="Top" type="N" value="0" />
+         <property name="Width" type="N" value="4" />
+         <property name="Height" type="N" value="100" />
+         <property name="lVertical" type="L" value="True" />
+         <property name="Anchor" type="N" value="-1" />
+         <property name="Hstyle" type="O" />
+         <property name="ALeft" type="A" />
+         <property name="ARight" type="A" />
+         <property name="nFrom" type="N" value="0"/>
+         <property name="nTo" type="N" value="0"/>
+         <method name="onInit" />
+         <method name="onSize" />
+         <method name="onPaint" />
+      </widget>
+      <widget class="link" name="Static link" bmp="BMP_HLINK">
+         <paint>
+            <![CDATA[
+            Private pArray, nJust
+            hwg_Fillrect( hDC,0,0,oCtrl:nWidth,oCtrl:nHeight,oCtrl:brush:handle )
+            pArray := oDesigner:aDataDef[Ascan(oDesigner:aDataDef,{|a|a[1]=="justify"}),6]
+            nJust := Ascan(pArray,oCtrl:GetProp("Justify"))-1
+            hwg_Drawtext( hDC,oCtrl:title,2,2,oCtrl:nWidth,oCtrl:nHeight,nJust )
+            ]]>
+         </paint>
+         <property name="Name" type="C" />
+         <property name="Caption" type="C" value="Link" />
+         <property name="Left" type="N" value="0" />
+         <property name="Top" type="N" value="0" />
+         <property name="Width" type="N" value="80" />
+         <property name="Height" type="N" value="22" />
+         <property name="Anchor" type="N" value="-1" />
+         <property name="BackColor" type="N"><![CDATA[ Ltrim(Str(hwg_Getsyscolor(15))) ]]></property>
+         <property name="Font" type="O" />
+         <property name="Border" type="L" value="False"/>
+         <property name="Justify" type="C" value="Left"/>
          <property name="3DLook" type="L" value="False" />
+         <property name="Transparent" type="L" value="False" />
+         <property name="ToolTip" type="C" value=""/>
+         <property name="cLink" type="C" value="" />
+         <property name="lColor" type="N" value="16711680"></property>
+         <property name="hColor" type="N" value="255"></property>
+         <property name="vColor" type="N" value=" 9380357"></property>
          <method name="onInit" />
          <method name="onSize" />
          <method name="onPaint" />
@@ -550,33 +716,42 @@
    <data>
       <property name="Caption">
          <code2><![CDATA[ oCtrl:title := Iif(value==Nil,"",value) ]]></code2>
-         <code3><![CDATA[ SetWindowText( oCtrl:handle,oCtrl:title ) ]]></code3>
+         <code3><![CDATA[ hwg_Setwindowtext( oCtrl:handle,oCtrl:title ) ]]></code3>
       </property>
       <property name="Left">
          <code2><![CDATA[ oCtrl:nLeft := Val(value) ]]></code2>
-         <code3><![CDATA[ MoveCtrl( oCtrl ) ]]></code3>
+         <code3><![CDATA[ hwg_Movewindow(oCtrl:handle,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight) ]]></code3>
       </property>
       <property name="Top">
          <code2><![CDATA[ oCtrl:nTop := Val(value) ]]></code2>
-         <code3><![CDATA[ MoveCtrl( oCtrl ) ]]></code3>
+         <code3><![CDATA[ hwg_Movewindow(oCtrl:handle,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight) ]]></code3>
       </property>
       <property name="Width">
          <code2><![CDATA[ oCtrl:nWidth := Val(value) ]]></code2>
-         <code3><![CDATA[ MoveCtrl( oCtrl ) ]]></code3>
+         <code3><![CDATA[ hwg_Movewindow(oCtrl:handle,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight) ]]></code3>
       </property>
       <property name="Height">
          <code2><![CDATA[ oCtrl:nHeight := Val(value) ]]></code2>
-         <code3><![CDATA[ MoveCtrl( oCtrl ) ]]></code3>
+         <code3><![CDATA[ hwg_Movewindow(oCtrl:handle,oCtrl:nLeft,oCtrl:nTop,oCtrl:nWidth,oCtrl:nHeight) ]]></code3>
       </property>
       <property name="TextColor" dlg="Color">
          <code2><![CDATA[ oCtrl:tColor := Val( value ) ]]></code2>
       </property>
       <property name="BackColor" dlg="Color">
-         <code2><![CDATA[ oCtrl:SetColor(,Val(value)) ]]></code2>
+         <code2><![CDATA[ Iif( Val(value)>=0,oCtrl:SetColor(,Val(value)),.T.) ]]></code2>
+      </property>
+      <property name="lColor" dlg="Color">
+         <code2><![CDATA[ oCtrl:tColor := Val( value ) ]]></code2>
+      </property>
+      <property name="hColor" dlg="Color">
+      </property>
+      <property name="vColor" dlg="Color">
+      </property>
+      <property name="trColor" dlg="Color">
       </property>
       <property name="Font" dlg="Font">
          <code2><![CDATA[ oCtrl:oFont := value ]]></code2>
-         <code3><![CDATA[ SetWindowFont( oCtrl:handle,oCtrl:oFont:handle,.T. ) ]]></code3>
+         <code3><![CDATA[ hwg_Setwindowfont( oCtrl:handle,oCtrl:oFont:handle,.T. ) ]]></code3>
       </property>
       <property name="Justify" array="Left,Center,Right">
       </property>
@@ -589,10 +764,10 @@
       </property>
       <property name="cInitValue">
          <code2><![CDATA[ oCtrl:title := value ]]></code2>
-         <code3><![CDATA[ SetWindowText( oCtrl:handle, value ) ]]></code3>
+         <code3><![CDATA[ hwg_Setwindowtext( oCtrl:handle, value ) ]]></code3>
       </property>
       <property name="lVertical">
-         <code2><![CDATA[ 
+         <code2><![CDATA[
             private nTemp
             if (value=="True") .and. oCtrl:nHeight < oCtrl:nWidth
                nTemp := oCtrl:nHeight
@@ -610,24 +785,38 @@
       </property>
       <property name="Bitmap">
          <code2><![CDATA[
-            oCtrl:oBitmap := Iif( At(".",value)!=0,HBitmap():AddFile(value),Nil )
+	   if oCtrl:ClassName()=="HDIALOG"
+                oCtrl:oBmp := Iif( At(".",value)!=0,HBitmap():AddFile(value), HBitmap():AddResource(value) )
+	   else
+	    if !empty(value)
+                oCtrl:oBitmap := Iif( At(".",value)!=0,HBitmap():AddFile(value), HBitmap():AddResource(value) )
+	    endif
             if oCtrl:oBitmap != Nil
               oCtrl:nWidth := oCtrl:oBitmap:nWidth
-              oCtrl:nHeight := oCtrl:oBitmap:nHeight
+              oCtrl:nHeight:= oCtrl:oBitmap:nHeight
               oCtrl:SetProp( "Height",Ltrim(Str(oCtrl:nHeight)) )
               oCtrl:SetProp( "Width",Ltrim(Str(oCtrl:nWidth)) )
             endif
+	   endif
           ]]></code2>
       </property>
       <property name="BtnBitmap">
          <code2><![CDATA[
-            oCtrl:oBitmap := Iif( At(".",value)!=0,HBitmap():AddFile(value),Nil )
+            if !empty(value)
+            oCtrl:oBitmap := Iif( At(".",value)!=0,HBitmap():AddFile(value),  HBitmap():AddResource(value) )
+	    endif
           ]]></code2>
       </property>
       <property name="Icon">
-         <code2><![CDATA[
-            oCtrl:oBitmap := Iif( At(".",value)!=0,HIcon():AddFile(value),Nil )
-          ]]></code2>
+         <code3><![CDATA[
+           if oCtrl:ClassName()=="HDIALOG"
+              oCtrl:oIcon:= Iif( At(".",value)!=0,HIcon():AddFile(value),HIcon():Resource(value))
+           else
+           if !empty(value)
+              oCtrl:oBitmap := Iif( At(".",value)!=0,HIcon():AddFile(value),HIcon():Resource(value))
+	   endif
+           endif 
+          ]]></code3>
       </property>
       <property name="BrwType" array="Dbf,Array">
       </property>
@@ -639,16 +828,32 @@
       </property>
       <property name="FormType" array="Main,dlgModal,dlgNoModal,mdiMain,mdiChild,Child">
       </property>
-      <property name="FromStyle" array="Popup,Child,Overlapped">     
+      <property name="FromStyle" array="Popup,Child,Overlapped">
+      </property>
+      <property name="Anchor" dlg="Anchor">
+      </property>
+      <property name="Hstyle" dlg="Hstyle">
+      </property>
+      <property name="Hstylehead" dlg="Hstyle">
+      </property>
+      <property name="Hstylefoot" dlg="Hstyle">
+      </property>
+      <property name="Hstylecell" dlg="Hstyle">
+      </property>
+      <property name="Styles" dlg="Styles">
       </property>
    </data>
    <methods>
       <method name="onDlgInit" params="oDlg" />
+      <method name="onDlgActivate" params="oDlg" />
       <method name="onInit" params="oCtrl" />
       <method name="onSize" params="oCtrl,x,y" />
       <method name="onPaint" params="oCtrl,hDC" />
-      <method name="onClick" params="oDlg,nId" />
+      <method name="onClick" params="oCtrl" />
       <method name="onTreeClick" params="oItem" />
+      <method name="onEnter" params="oCtrl,nCol,nRow" />
+      <method name="onRClick" params="oCtrl,nCol,nRow" />
+      <method name="onPosChg" params="oCtrl,nRow" />
    </methods>
    <temp>
    </temp>

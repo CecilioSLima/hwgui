@@ -6,4 +6,6 @@
   <editor>editor.iml</editor>
   <rep_widgetset>resource/repwidg.xml</rep_widgetset>
   <rep_format name="Plain text format" ext="rpt" file="resource/r_text.prg" rdscr="read"/>
+  <dirpath default="c:\myapps\source\huchet\options\"/>
+  <recent></recent>
 </designer>
