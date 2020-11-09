@@ -20,6 +20,27 @@
   Add extensions to your own needs
 */
 
+/*
+ List of used HWGUI standalone functions:
+ 
+ hwg_GetUTCTimeDate()
+ hwg_GetDateANSI()
+ hwg_GetUTCDateANSI()
+ hwg_GetUTCTime()
+ hwg_getCentury()
+ hwg_GetWindowsDir()
+ hwg_GetTempDir()
+ hwg_CreateTempfileName
+ Activate / Deactivate  Button
+ hwg_CompleteFullPath()
+ hwg_ShowCursor()
+ hwg_GetCursorType() && GTK only
+
+ Harbour functions:
+ CurDir() 
+ 
+*/
+
 
 #include "hwgui.ch"
 #include "common.ch"
@@ -34,11 +55,13 @@
 
 
 FUNCTION MAIN
-LOCAL Testfunc, oFont
+LOCAL Testfunc, oFont , nheight
 
 LOCAL oButton1, oButton2, oButton3, oButton4, oButton5, oButton6, oButton7, oButton8, oButton9
-LOCAL oButton10, oButton11, oButton12
-PUBLIC bgtk
+LOCAL oButton10, oButton11 , oButton12 , oButton13 , oButton14 , oButton15 , oButton16 , oButton17
+LOCAL oButton18, oButton19 , oButton20 , oButton21 
+PUBLIC cDirSep := hwg_GetDirSep()
+PUBLIC bgtk , ndefaultcsrtype
 
 * Detect GTK build
 bgtk := .F.
@@ -49,64 +72,155 @@ bgtk := .T.
 SET DATE ANSI  && YY(YY).MM.TT
 
 #ifdef __PLATFORM__WINDOWS
+ nheight := 18
  PREPARE FONT oFont NAME "MS Sans Serif" WIDTH 0 HEIGHT -10 && vorher -13
 #else
+ nheight := 25
  PREPARE FONT oFont NAME "Sans" WIDTH 0 HEIGHT 12 && vorher 13
 #endif 
+  
+* save default cursor style in a numeric variable for
+* later recovery after cursor hide action.  
+#ifdef __GTK__  
+ ndefaultcsrtype := hwg_GetCursorType() && GTK only
+#else
+ ndefaultcsrtype := 0  && not needed on WinAPI
+#endif 
+ 
+ // hwg_msginfo(Str(ndefaultcsrtype))
 
   INIT WINDOW Testfunc MAIN TITLE "Test Of Standalone HWGUI Functions" ;
     AT 1,1 SIZE 770,548 ; 
      STYLE WS_SYSMENU+WS_SIZEBOX+WS_VISIBLE
 
 
-   @ 25,25 BUTTON oButton1 CAPTION "Exit" SIZE 75,18 FONT oFont ;
+   @ 25,25 BUTTON oButton1 CAPTION "Exit" SIZE 75,nheight FONT oFont ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK { | | Testfunc:Close() }
-   @ 127,25 BUTTON oButton2 CAPTION "CENTURY ON"   SIZE 120,18 FONT oFont  ;
+   @ 127,25 BUTTON oButton2 CAPTION "CENTURY ON"   SIZE 120,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK  { | | CENT_ON() }
-   @ 277,25 BUTTON oButton3 CAPTION "CENTURY OFF"   SIZE 120,18 FONT oFont  ;
+   @ 277,25 BUTTON oButton3 CAPTION "CENTURY OFF"   SIZE 120,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK  { | | CENT_OFF() }
-   @ 407,25 BUTTON oButton4 CAPTION "DATE()"   SIZE 120,18 FONT oFont  ;
+   @ 407,25 BUTTON oButton4 CAPTION "DATE()"   SIZE 120,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
         { | |Funkt(DATE(),"D","DATE()") }
-   @ 537,25 BUTTON oButton5 CAPTION "Summary"   SIZE 120,18 FONT oFont  ;
+   @ 537,25 BUTTON oButton5 CAPTION "Summary"   SIZE 120,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
         { | |  fSUMM() }
-   @ 25,50 BUTTON oButton6 CAPTION "hwg_GetUTCTimeDate()" SIZE 218,18 FONT oFont  ;
+   @ 25,50 BUTTON oButton6 CAPTION "hwg_GetUTCTimeDate()" SIZE 218,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
        { | |Funkt(hwg_GetUTCTimeDate(),"C","hwg_GetUTCTimeDate()") }
-   @ 250,50 BUTTON oButton7 CAPTION "hwg_getCentury()" SIZE 218,18 FONT oFont  ;
+   @ 250,50 BUTTON oButton7 CAPTION "hwg_getCentury()" SIZE 218,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
        { | | Funkt(hwg_getCentury(),"O","hwg_getCentury()") }
 
    /* Sample for a Windows only function,
       use a intermediate function with compiler switch for platform windows   */
-   @ 505,50 BUTTON oButton8 CAPTION "hwg_GetWindowsDir()" SIZE 218,18 FONT oFont  ;
+   @ 505,50 BUTTON oButton8 CAPTION "hwg_GetWindowsDir()" SIZE 218,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
        { | | Funkt(GET_WINDIR(),"C","hwg_GetWindowsDir()") }
 
-   @ 25,75 BUTTON oButton9 CAPTION "hwg_GetTempDir()" SIZE 218,18 FONT oFont  ;
+   @ 25,75 BUTTON oButton9 CAPTION "hwg_GetTempDir()" SIZE 218,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
        { | |Funkt(hwg_GetTempDir(),"C","hwg_GetTempDir()") }
 
-   @ 25,100 BUTTON oButton10 CAPTION "Test Button" SIZE 140,18 FONT oFont  ;
+   @ 250,75 BUTTON oButton9 CAPTION "hwg_CreateTempfileName()" SIZE 218,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+       { | |Funkt(hwg_CreateTempfileName(),"C","hwg_CreateTempfileName()") }
+
+   @ 505,75 BUTTON oButton12 CAPTION "GetWindowsDir Full" SIZE 218,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+       { | | Funkt(GET_WINDIR_FULL(),"C","GET_WINDIR_FULL()") }
+
+   @ 25,100 BUTTON oButton10 CAPTION "Test Button" SIZE 140,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
        { | | Hwg_MsgInfo("This is a test without any function") }
 
-   @ 180,100 BUTTON oButton11 CAPTION "Deactivate Test Button" SIZE 140,18 FONT oFont  ;
+   @ 180,100 BUTTON oButton11 CAPTION "Deactivate Test Button" SIZE 140,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
        { | | TstButt_Deact(oButton10) }
 
-   @ 340,100 BUTTON oButton11 CAPTION "Activate Test Button" SIZE 140,18 FONT oFont  ;
+   @ 340,100 BUTTON oButton13 CAPTION "Activate Test Button" SIZE 140,nheight FONT oFont  ;
         STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
        { | | TstButt_Act(oButton10) }
-   
+
+   @ 25 ,125 BUTTON oButton15 CAPTION "CurDir()" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | Funkt(CurDir(),"C","CurDir()") }
+
+   @ 180 ,125 BUTTON oButton16 CAPTION "hwg_CurDir()" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | Funkt(hwg_CurDir(),"C","hwg_CurDir()") }
+
+   @ 25 ,150 BUTTON oButton17 CAPTION "hwg_GetDateANSI()" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | Funkt(hwg_GetDateANSI(),"C","hwg_GetDateANSI()") }
+
+   @ 180 ,150 BUTTON oButton18 CAPTION "hwg_GetUTCDateANSI()" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | Funkt(hwg_GetUTCDateANSI(),"C","hwg_GetUTCDateANSI()") }
+
+   @ 340 ,150 BUTTON oButton19 CAPTION "hwg_GetUTCTime()" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | Funkt(hwg_GetUTCTime(),"C","hwg_GetUTCTime()") }
+
+   * Hide / recovery of mouse cursor in extra dialog
+   @ 25 ,175 BUTTON oButton20 CAPTION "Cursor functions" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | HIDE_CURSOR ( oFont , nheight , Testfunc) }
+ 
+
 
 /* Disable buttons for Windows only functions */
 #ifndef __PLATFORM__WINDOWS
      oButton8:Disable()
 #endif
 
+
+
    ACTIVATE WINDOW Testfunc
+RETURN NIL
+
+FUNCTION HIDE_CURSOR ( oFont , nheight , Testfunc )
+* Testfunc: object variable of main window only for GTK
+
+  LOCAL odlg , oButton1 , oButton2 , oButton3 , ncursor , hmain
+  
+  * Init, otherwise crashes, if dialog closed without any action.
+  ncursor := 0 
+
+* For hiding mouse cursor on main window
+//     hmain := Testfunc:handle
+
+      INIT DIALOG odlg TITLE "Hide / show cursor"  AT 0,0   SIZE 400 , 100 ;
+      FONT oFont CLIPPER
+
+* Hide cursor only in dialog window.
+  hmain := odlg:handle  
+
+
+   @ 25 , 25 BUTTON oButton1 CAPTION "hwg_ShowCursor(.F.)" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | Funkt( ncursor := hwg_ShowCursor(.F.,hmain,ndefaultcsrtype),"N","hwg_ShowCursor(.F.)") , ;
+            hwg_Setfocus(oButton2:handle) }
+
+   @ 180 , 25 BUTTON oButton2 CAPTION "hwg_ShowCursor(.T.)" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | Funkt( ncursor := hwg_ShowCursor(.T.,hmain,ndefaultcsrtype),"N","hwg_ShowCursor(.T.)") }
+
+   @ 25 , 50 BUTTON oButton3 CAPTION "Return" SIZE 140,nheight FONT oFont  ;
+        STYLE WS_TABSTOP+BS_FLAT ON CLICK ;
+        { | | odlg:Close }
+
+  ACTIVATE DIALOG odlg
+ 
+#ifndef __GTK__ 
+   * Activate cursor before return to main window
+   * crash on GTK, because handle is lost after leaving dialog.
+   DO WHILE ncursor < 0
+      ncursor := hwg_ShowCursor(.T.)   && ,hmain,ndefaultcsrtype)  : crash 
+   ENDDO
+#endif   
+   
 RETURN NIL
 
 * ====================================
@@ -170,7 +284,8 @@ FUNCTION fSUMM
        "Locale :" + hwg_GetLocaleInfo() + CHR(10) +  ;
        "Locale (N) :" + N2STR(hwg_GetLocaleInfoN()) + CHR(10) +  ;
        "UTC :" + HWG_GETUTCTIMEDATE() + CHR(10) +  ;
-       "GTK : " + TotF(bgtk) ;
+       "GTK : " + TotF(bgtk)  + CHR(10) + ;
+       "Dir Separator: " + cDirSep ;
    )
 RETURN NIL
 
@@ -182,5 +297,15 @@ LOCAL verz
  verz := hwg_GetWindowsDir()
 #endif
 RETURN verz
+
+FUNCTION GET_WINDIR_FULL
+LOCAL verz
+#ifndef __PLATFORM__WINDOWS
+ verz := "<none>: Windows only"
+#else
+ verz := hwg_CompleteFullPath(hwg_GetWindowsDir() )
+#endif
+RETURN verz
+
 
 * ============================== EOF of testfunc.prg ==============================

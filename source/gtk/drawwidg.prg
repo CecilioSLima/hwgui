@@ -310,35 +310,68 @@ CLASS HBitmap INHERIT HObject
    DATA name
    DATA nWidth, nHeight
    DATA nCounter   INIT 1
+   
 
    METHOD AddResource( name )
-   METHOD AddFile( name, HDC )
+   METHOD AddFile( name, HDC , lTransparent, nWidth, nHeight)
    METHOD AddString( name, cVal )
    METHOD AddStandard( cId, nSize )
    METHOD AddWindow( oWnd, x1, y1, width, height )
    METHOD Release()
+   METHOD OBMP2FILE( cfilename , name )
 
 ENDCLASS
 
+/*
+ Stores a bitmap in a file from object
+*/
+METHOD OBMP2FILE( cfilename , name ) CLASS HBitmap
+
+LOCAL i , hbmp
+
+   hbmp := NIL
+   * Search for bitmap in object
+   FOR EACH i IN ::aBitmaps
+      IF i:name == name 
+         hbmp := i:handle
+      ELSE
+        * not found
+        RETURN NIL
+      ENDIF
+   NEXT
+   
+   hwg_SaveBitMap(cfilename, hbmp )
+
+RETURN NIL    
+
+
 METHOD AddResource( name ) CLASS HBitmap
+/*
+ *  name : resource name in container, not file name. 
+ *  returns an object to bitmap, if resource successfully added
+ */
    LOCAL oBmp, cVal
 
    For EACH oBmp IN ::aBitmaps
       IF oBmp:name == name
          oBmp:nCounter ++
-         RETURN oBmp
+         RETURN oBmp  && go back, if already exists
       ENDIF
    NEXT
 
+   /*
+    * DF7BE: AddString method loads image from file or
+    * binary container and added it to resource container.
+   */
    IF !Empty( oResCnt ) .AND. !Empty( cVal := oResCnt:Get( name ) )
       IF !Empty( oBmp := ::AddString( name, cVal ) )
-         RETURN oBmp
+          RETURN oBmp
       ENDIF
    ENDIF
 
    RETURN Nil
 
-METHOD AddFile( name, HDC ) CLASS HBitmap
+METHOD AddFile( name, HDC , lTransparent, nWidth, nHeight ) CLASS HBitmap
    LOCAL i, aBmpSize
 
    For EACH i IN ::aBitmaps
@@ -362,29 +395,48 @@ METHOD AddFile( name, HDC ) CLASS HBitmap
 
    RETURN Self
 
+   
+   
 METHOD AddString( name, cVal ) CLASS HBitmap
+/*
+  Add name to resource container (array ::aBitmaps)
+  and add image to resource container.
+  name : Name of resource in container
+  cVal : Contents of image
+*/
+
    LOCAL oBmp, aBmpSize, cTmp
 
    For EACH oBmp IN ::aBitmaps
       IF oBmp:name == name
          oBmp:nCounter ++
+         * already existing, nothing to add
          RETURN oBmp
       ENDIF
    NEXT
 
-   ::handle := hwg_Openimage( cVal, .T. )
+   /* Try to load image from file */
+   ::handle := hwg_Openimage( cVal  )  && 2nd parameter not .T. !
    IF Empty( ::handle )
-      hb_memowrit( cTmp := "/tmp/e"+Ltrim(Str(Int(Seconds()*100))), cVal )
+      * Otherwise:   
+      * Write image from binary container into temporary file
+      * (as a bitmap file)
+       
+*      hb_memowrit( cTmp := "/tmp/e" + Ltrim(Str(Int(Seconds()*100))), cVal )
+*      DF7BE: Ready for multi platform use
+       hb_memowrit( cTmp := hwg_CreateTempfileName() , cVal )
       ::handle := hwg_Openimage( cTmp )
       FErase( cTmp )
    ENDIF
    IF !Empty( ::handle )
+      * hwg_Msginfo("Bitmap successfully loaded: >" + name + "<")
       ::name := name
       aBmpSize  := hwg_Getbitmapsize( ::handle )
       ::nWidth  := aBmpSize[1]
       ::nHeight := aBmpSize[2]
       AAdd( ::aBitmaps, Self )
    ELSE
+      hwg_MsgStop("Bitmap not loaded >" + name + "<" ) 
       RETURN Nil
    ENDIF
 
@@ -467,15 +519,25 @@ CLASS HIcon INHERIT HObject
    DATA nCounter   INIT 1
    DATA nWidth, nHeight
 
-   METHOD AddResource( name )
-   METHOD AddFile( name, HDC )
+   METHOD AddResource( name , nWidth, nHeight , nFlags, lOEM )
+   METHOD AddFile( name, nWidth, nHeight )
+   METHOD AddString( name, cVal , nWidth, nHeight )
    METHOD RELEASE()
 
 ENDCLASS
 
-METHOD AddResource( name ) CLASS HIcon
-   LOCAL lPreDefined := .F. , i
-
+METHOD AddResource( name , nWidth, nHeight , nFlags, lOEM ) CLASS HIcon
+* For compatibility to WinAPI the parameters nFlags and lOEM are dummys  
+   LOCAL lPreDefined := .F. , i , cTmp
+ 
+/* 
+   IF nWidth == nil
+      nWidth := 0
+   ENDIF
+   IF nHeight == nil
+      nHeight := 0
+   ENDIF
+*/
    IF ValType( name ) == "N"
       name := LTrim( Str( name ) )
       lPreDefined := .T.
@@ -484,15 +546,25 @@ METHOD AddResource( name ) CLASS HIcon
    For EACH i IN ::aIcons
       IF i:name == name
          i:nCounter ++
+         * resource always existing, nothing to do
          RETURN i
       ENDIF
    NEXT
+   * oResCnt (Static Memvar) is object of HBinC class
    IF !Empty( oResCnt )
       IF !Empty( i := oResCnt:Get( name ) )
-         ::handle := hwg_OpenImage( i, .T. )
+       * DF7BE: 
+       * Store icon in a temporary file 
+       * (otherwise the icon is not loadable)
+       * Load from temporary file
+       *  ::handle := hwg_OpenImage( i, .T. )
+       * Ready for multi platform use
+       hb_memowrit( cTmp := hwg_CreateTempfileName() , i )
+         ::handle := hwg_OpenImage( cTmp )
       ENDIF
    ENDIF
    IF Empty( ::handle )
+      hwg_MsgStop("Can not add icon to resource container: >" + name + "<" )
       RETURN Nil
    ENDIF
    ::name   := name
@@ -500,8 +572,16 @@ METHOD AddResource( name ) CLASS HIcon
 
    RETURN Self
 
-METHOD AddFile( name ) CLASS HIcon
+METHOD AddFile( name , nWidth, nHeight ) CLASS HIcon
+
    LOCAL i, aBmpSize
+   
+   IF nWidth == nil
+      nWidth := 0
+   ENDIF
+   IF nHeight == nil
+      nHeight := 0
+   ENDIF   
 
    For EACH i IN  ::aIcons
       IF i:name == name
@@ -518,14 +598,69 @@ METHOD AddFile( name ) CLASS HIcon
    IF !Empty( ::handle )
       ::name := name
       aBmpSize  := hwg_Getbitmapsize( ::handle )
-      ::nWidth  := aBmpSize[1]
-      ::nHeight := aBmpSize[2]
+
+//      ::nWidth  := aBmpSize[1]
+//      ::nHeight := aBmpSize[2]
+      IF  nWidth > 0
+       ::nWidth := nWidth
+      ELSE
+       ::nWidth  := aBmpSize[ 1 ]
+      ENDIF
+      IF nHeight > 0
+       ::nHeight := nHeight
+      ELSE
+       ::nHeight := aBmpSize[ 2 ]
+      ENDIF
+
       AAdd( ::aIcons, Self )
    ELSE
+      hwg_MsgStop("Can not load icon: >" + name + "<")
       RETURN Nil
    ENDIF
 
    RETURN Self
+   
+   
+ /* Added by DF7BE
+ name : Name of resource
+ cVal : Binary contents of *.ico file 
+ */
+METHOD AddString( name, cVal , nWidth, nHeight ) CLASS HIcon
+
+ LOCAL i , cTmp , aBmpSize
+ 
+   IF nWidth == nil
+      nWidth := 0
+   ENDIF
+   IF nHeight == nil
+      nHeight := 0
+   ENDIF
+
+   For EACH i IN ::aIcons
+      IF i:name == name
+         i:nCounter ++
+         * resource always existing, nothing to do
+         RETURN i
+      ENDIF
+   NEXT
+   * DF7BE:
+   * Write contents into temporary file
+       hb_memowrit( cTmp := hwg_CreateTempfileName() , cVal )
+       ::handle := hwg_OpenImage( cTmp )
+       FERASE(cTmp)
+   IF !Empty( ::handle )
+      ::name := name
+      aBmpSize  := hwg_Getbitmapsize( ::handle )
+      ::nWidth  := aBmpSize[1]
+      ::nHeight := aBmpSize[2]
+      AAdd( ::aIcons, Self )
+   ELSE
+      hwg_MsgStop("Can not load icon: >" + name + "<")
+      RETURN Nil
+   ENDIF
+  
+   RETURN Self  
+   
 
 METHOD RELEASE() CLASS HIcon
    LOCAL i, nlen := Len( ::aIcons )
@@ -651,7 +786,10 @@ FUNCTION hwg_BmpFromRes( cBmp )
       IF !Empty( cBuff := oResCnt:Get( cBmp ) )
          handle := hwg_OpenImage( cBuff, .T. )
          IF Empty( handle )
-            hb_memowrit( cTmp := "/tmp/e"+Ltrim(Str(Int(Seconds()*100))), cBuff )
+            * hb_memowrit( cTmp := "/tmp/e"+Ltrim(Str(Int(Seconds()*100))), cBuff )
+            * DF7BE: Ready for multi platform use (also Windows cross development environment)
+            hb_memowrit( cTmp := hwg_CreateTempfileName() , cBuff )
+            * Load from temporary image file
             handle := hwg_Openimage( cTmp )
             FErase( cTmp )
          ENDIF
@@ -697,4 +835,7 @@ FUNCTION hwg_SetResContainer( cName )
    ENDIF
 
    RETURN
+   
+* ====================== EOF of drawwidg.prg ==========================
+   
 

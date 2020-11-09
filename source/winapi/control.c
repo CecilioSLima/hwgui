@@ -161,6 +161,19 @@ HB_FUNC( HWG_UPDATEPROGRESSBAR )
    SendMessage( ( HWND ) HB_PARHANDLE( 1 ), PBM_STEPIT, 0, 0 );
 }
 
+/*
+   ResetProgressBar( hPBar )
+   Added by DF7BE
+*/
+HB_FUNC( HWG_RESETPROGRESSBAR )
+{
+   SendMessage( ( HWND ) HB_PARHANDLE( 1 ), PBM_SETPOS,
+         ( WPARAM ) 0 , 0 );
+}
+
+/*
+   SetProgressBar( hPBar , nPercent )
+*/
 HB_FUNC( HWG_SETPROGRESSBAR )
 {
    SendMessage( ( HWND ) HB_PARHANDLE( 1 ), PBM_SETPOS,
@@ -1768,6 +1781,11 @@ HB_FUNC( HWG_CREATETOOLBAR )
 
 }
 
+/*
+   hwg_Toolbaraddbuttons( handle, aItem, nLen )
+   nLen : Set to Len(aItem )
+*/
+
 HB_FUNC( HWG_TOOLBARADDBUTTONS )
 {
 
@@ -2270,6 +2288,16 @@ HB_FUNC( HWG_GETUTCTIMEDATE )
   HB_RETSTR(cst);
 }
 
+HB_FUNC( HWG_GETDATEANSI )
+/* Format: YYYYMMDD, based on local time */
+{
+  SYSTEMTIME lt = { 0 };
+  char cst[41] = { 0 };
+  GetLocalTime(&lt);
+  sprintf(cst,"%04d%02d%02d", lt.wYear, lt.wMonth, lt.wDay);
+  HB_RETSTR(cst);
+}
+
 HB_FUNC( HWG_GETLOCALEINFON )
 {
 /* returns Windows LCID, type is int */
@@ -2287,6 +2315,15 @@ HB_FUNC( HWG_DEFUSERLANG )
   l = GetUserDefaultUILanguage();
   sprintf(clang, "%d", l);
   HB_RETSTR( clang  );
+}
+
+/*
+ DF7BE : Ticket #64
+ hwg_ShowCursor( lcursor )
+*/
+HB_FUNC( HWG_SHOWCURSOR )
+{
+  hb_retni(ShowCursor(hb_parl( 1 ) ) );
 }
 
 /* ====================== EOF of control.c ======================= */

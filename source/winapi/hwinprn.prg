@@ -7,9 +7,17 @@
  * Copyright 2005 Alexander S.Kresin <alex@kresin.ru>
  * www - http://www.kresin.ru
  *
- * Modified by DF7BE: New parameter "nCharset" for 
- * selecting international charachter sets
- * Data and methods for National Language Support
+ * Modifications by DF7BE:
+ * - New parameter "nCharset" for 
+ *   selecting international charachter sets
+ *   Data and methods for National Language Support
+ *
+ * - New method SetDefaultMode():
+ *   should act like a "printer reset"
+ *   (Set back to default values).
+ *
+ * - Recovered METHOD PrintBitmap
+ *   (Ticket #64, TNX HKrzak)
 */
 
 #include "hwgui.ch"
@@ -61,9 +69,11 @@ CLASS HWinPrn
    METHOD SetLanguage(apTooltips, apBootUser)
    METHOD InitValues( lElite, lCond, nLineInch, lBold, lItalic, lUnder, nLineMax , nCharset )
    METHOD SetMode( lElite, lCond, nLineInch, lBold, lItalic, lUnder, nLineMax , nCharset )
+   METHOD SetDefaultMode()
    METHOD StartDoc( lPreview, cMetaName )
    METHOD NextPage()
    METHOD PrintLine( cLine, lNewLine )
+   METHOD PrintBitmap( xBitmap, nAlign , cImageName )
    METHOD PrintText( cText )
    METHOD PutCode( cText )
    METHOD EndDoc()
@@ -168,6 +178,7 @@ METHOD SetMode( lElite, lCond, nLineInch, lBold, lItalic, lUnder, nLineMax , nCh
 
       nStdLineW  := Iif( ::nFormType==8, Iif(::oPrinter:nOrient==2,160,113), Iif(::oPrinter:nOrient==2,113,80) )
       nStdHeight := Iif( !Empty(::nLineMax), ::nStdHeight / ( ::nLineMax/nStdLineW ), ::nStdHeight )
+
       IF ::lElite ; nMode ++ ; ENDIF
       IF ::lCond ; nMode += 2 ; ENDIF
       //hwg_writelog( "nStdHeight: "+Ltrim(str(::nStdHeight))+"/"+Ltrim(str(nStdHeight))+" ::nLineMax: "+Ltrim(str(::nLineMax))+"  nStdLineW: "+Ltrim(str(nStdLineW)) )
@@ -180,6 +191,7 @@ METHOD SetMode( lElite, lCond, nLineInch, lBold, lItalic, lUnder, nLineMax , nCh
       IF ::oFont != Nil
          ::oFont:Release()
       ENDIF
+      
       ::oFont := oFont
 
       ::oPrinter:SetFont( ::oFont )
@@ -189,6 +201,18 @@ METHOD SetMode( lElite, lCond, nLineInch, lBold, lItalic, lUnder, nLineMax , nCh
    ENDIF
 
    RETURN Nil
+
+/*
+  Added by DF7BE:
+  Should act like a "printer reset"
+  (Set back to default values).
+*/   
+METHOD SetDefaultMode() CLASS HWinPrn
+
+   ::SetMode( .F., .F. , 6, .F. , .F. , .F. , 0 , 0 )
+
+   RETURN Nil
+
 
 METHOD StartDoc( lPreview, cMetaName ) CLASS HWinPrn
 
@@ -225,12 +249,105 @@ METHOD NextPage() CLASS HWinPrn
 
    RETURN Nil
 
+   
+/*
+   DF7BE:
+   Recovered from r2536 2016-06-16
+   added support for bitmap object
+
+   xBitmap     : Name and path to bitmap file 
+                 or bitmap object variable
+   nAlign      : 0 - left, 1 - center, 2 - right, default = 0
+   cBitmapName  : Name of resource, if xBitmap is bitmap object
+ */   
+METHOD PrintBitmap( xBitmap, nAlign , cBitmapName ) CLASS HWinPrn
+
+   LOCAL i , cTmp
+   LOCAL oBitmap, hBitmap, aBmpSize , cImageName
+
+   IF ! ::lDocStart
+      ::StartDoc()
+   ENDIF
+   
+   IF nAlign == NIL
+     nAlign := 0  // 0 - left, 1 - center, 2 - right
+   ENDIF
+
+   cTmp := hwg_CreateTempfileName( , ".bmp")   
+   
+   IF VALTYPE( xBitmap ) == "C"
+     * from file
+     IF ! hb_fileexists( xBitmap )
+       RETURN NIL
+     ENDIF  
+     hBitmap := hwg_Openbitmap( xBitmap, ::oPrinter:hDC )
+     // hwg_msginfo(hb_valtostr(hBitmap))
+     IF hb_ValToStr(hBitmap) == "0x00000000"
+       RETURN NIL
+     ENDIF  
+     cImageName := IIF(EMPTY (cBitmapName), xBitmap, cBitmapName)
+     aBmpSize  := hwg_Getbitmapsize( hBitmap )
+   ELSE
+     * xBitmap is a bitmap object
+     cImageName := IIF(EMPTY (cBitmapName), "" , cBitmapName)
+     * Store into a temporary file
+     xBitmap:OBMP2FILE( cTmp , cBitmapName )
+     hBitmap := hwg_Openbitmap( cTmp , ::oPrinter:hDC )
+     // hwg_msginfo(hb_valtostr(hBitmap))
+     IF hb_ValToStr(hBitmap) == "0x00000000"
+       RETURN NIL
+     ENDIF
+     aBmpSize  := hwg_Getbitmapsize( hBitmap )
+     FERASE(cTmp)
+   ENDIF  
+   
+#ifdef __GTK__
+   IF ::y + aBmpSize[2] + ::nLined > ::oPrinter:nHeight
+#else
+   IF ::y + aBmpSize[2] + ::nLined > ::oPrinter:nHeight
+#endif
+      ::NextPage()
+   ENDIF
+   
+   ::x := ::nLeft * ::oPrinter:nHRes
+   ::y += ::nLineHeight + ::nLined
+   IF nAlign == 1 .AND. ::x + aBmpSize[2] < ::oPrinter:nWidth 
+     ::x += ROUND( (::oPrinter:nWidth - ::x - aBmpSize[1] ) / 2, 0)
+   * HKrzak 2020-10-27 
+   ELSEIF nAlign == 2
+     ::x += ROUND( (::oPrinter:nWidth - ::x - aBmpSize[1]), 0)
+   ENDIF
+   IF ::lFirstLine
+      ::lFirstLine := .F.
+   ENDIF
+   * Paint bitmap
+   ::oPrinter:Bitmap( ::x, ::y, ::x + aBmpSize[1], ::y + aBmpSize[2],, hBitmap, cImageName )
+        
+   i := aBmpSize[2] - ::nLineHeight
+   IF i > 0
+     ::Y +=  i 
+   ENDIF  
+
+   RETURN Nil
+
+   
 METHOD PrintLine( cLine, lNewLine ) CLASS HWinPrn
    LOCAL i, i0, j, slen, c
 
    IF ! ::lDocStart
       ::StartDoc()
    ENDIF
+
+* HKrzak.Start 2020-10-25
+* Bug Ticket #64
+IF cLine != Nil .AND. VALTYPE(cLine) == "N"
+     ::y += ::nLineHeight * cLine
+     IF ::y < 0
+       ::y := 0
+     ENDIF
+   ENDIF
+* HKrzak.End   
+   
 
 #ifdef __GTK__
    IF ::y + 3 * ( ::nLineHeight + ::nLined ) > ::oPrinter:nHeight
@@ -239,6 +356,14 @@ METHOD PrintLine( cLine, lNewLine ) CLASS HWinPrn
 #endif
       ::NextPage()
    ENDIF
+
+* HKrzak.Start 2020-10-25
+* Bug Ticket #64
+   IF cLine != Nil .AND. VALTYPE(cLine) == "N"
+     RETURN NIL
+   ENDIF
+* HKrzak.End
+
    ::x := ::nLeft * ::oPrinter:nHRes
    IF ::lFirstLine
       ::lFirstLine := .F.

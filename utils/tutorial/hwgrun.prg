@@ -32,42 +32,63 @@ EXTERNAL HB_CODEPAGE_RU866, HB_CODEPAGE_RU1251, HB_CODEPAGE_RUKOI8, HB_CODEPAGE_
 #define DIR_SEP         '\'
 #endif
 
-STATIC cHwg_include_dir, cHrb_inc_dir
+STATIC cHwg_include_dir, cHrb_inc_dir, cMod_Dir
 
-FUNCTION _APPMAIN( cHRBFile, cPar1, cPar2, cPar3, cPar4, cPar5, cPar6, cPar7, cPar8, cPar9 )
-   LOCAL xRetVal, cHrb, cInitPath := FilePath( hb_ArgV( 0 ) ), cIncPath
+FUNCTION _APPMAIN( cFileName, cPar1, cPar2, cPar3, cPar4, cPar5, cPar6, cPar7, cPar8, cPar9 )
 
-   IF hwg__isUnicode()
-      hb_cdpSelect( "UTF8" )
-   ENDIF
+   LOCAL cInitPath := FilePath( hb_ArgV( 0 ) ), cIncPath
+   LOCAL xRetVal, cHrb, cPath, cHrbName, lExt, lCompile
+   LOCAL tHrb, tPrg
 
-   IF Empty( cHRBFile )
+   IF Empty( cFileName )
       hwg_Msginfo( "Harbour Runner - HwGUI version" + HB_OSNewLine() +;
-              "Copyright 1999-2016, http://www.harbour-project.org" + HB_OSNewLine() +;
+              "Copyright 1999-2020, http://www.harbour-project.org" + HB_OSNewLine() +;
               Version() + ",  " + hwg_Version() + HB_OSNewLine() +;
               HB_OSNewLine() +;
-              "Syntax:  hbrun <hrbfile[.hrb]> [parameters]" )
+              "Syntax:  hwgrun <hrbfile[.hrb]> [parameters]" )
 
    ELSE
-      IF Lower( Right( cHRBFile,4 ) ) == ".prg"
-#ifndef __XHARBOUR__
-         ReadIni( cInitPath )
-         IF Empty( cHwg_include_dir ) .OR. !File( cHwg_include_dir + DIR_SEP + "hwgui.ch" )
-            hwg_MsgStop( "Set correct path to HwGUI headers in hwgrun.xml", "Hwgui.ch isn't found" )
+      ReadIni( cInitPath )
+      IF !( lExt := !Empty( hb_fnameExt( cFileName ) ) )
+         cFileName += ".prg"
+      ENDIF
+      IF !File( cFileName )
+         IF !Empty( hb_fnameDir( cFileName ) ) .OR. Empty( cMod_Dir ) .OR. ;
+            !File( cFileName := hb_DirBase() + cMod_Dir + cFileName )
+            hwg_Msgstop( "Can't find " + hb_fnameName( cFileName ) )
             RETURN Nil
          ENDIF
-         cIncPath := cHwg_include_dir + Iif( Empty(cHrb_inc_dir), "", ;
-               hb_OsPathListSeparator() + cHrb_inc_dir )
-
-         IF Empty( cHrb := hb_compileBuf( "harbour", cHRBFile, "/n","/I"+cIncPath ) )
-            hwg_MsgStop( "Error while compiling " + cHRBFile )
-         ELSE
-            hb_Memowrit( "__tmp.hrb", cHrb )
-            xRetVal := hb_hrbRun( "__tmp.hrb", cPar1, cPar2, cPar3, cPar4, cPar5, cPar6, cPar7, cPar8, cPar9 )
+      ENDIF
+      cPath := hb_fnameDir( cFileName )
+      IF Lower( hb_fnameExt( cFileName ) ) == ".prg"
+#ifndef __XHARBOUR__
+         cHrbName := cPath + hb_fnameName( cFileName ) + ".hrb"
+         lCompile := .T.
+         IF !lExt .AND. File( cHrbName )
+            hb_vfTimeGet( cHrbName, @tHrb )
+            hb_vfTimeGet( cFileName, @tPrg )
+            lCompile := ( tPrg > tHrb )
          ENDIF
+
+         IF lCompile
+            IF Empty( cHwg_include_dir ) .OR. !File( cHwg_include_dir + DIR_SEP + "hwgui.ch" )
+               hwg_MsgStop( "Set correct path to HwGUI headers in hwgrun.xml", "Hwgui.ch isn't found" )
+               RETURN Nil
+            ENDIF
+            cIncPath := cHwg_include_dir + Iif( Empty(cHrb_inc_dir), "", ;
+                  hb_OsPathListSeparator() + cHrb_inc_dir )
+
+            IF Empty( cHrb := hb_compileBuf( "harbour", cFileName, "/n","/I"+cIncPath ) )
+               hwg_MsgStop( "Error while compiling " + cFileName )
+               RETURN Nil
+            ENDIF
+         ENDIF
+
+         hb_Memowrit( cHrbName, cHrb )
+         xRetVal := hb_hrbRun( cHrbName, cPar1, cPar2, cPar3, cPar4, cPar5, cPar6, cPar7, cPar8, cPar9 )
 #endif
       ELSE
-         xRetVal := hb_hrbRun( cHRBFile, cPar1, cPar2, cPar3, cPar4, cPar5, cPar6, cPar7, cPar8, cPar9 )
+         xRetVal := hb_hrbRun( cFileName, cPar1, cPar2, cPar3, cPar4, cPar5, cPar6, cPar7, cPar8, cPar9 )
       ENDIF
    ENDIF
 
@@ -85,8 +106,17 @@ STATIC FUNCTION ReadIni( cPath )
             cHwg_include_dir := oNode1:GetAttribute( "path",,"" )
          ELSEIF oNode1:title == "harbour_inc"
             cHrb_inc_dir := oNode1:GetAttribute( "path",,"" )
+         ELSEIF oNode1:title == "modules"
+            cMod_dir := oNode1:GetAttribute( "path",,"" )
          ENDIF
       NEXT
    ENDIF
 
    RETURN Nil
+
+INIT PROCEDURE FInit
+
+   IF hwg__isUnicode()
+      hb_cdpSelect( "UTF8" )
+   ENDIF
+   RETURN

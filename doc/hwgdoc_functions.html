@@ -1327,7 +1327,21 @@
 
    <br><strong class="subhead"><a name="Functions7" href="hwgdoc.html#_Functions7">
    5.7.  Windows registry.</a></strong><br>
-   <p></p>
+   <p>
+   <br> 
+   Comment for multi platform programs:<br>
+   It is not a good idea, to store program settings in the registry.<br>
+   Use configuration files instead, following formats are possible:<br>
+   - &nbsp;XML files (best choice, strictly recommended for new applications),<br>
+   - &nbsp;Ini files (*.ini), see comment for function Hwg_WriteIni(),<br>
+   - &nbsp;Clipper MEM files, are supported by Harbour of course,<br>
+   - &nbsp;Pure text files.<br>
+   <br>
+   The registry functions can be useful for writing a multi platform setup program<br>
+   with HWGUI.<br>
+   Use the compiler switch "#ifndef __GTK__" to hide the registry functions on
+   non Windows systems.<br> 
+   </p>
 
    <br><strong class="subhead"> hwg_RegCreateKey( handle, cKeyName )</strong> (Windows only)
    <p></p>
@@ -1363,8 +1377,35 @@
    <br>Returns the directory seperator character OS dependant.
    <ul>
      <li> Windows: &nbsp; &nbsp;"\"
-     <li> UNIX/LINUX: &nbsp; "/"
+     <li> UNIX/LINUX: &nbsp; &nbsp; "/"
    </ul>
+
+  <p></p>
+  <br><strong class="subhead"> hwg_CurDrive()</strong> 
+  <br>Windows:<br>
+     &nbsp; &nbsp;Returns the current drive letter with suffix ":\",<br>
+     &nbsp; &nbsp;so that complete path values can be easy concatenated.<br>
+     &nbsp; &nbsp;This function works also on GTK cross development environment.<br>
+     UNIX/LINUX:<br>
+     &nbsp; &nbsp;Returns for multi platform usage an empty String "".<br>
+     &nbsp; &nbsp;Use this function like the Windows version.<br> 
+
+  <p></p>
+  <br><strong class="subhead"> hwg_CurDir()</strong><br>
+   Returns full path of current directory.<br>
+   The Harbour function CurDir() does not return the<br>
+   leading "\" or "/" Character.<br>
+   This function returns the complete path with drive letter on Windows.<br>
+   This function works also on GTK cross development environment.<br>
+
+   <p></p>
+   <br><strong class="subhead"> hwg_EOLStyle()</strong> 
+   <br> Returns the "End Of Line" (EOL) character(s) OS dependent.<br>
+    Windows: 0D0A (CRLF)<br>
+    LINUX/UNIX:   0A (LF)<br>
+    This function works also on GTK cross development environment.<br>
+    MacOS not supported yet.<br>
+    Must then return 0D (CR).<br>
 
    <p></p>
    <br><strong class="subhead"> hwg_GetItemByName( arr, cName )</strong> 
@@ -1446,7 +1487,7 @@
    </ul>
 
    <br><strong class="subhead"> hwg_BmpFromRes( cBmp )</strong> 
-   <br>Creates a bitmap from the data stored in the resources or in the binary container (if it is previouslu opened with hwg_SetResContainer() function).
+   <br>Creates a bitmap from the data stored in the resources or in the binary container (if it is previously opened with hwg_SetResContainer() function).
    In most cases you don't need to call this function directly, use <code>HBitmap():AddResource(cBmp)</code> instead.
    <ul>
      <li> cName - name of a <i>bmp</i> resource;
@@ -1454,7 +1495,7 @@
    </ul>
 
    <a name="Functions8f"></a><br><strong class="subhead"> hwg_SetResContainer( cName )</strong> 
-   <br>Opens a file of a binary container and sets is as a current fot resources retrieving.
+   <br>Opens a file of a binary container and sets is as a current for resources retrieving.
    Corresponding command: <a href="hwgdoc_commands.html#Commands6-3"> SET RESOURCES CONTAINER TO</a>.
    <ul>
      <li>cName - a full path and name of a binary container;
@@ -1636,8 +1677,124 @@
    <br><strong class="subhead"> hwg_Pts2Pix( nPoints [,hDC] )</strong> (Windows only)
    <p></p>
 
+
+   <br><strong class="subhead"> hwg_ShowCursor(lcursor , hwindow , ndefaultcsrtype)</strong>
+   <p>
+   Hides or recovers the mouse cursor.<br>
+   This feature is helpful for computers with touchscreen.<br>
+   The behavior on GTK and Windows differs.<br>
+   First parameter: .F. hides the cursor, .T. recovers it.<br>
+   Do not forget, that the mouse action is forever active, only you<br>
+   cannot see the cursor.<br>
+   Use compiler switch "#ifdef __GTK__" to activate the individual function call<br>
+   on WinAPI or GTK for multi platform applications.<br>
+   For details see inline comments in sample program<br>
+   "testfunc.prg".<br>
+   <br>
+   WinAPI:<br>
+   Use this function only with first parameter, the second and third parameter are ignored.<br>
+   If used the 2nd and 3rd parameter (as a dummy for multi platform),<br>
+   be shure that they are not NIL,<br>
+   because the program crashes with argument error.<br>
+   The function has effect on all windows of the application<br>
+   (main window and child windows),<br>
+   also on internal HWGUI dialogs like hwg_msginfo().<br>
+   so only one call of this function is needed for the whole application.<br>
+   Parameter lcursor:<br>
+   - .T. increases the cursor display counter by 1.<br>
+   - .F. decrement it by 1.<br>
+   return value:<br>
+   Type = int, specifies the new display counter.<br>
+   The cursor is displayed, if greater or equal 0.<br>
+   Initial value is 0, if mouse is installed,<br>
+   otherwise -1.<br> 
+   <br>
+   GTK:<br>
+   The function has only effect on one window, the handle of the window<br>
+   desired for hiding the cursor must be delivered in parameter 2.<br>
+   The parameter 3 is needed for recovery.<br>
+   Repeat function for every window.<br>
+   Has no effect on special HWGUI dialogs like hwg_msginfo().<br>
+   Return values:<br>
+   0:  cursor visible<br>
+   -1: cursor hidden.
+   <br>
+   State of development: Only on LINUX the recovery crashes (range overflow).<br>
+   As a substitute, the cursor is recovered with type GDK_ARROW, which<br>
+   seems to be standard cursor.<br>
+   This function works also on GTK cross development environment.<BR>
+   </p>
+
+   <br><strong class="subhead"> hwg_GetCursorType()</strong> (GTK only)
+   <p>
+   In usage together with hwg_ShowCursor().<br>
+   Call this function in main section to save the old mouse cursor style<br>
+   in a numeric variable for later recovery after hiding it.<br>
+   For details see hwg_ShowCursor() and inline comments in sample program<br>
+   "testfunc.prg".<br>
+   Use compiler switch "#ifndef __GTK__" to hide the function call on WinAPI<br>
+   for multi platform applications.<br>
+   For recent bug in GTK on LINUX see description of hwg_ShowCursor().<br>
+   <br>
+   Some standard curser styles are defined in:<br>
+   include\gtk-2.0\gdk\gdkcursor.h<br>
+   This function works also on GTK cross development environment.<BR>
+   </p>
+
+   <br><strong class="subhead"> hwg_SetApplocale(cLocale)</strong> (GTK only)
+   <p>
+   cLocale: The locale string.<br>
+   Sets the locale for the HWGUI program.<br>
+   For WinAPI available, but function body is empty<br>
+   for compatibility purpose.<br>
+   Before calling this function, the desired locale must<br>
+   be requested with the REQUEST command.<br>
+   </p>
+
+
+   <br><strong class="subhead"> hwg_BaseName ( pFullpath )</strong>
+   <p>
+   Extracts the filename from a path string.<br>
+   Returns the extracted path.<br> 
+   Is equivalent to the UNIX command "basename".<br>
+   A trailing / or \ is deleted.<br>
+   </p>
+
+   <br><strong class="subhead"> hwg_Dirname ( pFullpath )</strong>
+   <p>
+   Extracts the filename from a path string.<br>
+   Returns the extracted file name.<br> 
+   Is equivalent to the UNIX command "dirname".<br>
+   A trailing \ or / is deleted.<br>
+   At recent directory it returns "." .<br>
+   <br>
+   With this rules a path can be combined like this sample:<br>
+   newname = hwg_Dirname("C:\") + "\" + "hugo.txt"<br>
+   <br>
+   Special case on Windows for example<br>
+   (should appear seldom):<br>
+   Fullpath ="C:hugo.txt"<br>
+   <br>
+   Handle this case as following:<br>
+   IF RAT(hwg_GetDirSep(),Fullpath) == 0 .AND. RAT(":",Fullpath) != 0<br>
+   &nbsp; newname = hwg_Dirname("Fullpath") + "hugo.txt"<br>
+   ELSE<br>
+   &nbsp; newname = hwg_Dirname("Fullpath") + "\" + "hugo.txt"<br>
+   ENDIF<br>
+   </p>
+
+   <br><strong class="subhead"> hwg_CleanPathname ( pSwithdbl )</strong>
+   <p>
+   Reduce \\ to \  or // to / in pSwithdbl<br>
+   (depends on operating system).<br>
+   For handling of file and path names.<br>
+   Returns the path value with reduced number of slashes or backslashes.<br> 
+   </p>
+ 
+
    <br><strong class="subhead"> hwg_GetWindowsDir()</strong> (Windows only)
    <p>
+   In most cases, the value is "C:\Windows".<BR>
    This function works also on GTK cross development environment.<BR>
    Is available on other operating systems for compatibility,<BR>
    then returns forever an empty string (""). 
@@ -1651,11 +1808,67 @@
    Returns the path of the temporary directory.<BR>
    Value depends on the version of the operating system.<BR>
    This function works also on GTK cross development environment.<BR>
-   Windows: In most cases, the value is "C:\Windows".<BR> 
+   Windows: In most cases, the value is "C:\Users\&lt;userid&gt;\AppData\Local\Temp\".<BR> 
    LINUX/UNIX: In most cases, the value is "/tmp" or "/var/tmp".<BR>
    First the function reads the environment variable "TMPDIR" and<BR>
    returns this value. If the TMPDIR variable does not exist, it returns<BR>
-   as default value "/tmp". 
+   as default value "/tmp".<br>
+   This function works also on GTK cross development environment.<BR>
+    </p>
+
+   <br><strong class="subhead"> hwg_CreateTempfileName(cPrefix , cSuffix)</strong>
+   <p>
+    Generates a unique full path and file name string for a temporary file.<br>
+    Format is:<br>
+    &lt;path to temporary directory&gt;+&lt;cPrefix&gt;999999&lt;cSuffix&gt;<br>
+    <br>
+    - The number is derived from return value of the SECONDS() function,<br>
+      &nbsp;&nbsp;&nbsp;so every hundreth second an new name is created.<br>
+      &nbsp;&nbsp;&nbsp;The returned number is of type integer.<br>
+      &nbsp;&nbsp;&nbsp;Range is from 0 to 8639900 (86399 * 100).<br>
+    - Parameters cPrefix and cSuffix are optional.<br>
+    - Default values: cPrefix = "e", cSuffix = ".tmp".<br> 
+    - &lt;path to temporary directory&gt; is returned from hwg_GetTempDir().<br>
+      &nbsp;&nbsp;&nbsp;Directory separator is suitable to used operating system.<br>
+    - If you need more than one temporary file at one time,<br>
+      &nbsp;&nbsp;&nbsp;use different prefixes or suffixes.<br> 
+    <br> 
+    Sample:<br>
+    &nbsp;&nbsp;&nbsp;cTmp := hwg_CreateTempfileName("pre",".ext")<br> 
+    <br>
+    Don't forget to delete the created file(s) after usage by<br>
+    &nbsp;&nbsp;&nbsp;FErase( cTmp )<br>
+    <br>
+    All characters for cPrefix and cSuffix are allowed, if supported by <br>
+    operating system for file and directory names (without directory separators).<br>
+    For best multi platform compatibilty we recommend to use only<br>
+    ASCII letters in lower case (a ... z).<br>
+    This function works also on GTK cross development environment.<BR>
+   </p>
+
+   <br><strong class="subhead"> hwg_CompleteFullPath()</strong>
+   <p>
+    Don't matter about a path string returned by several functions,<br>
+    if they are terminated with a trailing directory separator or not.<br>
+    This function adds the trailing directory separator,<br>
+    if it is not existing.<br>
+    So you can concatenate a normal file name<br>
+    to get full file name + path.<br>
+    Example:<br>
+    &nbsp;&nbsp;&nbsp;cp := hwg_CompleteFullPath( hwg_GetWindowsDir() ) + "filename.bin"<br>
+    hwg_GetWindowsDir() returns "C:\Windows", then<br>
+    cp was completed to:
+    &nbsp;&nbsp;&nbsp;"C:\Windows\filename.bin".<br>
+    Other example:<br>
+    hwg_GetTempDir() returns:<br>
+    &nbsp;&nbsp;&nbsp;"C:\Users\alex\AppData\Local\Temp\"<br>
+    so <br>
+    &nbsp;&nbsp;&nbsp;cp := hwg_CompleteFullPath( hwg_GetTempDir()  ) + "filename.bin"<br>
+    was completed to:<br>
+    &nbsp;&nbsp;&nbsp;"C:\Users\alex\AppData\Local\Temp\filename.bin".<br>
+    On UNIX/LINUX the functions handle the separator "/"<br>
+    in the same way as "\".<br>
+    This function works also on GTK cross development environment.<BR> 
    </p>
 
    <br><strong class="subhead"> hwg_Postquitmessage( nExitCode )</strong> (Windows only)
@@ -1814,13 +2027,44 @@
    <p></p> 
    
 
-    <br><strong class="subhead"> hwg_GetUTCTimeDate()</strong><br>
+   <br><strong class="subhead"> hwg_GetUTCTimeDate()</strong><br>
    Returns a string with date and time in UTC.<br>
    This function is platform independant.<br>
    Output format is: W,YYYYMMDD-HH:MM:SS<br>
    W: Weekday: 0 = Sunday, 1 = Monday ... 6 = Saturday<br>
-   Use the SUBSTR() function of Harbour to extract the desired
-   information.
+   Use the SUBSTR() function of Harbour to extract the desired<br>
+   information.<br>
+   The output format is independent by settings of:<br>
+   - SET DATE ...<br>
+   - SET CENTURY ...<br>
+   <p></p>
+
+   <br><strong class="subhead"> hwg_GetDateANSI()</strong><br>
+   Returns a string with date in ANSI format.<br>
+   This function is platform independant.<br>
+   Output format is: YYYYMMDD, based on local time.<br>
+   The output format is independent by settings of:<br>
+   - SET DATE ...<br>
+   - SET CENTURY ...<br>
+   If ANSI date is part of a file name, the files are listed<br>
+   in correct order sorted by date.<br> 
+   <p></p>
+
+   <br><strong class="subhead"> hwg_GetUTCDateANSI()</strong><br>
+   Returns a string with date in ANSI format.<br>
+   This function is platform independant.<br>
+   Output format is: YYYYMMDD, based on UTC.<br>
+   The output format is independent by settings of:<br>
+   - SET DATE ...<br>
+   - SET CENTURY ...<br>
+   If ANSI date is part of a file name, the files are listed<br>
+   in correct order sorted by date.<br> 
+   <p></p>
+
+   <br><strong class="subhead"> hwg_GetUTCTime()</strong><br>
+   Returns a string with UTC time.<br>
+   This function is platform independant.<br>
+   Output format is: HH:MM:SS (same as TIME() ).<br>
    <p></p>
 
    <br><strong class="subhead"> hwg_ProcessRun( cCommand )</strong> (Windows only)
@@ -1873,13 +2117,63 @@
    <br><strong class="subhead"> hwg_onAnchor( oWnd, wold, hold, wnew, hnew )</strong>
    <p></p>
 
-   <br><strong class="subhead"> hwg_Alert</strong>(Windows only)
+   <p></p>
+   <br><strong class="subhead"> hwg_cHex2Bin( chexstr )</strong>
+   <br> Converts a hex string to binary.<br>
+      Returns empty string, if error<br>
+      or number of hex characters is odd.<br> 
+      Valid characters for chexstr:<br>
+      0 ... 9 , A ... F , a ... f<br>
+      Other characters are ignored.<br>
+
+   <p></p>
+   <br><strong class="subhead"> hwg_HEX_DUMP (cinfield, npmode, cpVarName)</strong>
+   <br> Hex dump from a C field (binary)<br>
+     into C field (Character type).<br>
+     In general, every byte value (2 hex digits)<br>
+     is separated by a blank.<br>
+     <br>
+     npmode:<br>
+     Selects the output format.<br> 
+     0 : &nbsp; All hex values in one line,<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    without quotes and trailing EOL.<br>
+     1 : &nbsp; 16 bytes per line,<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    with display of printable<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    characters,<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   not inserted in quotes,<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     but columns with printable<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    characters are separated with<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    ">> " in every line.<br> 
+     2 : &nbsp; As variable definition<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    for copy and paste into prg source<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    code file, 16 bytes per line,<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     concatenated by "+ ;"<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     (Default)<br>
+     3 : &nbsp; 16 bytes per line, only hex output,<br>
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     no quotes or other characters.<br>
+     <br>
+     cpVarName:<br>
+     Only used, if npmode = 2.<br>
+     Preset for variable name,<br>
+     Default is "cVar".<br>
+     For other modes, this parameter is ignored.<br>     
+     <br>
+     Sample writing hex dump to text file:<br>
+     MEMOWRIT("hexdump.txt",HEX_DUMP(varbuf))<br>
+
+   <p></p>
+   <br><strong class="subhead"> hwg_NUMB2HEX ( nascchar )</strong>
+   <br> Converts  0 ... 255 TO HEX 00 ... FF<br>
+   (2 Bytes String)<br>
+
+   <p></p>
+   <br><strong class="subhead"> hwg_Alert</strong> (Windows only)
    <p></p>
 
-   <br><strong class="subhead"> hwg_Alert_DisableCloseButton()</strong>(Windows only)
+   <br><strong class="subhead"> hwg_Alert_DisableCloseButton()</strong> (Windows only)
    <p>Internal: Needed by HAlert class</p>
 
-   <br><strong class="subhead"> hwhwg_Alert_GetWindow()</strong>(Windows only)
+   <br><strong class="subhead"> hwhwg_Alert_GetWindow()</strong> (Windows only)
    <p>Internal: Needed by HAlert class</p>
 
 <hr align="left" width="100%">

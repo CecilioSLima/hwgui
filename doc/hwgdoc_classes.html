@@ -11,6 +11,8 @@
  +-------------------!---------------------------------!--------------------------------------------+ 
  ! Date (YYYY-MM-DD) ! Name and/or E-Mail or Call Sign !  Modification                              !
  +-------------------!---------------------------------!--------------------------------------------+
+ ! 2020-08-05        ! Wilfried Brunken, DF7BE         ! HBITMAP update                             !
+ +-------------------!---------------------------------!--------------------------------------------+
  ! 2020-05-06        ! Wilfried Brunken, DF7BE         ! Clipper style Alert() replacement          !
  !                   !                                 ! Delivered by Alex Strickland (TNX)         !  
  +-------------------!---------------------------------!--------------------------------------------+ 
@@ -110,6 +112,7 @@
        <li><a name="_Classes10" href="#Classes10">HBitmap</a>
        <li><a name="_Classes11" href="#Classes11">HIcon</a>
        <li><a name="_Classes12" href="#Classes12">HPrinter</a>
+       <li><a name="_Classes26" href="#Classes26">HProgressBar</a>
        <li><a name="_Classes13" href="#Classes13">HTreeNode</a>
        <li><a name="_Classes14" href="#Classes14">HTimer</a>
        <li><a name="_Classes15" href="#Classes15">HFreeImage</a> (WinAPI version only)
@@ -131,6 +134,8 @@
          </ul>
      </ul>
    </ul>
+
+   <!-- Last name used: Classes26 -->
 
    <br><strong class="subhead"><a name="Classes2" href="#_Classes2">
    HObject</a></strong> 
@@ -1432,12 +1437,20 @@
    <pre class="code">METHODS
       AddResource( name, nFlags, lOEM, nWidth, nHeight )
       AddStandard( nId )
-      AddFile( name, hDC, lTranparent, nWidth, nHeight )
+      AddFile( name, hDC, lTransparent, nWidth, nHeight )
       AddString( name, cVal )
       AddWindow( oWnd, x1, y1, width, height )  - Creates a bitmap from a given window.
       Draw( hDC, x1, y1, width, height )
       Release()
+      OBMP2FILE( cfilename , name )  - Writes a bitmap object into file
    </pre>
+   Supported image formats:<br>
+   Windows: bmp, jpg<br>
+   LINUX:  bmp, jpg, png, ico<br>
+   <br>
+   <p>
+   Parameter lTransparent ignored on GTK.<br>
+   </p>
 
    <br><strong class="subhead"><a name="Classes11" href="#_Classes11">
    HIcon</a></strong> 
@@ -1453,9 +1466,16 @@
    <pre class="code">METHODS
       AddResource( name, nWidth, nHeight, nFlags, lOEM )
       AddFile( name, nWidth, nHeight )
+      AddString( name, cVal )
       Draw( hDC, x, y )
       Release()
    </pre>
+
+   <p>
+   Supported image formats:<br>
+   Windows: ico<br>
+   LINUX:  bmp, jpg, png, ico<br>
+   </p>
 
    <br><strong class="subhead"><a name="Classes12" href="#_Classes12">
    HPrinter</a></strong> 
@@ -1536,6 +1556,35 @@
       Say( cString,x1,y1,x2,y2,nOpt,oFont )
       Bitmap( x1,y1,x2,y2,nOpt,hBitmap )
       GetTextWidth( cString, oFont )
+   </pre>
+
+   <br><strong class="subhead"><a name="Classes26" href="#_Classes26">
+   HProgressBar</a></strong> 
+   <pre class="code">DATA
+      CLASS VAR winclass
+      DATA  maxPos
+      DATA  nRange (WinAPI only)
+      DATA  lNewBox
+      DATA  nCount INIT 0
+      DATA  nLimit
+      DATA  nAnimation  (WinAPI only)
+      DATA  LabelBox  (WinAPI only)
+      DATA  nPercent INIT 0  (WinAPI only)
+      DATA  lPercent INIT .F.  (WinAPI only)
+   </pre>
+  <pre class="code">METHODS
+      New( oWndParent, nId, nLeft, nTop, nWidth, nHeight, maxPos, nRange, bInit, bSize, bPaint, ctooltip, nAnimation, lVertical )
+      NewBox( cTitle, nLeft, nTop, nWidth, nHeight, maxPos, nRange, bExit, bInit, bSize, bPaint, ctooltip )
+      Init()    (WinAPI only)
+      Activate()
+      Increment() INLINE hwg_Updateprogressbar( ::handle )
+      STEP()
+      RESET( cTitle )    (Parameter cTitle WinAPI only)
+      SET( cTitle, nPos )
+      SetLabel( cCaption )   (WinAPI only)
+      CLOSE()
+      End() INLINE hwg_Destroywindow( ::handle )   (WinAPI only)
+      Redefine( oWndParent, nId,  maxPos, nRange, bInit, bSize, bPaint, ctooltip, nAnimation, lVertical )  (WinAPI only)
    </pre>
 
    <br><strong class="subhead"><a name="Classes13" href="#_Classes13">
@@ -1652,21 +1701,21 @@
       nCharW                   (R)
       x, y                     (R)
       cPseudo                  (R)
-      lElite                   (R)
-      lCond                    (R)
-      nLineInch                (R)
-      lBold                    (R)
-      lItalic                  (R)
-      lUnder                   (R)
-      nLineMax                 (R)
-      lChanged                 (R)
+      lElite                   (R)    INIT .F.
+      lCond                    (R)    INIT .F.
+      nLineInch                (R)    INIT 6
+      lBold                    (R)    INIT .F.
+      lItalic                  (R)    INIT .F.
+      lUnder                   (R)    INIT .F.
+      nLineMax                 (R)    INIT 0
+      lChanged                 (R)    INIT .F.
 
       cpFrom, cpTo             (R)
       nTop                     (R)
       nBottom                  (R)
       nLeft                    (R)
       nRight                   (R)
-      nCharset                 (RW)  Printer Character Set, default is 0 (ANSI)
+      nCharset                 (RW)  Printer Character Set, default is 0 (ANSI) "INIT 0".
                                      For allowed values see include file "prncharsets.ch".
     // --- International Language Support for internal dialogs --
       aTooltips                (RW) INIT {}  // Array with tooltips messages for print preview dialog
@@ -1679,15 +1728,21 @@
       SetLanguage(apTooltips, apBootUser)
       InitValues( lElite, lCond, nLineInch, lBold, lItalic, lUnder, nLineMax  )
       SetMode( lElite, lCond, nLineInch, lBold, lItalic, lUnder, nLineMax  )
+      SetDefaultMode() &nbsp;&nbsp;  // Should act like a "printer reset".
       StartDoc( lPreview,cMetaName )
       NextPage()
       PrintLine( cLine,lNewLine )
+      PrintBitmap( xBitmap, nAlign , cBitmapName ) 
       PrintText( cText )
       PutCode( cText )
       EndDoc()
       End()
    </pre>
    <p>
+   Default fonts:<BR>
+   GTK:&nbsp;&nbsp;   "monospace"<BR>  
+   WinAPI:      "Lucida Console"<BR>
+   <BR>
    Additional instructions:<BR>
    Special hints for test and development without printer usage:<BR>
     Windows 10: You can install a virtual printer driver named "Print to PDF" to redirect the printer data.<BR>
@@ -1696,13 +1751,13 @@
    Attention: Before the print preview dialog appears, you must select a printer with this dialog<BR>
    of the Windows System (Sample in german language):<BR>
    <img src="./image/Win10_PR2PDF_Dialog.png" align=center wborder=0 alt="System dialog for printer selection">
-   <BR> ===> Do not press "Cancel" (Abbruch), otherwise the program crashes.
+   <BR> ===> Do not press "Cancel" (Abbruch), otherwise the program crashes.<br>
    After say "Print" in the preview dialog, you must enter a file name for the created PDF file:<BR>
    <BR>
      <img src="./image/Win10_PR2PDF_FSel.png" align=center wborder=0 alt="System dialog for printer selection"> 
    <BR>
    National Language Support for Print Preview Dialog:<BR>
-   Detailed instructions in inline comment lines of sample program ""winprn.prg".<BR>
+   Detailed instructions in inline comment lines of sample program "winprn.prg".<BR>
    Here you find also instructions for National Language Support of the preview dialog. 
    </p>
 

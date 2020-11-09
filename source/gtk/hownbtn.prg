@@ -58,7 +58,7 @@ METHOD New( oWndParent, nId, aStyles, nLeft, nTop, nWidth, nHeight,   ;
       cTooltip, lEnabled, lCheck, bColor  ) CLASS HOwnButton
 
    ::Super:New( oWndParent, nId,, nLeft, nTop, nWidth, nHeight, font, bInit, ;
-      bSize, bPaint, ctooltip )
+      bSize, bPaint, cTooltip )
 
    ::lFlat   := Iif( lFlat == Nil, .F. , lFlat )
    ::bClick  := bClick
@@ -85,8 +85,10 @@ METHOD New( oWndParent, nId, aStyles, nLeft, nTop, nWidth, nHeight,   ;
    ENDIF
    IF bmp != Nil
       IF ValType( bmp ) == "O"
+         * Valid bitmap object
          ::oBitmap := bmp
       ELSE
+         * otherwise load from file or resource container
          ::oBitmap := Iif( ( lResour != Nil .AND. lResour ) .OR. ValType( bmp ) == "N", ;
             HBitmap():AddResource( bmp ), ;
             HBitmap():AddFile( Iif( ::cPath != Nil,::cPath + bmp,bmp ) ) )
@@ -137,6 +139,12 @@ METHOD onEvent( msg, wParam, lParam )  CLASS HOwnButton
    ELSEIF msg == WM_LBUTTONDOWN
       ::MDown()
       h := hwg_Setfocus( ::handle )
+   ELSEIF msg == WM_LBUTTONDBLCLK
+           /* Asmith 2017-06-06 workaround for touch terminals */
+           IF ::bClick != Nil
+                 Eval( ::bClick, Self )
+           ENDIF
+
    ELSEIF msg == WM_LBUTTONUP
       ::MUp()
       hwg_Setfocus( h )
@@ -323,3 +331,6 @@ METHOD Disable() CLASS HOwnButton
    hwg_Enablewindow( ::handle, .F. )
 
    RETURN Nil
+   
+* ====================== EOF of hownbtn.prg ===========================
+   

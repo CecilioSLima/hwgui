@@ -10,6 +10,10 @@
 /*
  * Copyright 2008 Luiz Rafal Culik Guimaraes <luiz at xharbour.com.br>
  * port for linux version
+ *
+ * Bugfix by DF7BE September 2020
+ * Checked on Windows Cross Development Environment and
+ * Ubuntu-Linux 
 */
 
 #include "windows.ch"
@@ -30,6 +34,7 @@ CLASS HProgressBar INHERIT HControl
    METHOD Increment() INLINE hwg_Updateprogressbar( ::handle )
    METHOD Step()
    METHOD SET( cTitle, nPos )
+   METHOD RESET()
    METHOD CLOSE()
 
 ENDCLASS
@@ -66,7 +71,8 @@ METHOD NewBox( cTitle, nLeft, nTop, nWidth, nHeight, maxPos, nRange, bExit ) CLA
 
    INIT DIALOG ::oParent TITLE cTitle       ;
       AT nLeft, nTop SIZE nWidth, nHeight   ;
-      STYLE WS_POPUP + WS_VISIBLE + WS_CAPTION + WS_SYSMENU + WS_SIZEBOX + iif( nTop == 0, DS_CENTER, 0 ) + DS_SYSMODAL
+      STYLE WS_POPUP + WS_VISIBLE + WS_CAPTION + WS_SYSMENU + WS_SIZEBOX + iif( nTop == 0, DS_CENTER, nTop ) + DS_SYSMODAL
+      * DF7BE: iif( nTop == 0, DS_CENTER, 0 )  ??? 
 
    IF bExit != Nil
       ::oParent:bDestroy := bExit
@@ -109,10 +115,28 @@ METHOD SET( cTitle, nPos ) CLASS HProgressBar
       IF ::nLimit * ::maxpos != 0
          nPos := nPos / (::nLimit*::maxpos)
       ENDIF
-      hwg_Setprogressbar( ::handle, nPos )
+      /*
+       DF7BE: Ticket #52: avoid message:
+       Gtk-CRITICAL ... IA__gtk_progress_set_percentage:
+       assertion 'percentage >= 0 && percentage <= 1.0' failed
+       if progbar reached end.
+      */
+      IF ( nPos >= 0  ) .AND. (nPos <= 1 ) 
+       hwg_Setprogressbar( ::handle, nPos )
+      END
    ENDIF
 
    RETURN Nil
+ 
+
+METHOD RESET CLASS HProgressBar
+ IF ::handle != NIL
+    ::nCount := 0
+    hwg_Resetprogressbar( ::handle )
+    * hwg_Updateprogressbar( ::handle )    
+ ENDIF
+RETURN NIL
+ 
 
 METHOD CLOSE()
 
@@ -122,3 +146,6 @@ METHOD CLOSE()
    ENDIF
 
    RETURN Nil
+
+* ==================== EOF of hprogres.prg ======================
+   

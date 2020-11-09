@@ -12,6 +12,8 @@
 #include "fileio.ch"
 #include "hxml.ch"
 
+#define XML_ERROR_FILEOPEN     11
+
 STATIC cNewLine := e"\r\n"
 
 /*
@@ -27,7 +29,7 @@ CLASS HXMLNode
    DATA aItems  INIT {}
    DATA aAttr   INIT {}
    DATA cargo
-   DATA aItems  INIT {}
+//   DATA aItems  INIT {}
 
    METHOD New( cTitle, type, aAttr )
    METHOD Add( xItem )
@@ -232,6 +234,8 @@ Local han
       IF han != -1
          ::nLastErr := hbxml_GetDoc( Self,han )
          FClose( han )
+      ELSE
+         ::nLastErr := XML_ERROR_FILEOPEN
       ENDIF
    ELSEIF buffer != Nil
       ::nLastErr := hbxml_GetDoc( Self,buffer )
@@ -269,3 +273,5 @@ Local cEncod, i, s
       ENDIF
    ENDIF
 Return .T.
+
+* ======================= EOF of hxmldoc.prg ========================

@@ -11,7 +11,11 @@ For beginners:
 
 1.1.) Read the Article of Alexander Kresin "Harbour for Beginners", it is a very good introduction
       into Harbour programming language: 
-      http://www.kresin.ru/en/hrbfaq.html
+       http://www.kresin.ru/en/hrbfaq.html
+      Hint for offline reading:
+      Download the *.chm file with complete manual
+      and extract it with 7zip. Now you can open the
+      HTML files with your preferred browser. 
 
 1.2.) Compile and run the editorial in directory utils\tutorial
       Interactive - because you
@@ -54,6 +58,11 @@ For beginners:
     Special sample programs for GTK in directory "gtk_samples".
     The list contains only the main programs.
     Some of the programs are also ready for GTK, they are marked in the GTK column with "Y".
+    
+    If sample program also ready for GTK:
+    For test with GTK create a locol copy of
+    sample program in samples\gtk_samples,
+    because here are the compile scripts.
 
     Some samples could not be compiled or are crashing, hope that we can fix the bugs if we have time,
     see remarks in "Purpose" column, marked with # sign (Test with MingW, recent Harbour Code snapshot).
@@ -61,14 +70,16 @@ For beginners:
     NLS: National language support could be possible (P) or is implemented, activate it with
     little modifications (Y).
 
-    MinGW64: Succesfull tested 64 bit support with MinGW.
+    MinGW64: Successfull tested 64 bit support with MinGW.
     Use only script "bldmingw64.bat" for building sample and environment settings of file "pfad64.bat".
-    Y: Run OK, W: compiled with warnings, -: not (yet) tested , C: can not be compiled , N: error at runtime
+    Y: Run OK, W: compiled with warnings, -: not (yet) tested ,
+    C: can not be compiled , N: error at runtime
 
 
  Sample program     GTK   NLS MinGW64 Purpose
  =================  ===   === ======= =======
  a.prg              N         CN 9)   Some HWGUI basics (Open DBF's, GET's, ...)
+ bincnts.prg 10)    N  #              Usage of images from Binary container
  buildpelles.prg    N         Y       Build APP using Pelles C Compiler (*.bld file)
  colrbloc.prg       Y         Y       BROWSE: arrays and DBF's with colored lines and columns
  dbview.prg         Y         Y       DBF access (Browse, Indexing, Codepages, Structure, ... )
@@ -86,17 +97,20 @@ For beginners:
  grid_5.prg         N  #      -       Grid Editor  (crashes, if click on button "Change") 
  hello.prg          N                 Some elements: Edit field, tabs, tree view, combobox, ...
  helpdemo.prg 6) 7) N                 Context help using windows help (Shellexecute crashes)
+ hexbincnt.prg 11)  Y                 Handling of binary resources with hex values. 
  hole.prg   2) 4)   N                 MS Agent Control
  icons.prg          Y                 Icons and background bitmaps
  iesample.prg 2) 5) N                 Sample of ActiveX container for the IE browser object. 
  modtitle.prg       N                 Sample for modifying a main window title in HWGUI
  nice.prg           N                 Demo of NICEBUTTON
  nice2.prg          N  #      -       Seems to be outdated, starts only in background, kill with Task Manager
- progbars.prg       N                 Progress bar
+ progbars.prg  12)  Y                 Progress bar
  propsh.prg         N                 Property sheet, INIT DIALOG aDlg1 FROM RESOURCE not working.
  pseudocm.prg       Y                 Pseudo context menu
  shadebtn.prg       N                 Shade buttons
+ stretch.prg        Y  #              Sample for resizing bitmaps (background), some bugs (as test program) 
  tab.prg            N  #      -       missing function(s): hb_enumIndex(), resource DIALOG_1 not working
+Testado.prg         N                 Test program sample for ADO Browse (TNX Itamar M. Lins Jr.)
  testalert.prg      N                 Clipper style Alert() replacement, delivered by Alex Strickland (TNX !) 
  test_bot.prg       N                 bOther Test: Press key, after key up the scan code is displayed.
  testbrw.prg        N                 Another BROWSE test
@@ -158,7 +172,7 @@ For beginners:
     - Compile and run sample "helpdemo.prg", Press F1 and the help program starts in an
       extra window.
 
- 7) We suggest to create an own help system in your application to be independant of
+ 7) We suggest to create an own help system in your application to be independent of
     a foreign help system. There are several possibilities for storing:
     - As an XML file: There are classes in HWGUI supporting XML.
       Could be edited with a normal text editor.
@@ -186,5 +200,17 @@ For beginners:
   9) MinGW64: Syntax error in rc file, hex values not allowed any more, must be following:
      <name> BITMAP "<file.bmp>"
 
+ 10) Binary container manager: See instructions in inline command. For this sample a
+     sample binary container is stored here: image/sample.bin.
+     It contains all images needed for this sample.
+     For creating and editing binary container you find the utility "Binary container manager"
+     in directory "utils/bincnt". 
+ 
+ 11) Read more about the handling of hex value resources in file "utils/bincnt/Readme.txt".
+
+ 12) Little modifications for GTK needed (use compiler switch "#ifdef __GTK__").
+     Extra sample program with same filename in subdirectory "gtk_samples"
+ 
+* =================== EOF of Readme.txt ========================
 
 

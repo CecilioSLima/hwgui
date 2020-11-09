@@ -194,8 +194,8 @@ HB_FUNC( HWG_STATIC_GETTEXT )
 }
 
 /*
-   CreateButton( hParentWindow, nButtonID, nStyle, x, y, nWidth, nHeight,
-                 cCaption )
+   hwg_CreateButton( hParentWindow, nButtonID, nStyle, x, y, nWidth, nHeight,
+                 cCaption , hpixbuf )
 */
 HB_FUNC( HWG_CREATEBUTTON )
 {
@@ -1062,6 +1062,10 @@ HB_FUNC( HWG_LOADCURSOR )
       HB_RETHANDLE( gdk_cursor_new( ( GdkCursorType ) hb_parni( 1 ) ) );
 }
 
+/*
+ Hwg_SetCursor(objecthandle , areahandle )
+ area : for example return value of Select() in HBROWSE
+*/
 HB_FUNC( HWG_SETCURSOR )
 {
    GtkWidget *widget =
@@ -1135,6 +1139,25 @@ HB_FUNC( HWG_SETPROGRESSBAR )
    //gtk_progress_bar_update( GTK_PROGRESS_BAR( widget ), b );
    gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( widget ), b );
    while( gtk_events_pending(  ) )
+   {
+      gtk_main_iteration(  );
+   }
+
+}
+
+/* Added by DF7BE:
+   Resets an existing progress bar:
+   Use this function after creating a
+   progress bar after a first use.
+ */
+HB_FUNC( HWG_RESETPROGRESSBAR )
+{
+   GtkWidget *widget = ( GtkWidget * ) HB_PARHANDLE( 1 );
+
+ 
+    gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( widget ), 0.0 );
+    gtk_progress_bar_update( GTK_PROGRESS_BAR( widget ), 0.0 );
+    while( gtk_events_pending(  ) )
    {
       gtk_main_iteration(  );
    }
@@ -1477,5 +1500,51 @@ HB_FUNC( HWG_SETWIDGETNAME )
    gtk_widget_set_name( ( GtkWidget * ) HB_PARHANDLE( 1 ), hb_parc(2) );
 }
 
+/*
+ DF7BE : Ticket #64
+ hwg_ShowCursor( lcursor , hwindow , ndefaultcsrtype )
+*/
+HB_FUNC( HWG_SHOWCURSOR )
+{
+
+  HB_BOOL modus ;
+  int rvalue ;
+ 
+  GdkCursor *cursor;
+  GdkWindow *win; 
+
+  /* long csrtype; */   
+  
+  modus = hb_parl( 1 );
+
+  /* csrtype = ( HB_ISNIL(3) ) ? 0 : hb_parnl(3) ; */
+  
+  
+  if (modus)
+  /* show cursor */
+  {
+   cursor = gdk_cursor_new(GDK_ARROW);
+  /*
+  crashes on LINUX, works best on GTK development environment on Windows
+  cursor = gdk_cursor_new(csrtype);
+  */
+ 
+   rvalue = 0;
+  }
+  else  
+  {
+  /* hide cursor */
+   cursor = gdk_cursor_new(GDK_BLANK_CURSOR);
+   rvalue = -1;
+  }
+  win = gtk_widget_get_window( ( GtkWidget * ) HB_PARHANDLE( 2 )  ) ; 
+  gdk_window_set_cursor( win , cursor); 
+  hb_retni( rvalue );
+} 
+
+HB_FUNC( HWG_GETCURSORTYPE )
+{
+  hb_retnl( (long) gdk_cursor_get_type );
+}  
 
 /* ====================== EOF of control.c ======================= */

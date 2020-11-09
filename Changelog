@@ -8,6 +8,466 @@
    2002-12-01 23:12 UTC+0100 Foo Bar <foo.bar@foobar.org>
 */
 
+2020-11-09 23:20 UTC+0100 Wilfried Brunken DF7BE
+  *  source/gtk/hownbtn.prg
+  *  source/winapi/hownbtn.prg
+    ! Ticket #64 (to be continued)
+    ! delivered by HKrzak (TNX). 
+
+2020-11-03 19:00 UTC+0100 Wilfried Brunken DF7BE
+  * source/gtk/draw.c
+  * source/gtk/hwinprn.prg
+  * source/winapi/hwinprn.prg
+    ! Ticket #64 (to be continued)
+    ! See comment to ticket.
+  * doc/hwgdoc_functions.html
+    ! Additional comment in chapter
+    ! "5.7.  Windows registry" for
+    ! multi platform usage.
+
+
+
+2020-10-27 23:15 UTC+0100 Wilfried Brunken DF7BE
+  * samples/gtk_samples/winprn.prg
+  * samples/winprn.prg
+  * source/gtk/hwinprn.prg
+  * source/winapi/hwinprn.prg
+    ! Ticket #64:
+    ! Extensions for WINPRN class 
+    ! delivered by HKrzak (TNX).
+    ! Works best on WinAPI,
+    ! but crashes on LINUX/GTK,
+    ! see post to ticket.
+    ! (To be continued for GTK).
+  * todo.txt
+    ! List of "Windows only" functions
+    ! to be ported to GTK
+     
+
+2020-10-23 14:30 UTC+0200 Wilfried Brunken DF7BE
+  *  doc/hwgdoc_functions.html
+  *  source/gtk/control.c
+  *  source/gtk/hmisc.prg
+  *  source/winapi/hmisc.prg
+  *  source/winapi/window.c
+    ! Ticket #68 and needed for CLLOG:
+    !
+    ! hwg_SetApplocale():
+    ! Dummy function added for WinAPI,
+    ! for compatibility purpose.
+    ! Added in function docu.
+    !
+    ! New functions:
+    ! hwg_BaseName() *)
+    ! hwg_Dirname()  *)
+    ! hwg_CleanPathname()
+    ! *) Eqivalent to the
+    ! UNIX commands.
+    !
+
+
+2020-10-21 09:45 UTC+0200 Wilfried Brunken DF7BE
+  * samples/testfunc.prg
+  * source/gtk/control.c
+  * source/winapi/control.c
+    ! Ticket #64:
+    ! New functions for
+    ! hide and recover mouse cursor:
+    ! hwg_ShowCursor()
+    ! hwg_GetCursorType() && GTK only
+    ! Docu updated.
+    ! TO-DO: crashes on LINUX with 
+    ! range overflow recovering the cursor.
+    ! Works best on WinAPI and.
+    ! GTK cross development environment on Windows.
+    ! (to be continued).
+  * todo.txt 
+    ! Tasks added.
+  * samples/Readme.txt
+    ! Update for copy to
+    ! sample/grk_samples.
+
+
+
+2020-10-18 12:15 UTC+0200 Wilfried Brunken DF7BE
+  * doc/hwgdoc_misc.html
+  * utils/bincnt/bldgtk.bat
+  * utils/editor/Readme.txt (New)
+  * utils/editor/bldgtk.bat (New)
+  * utils/editor/editor.hbp
+  * utils/editor/editor.prg
+    ! Ticket #65, the 3rd.
+    ! Docu entended.
+    ! Build gtk/Win:
+    ! Installation path of HWGUI
+    ! shortened.
+
+2020-10-17 10:10 UTC+0200 Wilfried Brunken DF7BE
+  * hwgui.hbm
+    ! Ticket #65, the 2nd.
+
+2020-10-16 16:00 UTC+0200 Wilfried Brunken DF7BE
+  * source/gtk/control.c
+  * source/gtk/hbrowse.prg
+    ! Bugfix detected during developing of CLLOG:
+    ! HBROWSE/GTK: Fast cursor move with mouse wheel
+    ! let lines blank.
+
+2020-10-15 23:50 UTC+0200 Wilfried Brunken DF7BE
+  * utils/editor/editor.prg
+    ! Ticket #65
+
+2020-10-10 23:59 UTC+0200 Wilfried Brunken DF7BE
+  * samples/gtk_samples/build.sh
+  * samples/gtk_samples/winprn.prg
+  * samples/hexres.ch
+  * samples/winprn.prg
+  * source/gtk/draw.c
+  * source/gtk/drawwidg.prg
+  * source/gtk/hwinprn.prg
+  * source/winapi/draw.c
+  * source/winapi/drawwidg.prg
+  * source/winapi/hwinprn.prg
+  * doc/hwgdoc_classes.html
+    ! Ticket #64, TNX HKrzak:
+    ! Recovered METHOD 
+    ! PrintBitmap() CLASS HWinPrn
+    ! with extension for bitmap objects.
+    ! To be continued for GTK:
+    ! Y position calculation.
+    ! Works correct on WinAPI.
+  * Suggestions
+    ! Marked done tasks 
+
+2020-10-05 22:45 UTC+0200 Wilfried Brunken DF7BE
+  * source/common/xml/hxmldoc.prg
+  * utils/debugger/hwgdebug.prg
+  * utils/debugger/sample.hbp (New)
+  * utils/debugger/sample.prg (New)
+    ! Ticket #62 (with new sample) for WinAPI
+    ! To be continued: Check for LINUX.
+
+
+2020-09-30 22:30 UTC+0200 Wilfried Brunken DF7BE
+  * samples/testfunc.prg
+  * source/gtk/hmisc.prg
+  * source/gtk/inter.c
+  * source/winapi/control.c
+  * source/winapi/hmisc.prg
+  * doc/hwgdoc_functions.html
+    ! Added new functions (with docu update):
+    ! hwg_GetDateANSI()
+    ! hwg_GetUTCDateANSI()
+    ! hwg_GetUTCTime()
+
+
+2020-09-29 23:15 UTC+0200 Wilfried Brunken DF7BE
+  * test/Readme.txt
+  * test/Ticket27.hbp
+  * test/Ticket27.prg
+    ! Support Ticket #27:
+    ! Test sample for multithreading and mutex lock.
+    ! To be continued for LINUX.
+  * samples/Readme.txt
+    ! Hint for offline reading of document
+    ! "Harbour for beginners", how to extract *.chm file.
+  * doc/hwgdoc_functions.html
+    ! hwg_GetUTCTimeDate():
+    ! Hint, that output format is independent by settings of:
+    ! SET DATE ... and SET CENTURY ...
+
+
+2020-09-27 22:30 UTC+0200 Wilfried Brunken DF7BE
+  * samples/colrbloc.prg
+    ! Ready for LINUX.
+
+2020-09-27 11:20 UTC+0200 Wilfried Brunken DF7BE
+  * image/exclmk_trsp.ico (New)
+  * source/gtk/drawwidg.prg
+  * source/gtk/hsayimg.prg
+  * source/winapi/drawwidg.prg
+  * source/winapi/hsayimg.prg
+  * test/Ticket60.prg  (New)
+  * test/Ticket60.rc  (New)
+  * test/bldmingw.bat  (New)
+  * test/gtk_test/build.sh  (New)
+  * test/gtk_test/hwmingnw.bat  (New)
+  * doc/hwgdoc_commands.html
+    ! Ticket #60:
+    ! Fix for WinAPI done.
+    ! Size parameters must be set at creating
+    ! HICON object.
+    ! Docu updated for @ x,y ICON ...
+    ! LINUX to be continued:
+    ! No resize possible.
+    ! Need to read a lot of GTK reference docu.
+    ! (I'll do it ASAP).
+    ! Directory "test" with  subdir "gtk_test"
+    ! added for handling tickets, bugfixing
+    ! and developing purposes.
+    ! The test programs must not be runnable,
+    ! so also for documentation purposes.
+    ! Parameter write:
+    ! lTranparent ==> lTransparent
+  * samples/colrbloc.prg 
+    ! Now valid resources. 
+    ! (OWNERBUTTONs for skipping in browse list).
+
+
+2020-09-20 23:10 UTC+0200 Wilfried Brunken DF7BE
+  * doc/hwgdoc_classes.html
+  * doc/hwgdoc_commands.html
+    ! Ticket #56: Supported image formats
+    ! for HICON and HBITMAP classes.
+    ! Charset error in LINUX editor:
+    ! substitutes with &egrave;&euml;&egrave;
+    ! + little corrections.
+
+2020-09-20 10:00 UTC+0200 Wilfried Brunken DF7BE
+  * source/gtk/hwinprn.prg
+  * source/winapi/hwinprn.prg
+    ! Files forgotten for r2883 from 2020-09-19. 
+
+2020-09-19 09:30 UTC+0200 Wilfried Brunken DF7BE
+  * samples\bldmingw.bat
+  * source\winapi\hbrowse.prg  
+  * samples\Testado.prg (New)
+  * doc/hwgdoc_commands.html
+    ! Ticket #55 HBROWSE LineUp and LineDown (WinAPI)
+    ! Sample program delivered by Itamar M. Lins Jr. (TNX)
+    ! Modification tested with samples Testado.prg and
+    ! colrbloc.prg and app CLLOG.
+    ! Docu updated (Default is DATABASE)
+    ! Build script: win_oleCreateObject()
+    ! needs to include "%HRB_DIR%\contrib\hbwin.hbc"
+  * contrib\misc\arr2str.c
+    ! Ticket #53: xHarbour support (with bcc)
+  * source\winapi\hwinprn.prg
+  * source\gtk\hwinprn.prg
+  * samples\winprn.prg
+  * samples\gtk_samples\winprn.prg
+  * doc/hwgdoc_classes.html
+    ! Prepare for "hwlabel":
+    ! New method SetDefaultMode():
+    ! should act like a "printer reset"
+    ! (Set back to default values).
+    ! Docu updated.   
+
+
+2020-09-13 10:51 UTC+0200 Wilfried Brunken DF7BE
+  * utils/bincnt/Readme.txt
+    ! Little corrections.
+
+
+2020-09-12 22:20 UTC+0200 Wilfried Brunken DF7BE
+  *  hwgui/source/winapi/drawwidg.prg
+  *  hwgui/utils/bincnt/Readme.txt
+    ! hexbincnt: Bugfix for WinAPI
+    ! Additional info in Readme
+
+
+2020-09-12 16:55 UTC+0200 Wilfried Brunken DF7BE
+  * todo.txt
+  * utils/bincnt/Readme.txt
+  * utils/bincnt/file2hex.hbp
+  * utils/bincnt/file2hex.prg
+  * whatsnew.txt
+    ! Ticket #54. 
+
+2020-09-08 17:00 UTC+0200 Wilfried Brunken DF7BE
+  * samples/gtk_samples/Readme.txt
+    ! Write error fixed.
+  * source/gtk/hprogres.prg
+    ! Ticket #52: avoid message:
+    ! Gtk-CRITICAL ... IA__gtk_progress_set_percentage:
+    ! assertion 'percentage >= 0 && percentage <= 1.0' failed
+    ! if progbar reached end.
+
+
+2020-09-08 13:10 UTC+0200 Wilfried Brunken DF7BE
+  * samples/gtk_samples/hwmingnw.bat
+    ! Relative path for HWGUI install
+  * samples/gtk_samples/progbars.prg
+  * samples/progbars.prg
+  * source/gtk/control.c
+  * source/gtk/hprogres.prg
+  * source/winapi/control.c
+  * source/winapi/hprogres.prg
+  * samples/gtk_samples/Readme.txt
+  * samples/Readme.txt
+    ! Ticket #52:
+    ! (To be continued)
+    ! Now reset of progbar fixed, METHOD RESET() added.
+    ! Docu: Missing part for CLASS HProgressBar added
+    
+
+
+2020-09-07 00:15 UTC+0200 Wilfried Brunken DF7BE
+  * samples/gtk_samples/hexbincnt.prg (New)
+  * samples/hexbincnt.prg (New)
+  * utils/bincnt/file2hex.prg (New)
+  * source/gtk/drawwidg.prg
+  * source/gtk/hmisc.prg
+  * source/winapi/drawwidg.prg
+  * source/winapi/hmisc.prg
+  * utils/tutorial/bldgtkwin.bat (New)
+  * samples/testfunc.prg
+  * doc/hwgdoc_functions.html
+  * doc/hwgdoc_misc.html
+  * utils/bincnt/Readme.txt (New)
+    ! Task: New feature 
+    ! binary resources with Hex values
+    ! (as multi platform substitute for
+    !  for Windows resource compiler,
+    ! compile resources into exe).
+    ! Afterglow to Ticket #51.
+    ! Added documentation for new functions
+    ! and instructions for bincnt and hex 
+    ! resources.
+    ! Build script Tutorial for GTK Cross
+    ! development environment added.  
+
+
+2020-09-04 08:00 UTC+0200 Wilfried Brunken DF7BE
+  * samples/gtk_samples/progbars.prg
+  * source/gtk/hprogres.prg
+    ! Ticket #52:
+    ! Progress bar, Bugfix for
+    ! LINUX, see comment 
+    ! to ticket. 
+
+
+2020-08-25 21:15 UTC+0200 Wilfried Brunken DF7BE
+  * samples/gtk_samples/bincnts.prg
+  * samples/gtk_samples/image/sample.bin
+    ! Ticket #51:
+    ! Verify astro.png
+    ! See post to ticket.
+
+2020-08-24 22:40 UTC+0200 Wilfried Brunken DF7BE
+  * utils/bincnt/bldgtk.bat
+    ! For test purpose, build
+    ! for GTK Cross development environment
+    ! on Windows.
+  * source/gtk/misc.c
+    ! Warning on LINUX fixed: 
+    ! misc.c:372:2: warning: this ‘if’ clause does not guard...
+  * samples/gtk_samples/bincnts.prg
+  * samples/gtk_samples/image/sample.bin
+    ! Ticket #51:
+    ! See post to ticket.
+ 
+
+2020-08-24 14:55 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * utils/tutorial/hwgrun.prg
+    ! Small fixes
+
+2020-08-22 18:30 UTC+0200 Wilfried Brunken DF7BE
+  * samples/bincnts.prg
+  * samples/gtk_samples/bincnts.prg
+  * samples/gtk_samples/image/sample.bin
+  * source/gtk/control.c
+  * source/gtk/draw.c
+  * source/gtk/drawwidg.prg
+  * source/gtk/hcontrol.prg
+  * source/gtk/hownbtn.prg
+   ! Ticket #51
+   ! (How to use image in container ?)
+   ! Fixed.
+   ! Tested with LinuxMINT.
+   ! Important !
+   ! Not visible, if TOOLBAR is used
+   ! on LINUX/GTK. WinAPI ok.
+   ! Added some inline comment for
+   ! better understanding.
+   ! Details in post to ticket. 
+
+2020-08-22 18:30 UTC+0200 Wilfried Brunken DF7BE
+  * source/winapi/hmisc.prg
+  * source/gtk/hmisc.prg
+  * samples/testfunc.prg
+  * doc/hwgdoc_functions.html
+   ! New functions
+   ! (prepare for fixing ticket #51)
+   ! - hwg_CreateTempfileName()
+   ! - hwg_CompleteFullPath()
+   ! + sample extended for test.
+   ! Docu updated.  
+
+2020-08-21 15:15 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * utils/tutorial/hwgrun.prg
+    * Some enhancements
+  * source\gtk\hcheck.prg
+  * source\gtk\hcontrol.prg
+  * source\gtk\hedit.prg
+  * source\gtk\hradio.prg
+    * :SetText() methods modified ( "::title := value" added ) for compatibility
+      with Winapi version.
+
+2020-08-21 09:30 UTC+0200 Wilfried Brunken DF7BE
+  * samples/bincnts.prg (New)
+  * samples/Readme.txt
+  * samples/gtk_samples/Readme.txt
+  * image/door.png
+  * image/next.jpg
+  * samples/image/sample.bin (New)
+  * samples/gtk_samples/image (New directory)
+   ! Ticket #51:
+   ! How to use image in container ?
+   ! 
+   ! Sample with additional files
+   ! added for retracing the error.
+   ! (To be continued)
+  * samples/testimage.prg
+   ! Filename in comment corrected.
+  * doc/hwgdoc_misc.html
+   ! 7.3. Visual debugger:
+   ! Link to description in text files.
+   ! Short instructions for
+   ! Binary container manager added.
+  * doc/hwgdoc_functions.html
+   ! Little corrections.
+  * todo.txt
+   ! New tasks for me and A.Kresin added.
+
+
+2020-08-19 14:24 UTC+0300 Alexander Kresin <alex@belacy.belgorod.su>
+  * source\common\xml\hxmldoc.prg
+    ! Open error detection fixed.
+  * source\common\xml\xmlparse.c
+    * BOM detection added.
+
+2020-08-17 13:33 UTC+0200 Wilfried Brunken DF7BE
+  * contrib/Readme.txt (New)
+  * samples/gtk_samples/stretch.prg (New)
+  * samples/gtk_samples/Readme.txt
+  * samples/Readme.txt
+  * samples/stretch.prg (New)
+  * doc/activex.txt
+  * doc/hwgdoc.html
+  * doc/hwgdoc_classes.html
+  * doc/hwgdoc_misc.html
+  * doc/PRINTDOS.txt
+  * source/gtk/drawwidg.prg
+   !
+   ! More preparations for tickets #48,49.
+   ! Sample and test programs.
+   ! (to be continued)
+   !
+   ! Readme for contrib added.
+   ! Some corrections in documents.
+   ! for example adding contrib's.
+   ! PRINTDOS is outdated.
+   ! ActiveX is out of support.
+
+
+2020-08-13 10:15 UTC+0200 Wilfried Brunken DF7BE
+  * samples/gtk_samples/hbmk.hbm
+    ! Ticket #48:
+    ! (to be continued)
+    ! -lm removed, was delivered by hbmk2 tool.
+
+
 2020-08-04 09:15 UTC+0200 Wilfried Brunken DF7BE
   * source/gtk/commond.c
   * samples/gtk_samples/fileselect.prg (New)
@@ -22183,3 +22643,7 @@
    * source/Makefile
    + source/misc.c
      * Committed changes, included in the patch (29.10.2003)
+
+* ======================= EOF of Changelog =======================
+
+
