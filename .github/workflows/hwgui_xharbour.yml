@@ -1,0 +1,91 @@
+
+name: HWGUI XHarbour
+
+on:
+  push:
+  schedule:
+   - cron: "30 4 1 * *"
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'HWGUI XHarbour'
+        default: 'hwgui_xharbour'
+        required: true
+
+jobs:
+
+  Build:
+    runs-on: windows-latest
+    steps:
+
+    - name: Copy Harbour
+      uses: JoseQuintas/action-download-artifact@v2
+      with:
+         workflow: xharbour.yml
+         workflow_conclusion: success
+         name: xharbour
+         path: c:\temp
+         repo: JoseQuintas/hbpack
+
+    - name: Unzip
+      run: |
+         c:
+         dir c:\temp
+         md c:\temp\harbour
+         7z x -y c:\temp\xharbour.7z -oc:\temp\harbour
+
+    - name: Install Source Code
+      env:
+         REPO: ${{ github.repository }}
+      run: |
+         c:
+         md \temp\harbour\addons
+         git clone https://github.com/$env:repo c:\temp\harbour\addons\hwgui --depth 1
+
+    - name: Build 32 bits
+      env:
+         HB_COMPILER: bcc
+         HB_INSTALL_PREFIX: c:\temp\harbour
+         PATH: c:\temp\harbour\bin;c:\temp\harbour\comp\bcc\bin
+      run: |
+         c:
+         cd \temp\harbour\addons\hwgui
+         cd c:\temp\harbour\addons\hwgui
+         hbmk2 -xhb -w0 -rebuild -workdir=/temp hwgui.hbp
+         hbmk2 -xhb -w0 -rebuild -workdir=/temp hbxml.hbp
+         hbmk2 -xhb -w0 -rebuild -workdir=/temp hwgdebug.hbp
+         hbmk2 -xhb -w0 -rebuild -workdir=/temp procmisc.hbp
+         hbmk2 -xhb -w0 -rebuild -workdir=/temp contrib/hbactivex.hbp
+         hbmk2 -xhb -w0 -rebuild -workdir=/temp contrib/hwg_extctrl.hbp
+         hbmk2 -xhb -w0 -rebuild -workdir=/temp contrib/hwg_qhtm.hbp
+
+    - name: Zip
+      env:
+         PATH: c:\program files\7-zip
+      run: |
+         c:
+         cd \temp\harbour
+         7z a -r c:\temp\hwgui_xharbour.7z c:\temp\harbour\addons\hwgui\*.*  -xr'!.git' -xr'!.github' -xr'!.hbmk'
+
+    - name: Save
+      uses: actions/upload-artifact@v2
+      with:
+         name: xharbour
+         path: c:\temp\xharbour.7z
+
+#    - name: Save
+#      uses: actions/upload-artifact@v2
+#      with:
+#         name: hwgui_xharbour
+#         path: c:\temp\hwgui_xharbour.7z
+
+#    - name: TestAll
+#      env:
+#         HB_COMPILER: mingw
+#         HB_INSTALL_PREFIX: c:\temp\harbour
+#         PATH: c:\temp\harbour\bin;c:\temp\harbour\comp\mingw64\bin
+#         HBMK_CMD: -q -rebuild -workdir=c:\temp
+#      run: |
+#         c:
+#         cd c:\temp\harbour\addons\hwgui\test
+#         hbmk2 testall.hbp -q -workdir=c:\temp
