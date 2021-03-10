@@ -106,13 +106,13 @@ jobs:
 #         name: mingw_1002_32
 #         path: c:\temp\mingw_1002_32.7z
 
-#    - name: TestAll
-#      env:
-#         HB_COMPILER: mingw
-#         HB_INSTALL_PREFIX: c:\temp\harbour
-#         PATH: c:\temp\harbour\bin;c:\temp\harbour\comp\mingw64\bin
-#         HBMK_CMD: -q -rebuild -workdir=c:\temp
-#      run: |
-#         c:
-#         cd c:\temp\harbour\addons\hwgui\test
-#         hbmk2 testall.hbp -q -workdir=c:\temp
+    - name: TestAll
+      env:
+         HB_COMPILER: mingw
+         HB_INSTALL_PREFIX: c:\temp\harbour
+         PATH: c:\temp\harbour\bin;c:\temp\harbour\comp\mingw64\bin
+         HBMK_CMD: -q -rebuild -workdir=c:\temp
+      run: |
+         c:
+         cd c:\temp\harbour\addons\hwgui\samples
+         hbmk2 allhbp.hbp -q -workdir=c:\temp
