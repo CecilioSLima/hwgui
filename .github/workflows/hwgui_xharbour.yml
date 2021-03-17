@@ -83,7 +83,7 @@ jobs:
       env:
          HB_COMPILER: mingw
          HB_INSTALL_PREFIX: c:\temp\harbour
-         PATH: c:\temp\harbour\bin;c:\temp\harbour\comp\mingw64\bin
+         PATH: c:\temp\harbour\bin;c:\temp\harbour\comp\bcc\bin
          HBMK_CMD: -q -rebuild -workdir=c:\temp
       run: |
          c:

@@ -73,7 +73,7 @@ jobs:
 #      env:
 #         HB_COMPILER: mingw64
 #         HB_INSTALL_PREFIX: c:\temp\harbour
-#         PATH: c:\temp\harbour\bin;c:\temp\mingw\mingw64\bin
+#         PATH: c:\temp\harbour\bin;c:\temp\mingw64\bin
 #      run: |
 #         c:
 #         cd \temp\harbour\addons\hwgui
@@ -110,7 +110,7 @@ jobs:
       env:
          HB_COMPILER: mingw
          HB_INSTALL_PREFIX: c:\temp\harbour
-         PATH: c:\temp\harbour\bin;c:\temp\harbour\comp\mingw64\bin
+         PATH: c:\temp\harbour\bin;c:\temp\mingw32\bin
          HBMK_CMD: -q -rebuild -workdir=c:\temp
       run: |
          c:
