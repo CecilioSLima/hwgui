@@ -88,4 +88,4 @@ jobs:
       run: |
          c:
          cd c:\temp\harbour\addons\hwgui\samples
-         hbmk2 allhbp.hbp -q -workdir=c:\temp
+         hbmk2 allhbp.hbp -w0 -q -workdir=c:\temp

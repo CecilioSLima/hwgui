@@ -31,5 +31,5 @@ jobs:
          hbmk2 -rebuild hwgdebug.hbp
          hbmk2 -rebuild procmisc.hbp
          cd /tmp/harbour/addons/hwgui/samples
-         hbmk2 allhbp.hbp -workdir=c:/tmp
+         hbmk2 allhbp.hbp -workdir=/tmp
 
